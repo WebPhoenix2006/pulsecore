@@ -1,0 +1,151 @@
+openapi: 3.0.3
+info:
+  title: PulseCore Authentication API
+  version: 1.0.0
+  description: Authentication and user management endpoints for Phase 1 (MVP).
+servers:
+  - url: https://api.pulsecore.com/v1
+    description: Production server
+  - url: http://localhost:8000/api/v1
+    description: Local development
+
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, full_name, tenant_id]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                full_name:
+                  type: string
+                tenant_id:
+                  type: string
+                  description: Organization/tenant identifier
+      responses:
+        "201":
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: string
+                  email:
+                    type: string
+                  role:
+                    type: string
+                    enum: [Admin, Manager, Viewer]
+                  tenant_id:
+                    type: string
+        "400":
+          description: Validation error
+
+  /auth/login:
+    post:
+      summary: Authenticate user and return JWT
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+                  expires_in:
+                    type: integer
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      summary: Invalidate the current JWT
+      tags: [Authentication]
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Logout successful
+
+  /auth/reset-password-request:
+    post:
+      summary: Request a password reset email
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        "200":
+          description: Password reset link sent
+
+  /auth/reset-password-confirm:
+    post:
+      summary: Reset password using token from email
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, new_password]
+              properties:
+                token:
+                  type: string
+                new_password:
+                  type: string
+                  format: password
+                  minLength: 8
+      responses:
+        "200":
+          description: Password successfully reset
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
