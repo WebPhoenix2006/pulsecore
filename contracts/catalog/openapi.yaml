@@ -1,0 +1,316 @@
+openapi: 3.0.3
+info:
+  title: PulseCore Catalog API
+  version: 1.0.0
+  description: >
+    Catalog service for managing products (SKUs) and categories.
+    Multi-tenant via `tenant_id`.  
+    Foundation for Inventory & Orders modules.
+
+servers:
+  - url: /api/catalog
+
+paths:
+  /categories/:
+    get:
+      summary: List categories
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+    post:
+      summary: Create category
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryCreate"
+      responses:
+        "201":
+          description: Created category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+  /categories/{id}/:
+    get:
+      summary: Retrieve category
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+        - $ref: "#/components/parameters/CategoryId"
+      responses:
+        "200":
+          description: Category details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    patch:
+      summary: Update category
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+        - $ref: "#/components/parameters/CategoryId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryUpdate"
+      responses:
+        "200":
+          description: Updated category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    delete:
+      summary: Delete category
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+        - $ref: "#/components/parameters/CategoryId"
+      responses:
+        "204":
+          description: Deleted
+
+  /products/:
+    get:
+      summary: List products
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Filter by category ID
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      summary: Create product
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductCreate"
+      responses:
+        "201":
+          description: Created product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/{id}/:
+    get:
+      summary: Retrieve product
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+        - $ref: "#/components/parameters/ProductId"
+      responses:
+        "200":
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    patch:
+      summary: Update product
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+        - $ref: "#/components/parameters/ProductId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      summary: Delete product
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+        - $ref: "#/components/parameters/ProductId"
+      responses:
+        "204":
+          description: Deleted
+
+components:
+  parameters:
+    TenantId:
+      name: X-Tenant-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Tenant identifier for multi-tenancy
+    CategoryId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ProductId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    CategoryCreate:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+    CategoryUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+
+    Product:
+      type: object
+      properties:
+        sku_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          type: string
+          format: uuid
+          nullable: true
+        attributes:
+          type: object
+          additionalProperties: true
+        barcode:
+          type: string
+          nullable: true
+        price:
+          type: number
+          format: float
+        supplier_id:
+          type: string
+          format: uuid
+          nullable: true
+        batch_number:
+          type: string
+          nullable: true
+        expiry_date:
+          type: string
+          format: date
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    ProductCreate:
+      type: object
+      required: [name, price]
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+          format: uuid
+          nullable: true
+        attributes:
+          type: object
+          additionalProperties: true
+        barcode:
+          type: string
+        price:
+          type: number
+          format: float
+        supplier_id:
+          type: string
+          format: uuid
+        batch_number:
+          type: string
+        expiry_date:
+          type: string
+          format: date
+    ProductUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+          format: uuid
+          nullable: true
+        attributes:
+          type: object
+          additionalProperties: true
+        barcode:
+          type: string
+        price:
+          type: number
+          format: float
+        supplier_id:
+          type: string
+          format: uuid
+        batch_number:
+          type: string
+        expiry_date:
+          type: string
+          format: date
