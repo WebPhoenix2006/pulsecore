@@ -49,7 +49,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
 
-    # Optional
+    # Optional fields
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
 
@@ -63,8 +63,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
+    # IMPORTANT: Only define these once!
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["first_name", "last_name", "username"]
+    REQUIRED_FIELDS = []  # Keep this empty since email is already the USERNAME_FIELD
 
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}".strip()

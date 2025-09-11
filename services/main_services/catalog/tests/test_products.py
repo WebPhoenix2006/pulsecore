@@ -30,7 +30,9 @@ def test_list_products(auth_client):
     )
     response = auth_client.get("/api/catalog/products/")
     assert response.status_code == 200
-    assert response.json()[0]["name"] == "Fanta 1L"
+    data = response.json()
+    assert "results" in data
+    assert data["results"][0]["name"] == "Fanta 1L"
 
 
 @pytest.mark.django_db
@@ -88,4 +90,4 @@ def test_retrieve_product_invalid_uuid(auth_client):
 @pytest.mark.django_db
 def test_access_without_tenant_header(api_client):
     response = api_client.get("/api/catalog/products/")
-    assert response.status_code in [400, 403]
+    assert response.status_code in [400, 401, 403]

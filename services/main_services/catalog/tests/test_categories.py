@@ -19,9 +19,11 @@ def test_list_categories(auth_client):
     Category.objects.create(
         tenant_id="11111111-1111-1111-1111-111111111111", name="Snacks"
     )
-    response = auth_client.get("/api/catalog/categories/")  # ✅ fixed leading slash
+    response = auth_client.get("/api/catalog/categories/")
     assert response.status_code == 200
-    assert response.json()[0]["name"] == "Snacks"
+    data = response.json()
+    assert "results" in data
+    assert data["results"][0]["name"] == "Snacks"
 
 
 @pytest.mark.django_db

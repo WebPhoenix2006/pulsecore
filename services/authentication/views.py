@@ -20,18 +20,39 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 # Custom TokenObtainPairSerializer so response includes user data
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        # customize token claims if needed
-        token = super().get_token(user)
-        token["email"] = user.email
-        return token
-
     def validate(self, attrs):
-        data = super().validate(attrs)
-        # add user data
-        data["user"] = UserSerializer(self.user).data
-        return data
+        # Get email and password from request
+        email = attrs.get("email", "")
+        password = attrs.get("password", "")
+
+        if email and password:
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                raise serializers.ValidationError(
+                    "No account found with this email address."
+                )
+
+            if not user.check_password(password):
+                raise serializers.ValidationError("Invalid password.")
+
+            if not user.is_active:
+                raise serializers.ValidationError(
+                    "Account is not active. Please verify your email first."
+                )
+
+            self.user = user
+            refresh = self.get_token(user)
+            data = {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "user": UserSerializer(user).data,
+            }
+            return data
+        else:
+            raise serializers.ValidationError(
+                "Must include 'email' and 'password' fields."
+            )
 
 
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -47,12 +68,13 @@ class RegisterView(generics.CreateAPIView):
         existing_user = User.objects.filter(email=email).first()
 
         if existing_user:
-            if not existing_user.is_verified:
+            # Fixed: Use is_active instead of is_verified
+            if not existing_user.is_active:
                 send_verification_email(existing_user, request=self.request)
                 return existing_user
             else:
                 raise serializers.ValidationError(
-                    {"email": "Email already registered."}
+                    {"email": "Email already registered and verified."}
                 )
 
         user = serializer.save()
@@ -60,13 +82,16 @@ class RegisterView(generics.CreateAPIView):
         return user
 
     def create(self, request, *args, **kwargs):
-        resp = super().create(request, *args, **kwargs)
-        return Response(
-            {
-                "message": "User created successfully. Please verify email before logging in."
-            },
-            status=status.HTTP_201_CREATED,
-        )
+        try:
+            resp = super().create(request, *args, **kwargs)
+            return Response(
+                {
+                    "message": "User created successfully. Please check your email for verification link."
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        except serializers.ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
 
 from rest_framework_simplejwt.exceptions import TokenError
@@ -76,6 +101,7 @@ logger = logging.getLogger(__name__)
 
 
 class LogoutView(APIView):
+    # Use Access token in Authorization Bearer Token, and Refresh token in logout body
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
@@ -129,6 +155,7 @@ class VerifyEmailView(APIView):
             )
 
         if token_obj.is_expired():
+            token_obj.delete()  # Clean up expired token
             return Response(
                 {"detail": "Token has expired"}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -138,19 +165,14 @@ class VerifyEmailView(APIView):
         user.save()
         # delete token after use
         token_obj.delete()
+
         refresh = RefreshToken.for_user(user)
         return Response(
             {
-                "detail": "Email verified. You are now logged in.",
+                "detail": "Email verified successfully. You are now logged in.",
                 "token": str(refresh.access_token),
                 "refresh": str(refresh),
-                "user": {
-                    "id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                },
+                "user": UserSerializer(user).data,
             },
             status=200,
         )
@@ -162,28 +184,36 @@ class PasswordResetView(APIView):
 
     def post(self, request):
         email = request.data.get("email")
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
+        if not email:
             return Response(
-                {"detail": "Email doesn't exist"}, status=status.HTTP_200_OK
+                {"detail": "Email is required"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        token_obj = OneTimeToken.create_token(
-            user, token_type="password_reset", ttl_minutes=60
-        )
+        try:
+            user = User.objects.get(email=email)
+            # Delete any existing password reset tokens for this user
+            OneTimeToken.objects.filter(user=user, token_type="password_reset").delete()
 
-        reset_url = (
-            f"{settings.FRONTEND_BASE_URL}/auth/reset-password?token={token_obj.token}"
-        )
-        send_mail(
-            "Reset your password",
-            f"Click here to reset your password: {reset_url}",
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-        )
+            token_obj = OneTimeToken.create_token(
+                user, token_type="password_reset", ttl_minutes=60
+            )
+
+            reset_url = f"{settings.FRONTEND_BASE_URL}/auth/password-reset/confirm?token={token_obj.token}"
+            send_mail(
+                "Reset your password",
+                f"Click here to reset your password: {reset_url}",
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+            )
+        except User.DoesNotExist:
+            # Don't reveal if email exists or not for security
+            pass
+
         return Response(
-            {"detail": "Password reset email sent."}, status=status.HTTP_200_OK
+            {
+                "detail": "If an account with this email exists, a password reset link has been sent."
+            },
+            status=status.HTTP_200_OK,
         )
 
 
@@ -195,13 +225,19 @@ class PasswordResetConfirmView(APIView):
         token = request.data.get("token")
         new_password = request.data.get("password")
 
+        if not token or not new_password:
+            return Response(
+                {"detail": "Token and new password are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         try:
             token_obj = OneTimeToken.objects.get(
                 token=token, token_type="password_reset"
             )
         except OneTimeToken.DoesNotExist:
             return Response(
-                {"details": "Invalid or expired token."},
+                {"detail": "Invalid or expired token."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -212,13 +248,23 @@ class PasswordResetConfirmView(APIView):
             )
 
         user = token_obj.user
-        user.password = make_password(new_password)
-        user.save()
+        user.set_password(new_password)  # ✅ correct way
+        user.is_active = True  # ensure active after password reset
+        user.save()  # ✅ save properly
 
+        # Delete the used token
         token_obj.delete()  # invalidate after use
 
+        # Return both success message and auth tokens for immediate login
+        refresh = RefreshToken.for_user(user)
         return Response(
-            {"detail": "Password reset successful."}, status=status.HTTP_200_OK
+            {
+                "detail": "Password reset successful. You are now logged in.",
+                "token": str(refresh.access_token),
+                "refresh": str(refresh),
+                "user": UserSerializer(user).data,
+            },
+            status=status.HTTP_200_OK,
         )
 
 
