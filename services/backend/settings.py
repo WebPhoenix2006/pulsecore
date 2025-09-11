@@ -32,8 +32,12 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "drf_spectacular",
     "corsheaders",
+    "django_filters",
     # Local apps
     "authentication",
+    # Main Services
+    "main_services.catalog",
+    "main_services.inventory",
 ]
 
 MIDDLEWARE = [
@@ -67,6 +71,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "backend.wsgi.application"
 
+# Custom User Model - Define ONCE here
+AUTH_USER_MODEL = "authentication.User"
+
+# Authentication Backends - Define ONCE here
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 # REST_FRAMEWORK SETTINGS
 
 REST_FRAMEWORK = {
@@ -79,6 +91,9 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+    "DEFAULT_FILTER_BACKENDS": [
+        "django_filters.rest_framework.DjangoFilterBackend",
+    ],
 }
 
 SIMPLE_JWT = {
@@ -87,8 +102,11 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
+    # Fixed: Use 'id' instead of 'email' for USER_ID_FIELD and USER_ID_CLAIM
+    # This prevents issues with JWT token generation
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
 }
-
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -142,25 +160,21 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Custom User Model
-AUTH_USER_MODEL = "authentication.User"
-
 FRONTEND_BASE_URL = "http://localhost:4200"
 
 # Email settings
-DEFAULT_FROM_EMAIL = config("EMAIL_HOST_USER")
+DEFAULT_FROM_EMAIL = config("EMAIL_HOST_USER", default="noreply@yourdomain.com")
 
-# if DEBUG:
-# In development, just print emails to the console
+# Email backend configuration
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-# else:
-#     # In production, use Gmail SMTP
-#     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-#     EMAIL_HOST = "smtp.gmail.com"
-#     EMAIL_PORT = 587
-#     EMAIL_USE_TLS = True
-#     EMAIL_HOST_USER = config("EMAIL_HOST_USER")
-#     EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+
+# For production, uncomment and configure these:
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = "smtp.gmail.com"
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+# EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
@@ -183,4 +197,22 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API for managing foods and more",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+}
+
+# Logging configuration to help debug authentication issues
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "authentication": {
+            "handlers": ["console"],
+            "level": "DEBUG" if DEBUG else "INFO",
+            "propagate": False,
+        },
+    },
 }

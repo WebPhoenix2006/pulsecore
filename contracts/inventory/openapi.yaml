@@ -1,0 +1,323 @@
+openapi: 3.0.3
+info:
+  title: PulseCore Inventory API
+  version: 1.0.0
+  description: Inventory management endpoints (Phase B). Multi-tenant via X-Tenant-ID header.
+
+servers:
+  - url: https://api.pulsecore.local/api
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    TenantHeader:
+      name: X-Tenant-ID
+      in: header
+      required: true
+      description: Tenant identifier (UUID)
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    SKU:
+      type: object
+      properties:
+        sku_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        sku_code:
+          type: string
+          nullable: true
+        category:
+          type: string
+        attributes:
+          type: object
+        barcode:
+          type: string
+          nullable: true
+        price:
+          type: number
+          format: float
+        stock_level:
+          type: integer
+        supplier_id:
+          type: string
+          format: uuid
+          nullable: true
+        track_batches:
+          type: boolean
+        reorder_threshold:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Batch:
+      type: object
+      properties:
+        batch_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        sku_id:
+          type: string
+          format: uuid
+        batch_number:
+          type: string
+        quantity:
+          type: integer
+        remaining_quantity:
+          type: integer
+        received_at:
+          type: string
+          format: date
+          nullable: true
+        expiry_date:
+          type: string
+          format: date
+          nullable: true
+        cost_price:
+          type: number
+          format: float
+        created_at:
+          type: string
+          format: date-time
+
+    StockAdjustment:
+      type: object
+      properties:
+        adjustment_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        sku_id:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+        reason:
+          type: string
+          enum: [purchase, sale, return, correction, transfer]
+        batch_id:
+          type: string
+          format: uuid
+          nullable: true
+        reference:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    Alert:
+      type: object
+      properties:
+        alert_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        sku_id:
+          type: string
+          format: uuid
+        sku_name:
+          type: string
+        current_stock:
+          type: integer
+        threshold:
+          type: integer
+          nullable: true
+        type:
+          type: string
+          enum: [low_stock, batch_expiry]
+        created_at:
+          type: string
+          format: date-time
+        acknowledged:
+          type: boolean
+        acknowledged_by:
+          type: string
+          format: uuid
+          nullable: true
+        acknowledged_at:
+          type: string
+          format: date-time
+          nullable: true
+
+security:
+  - bearerAuth: []
+
+paths:
+  /inventory/skus/:
+    get:
+      summary: List SKUs
+      parameters:
+        - $ref: "#/components/parameters/TenantHeader"
+      responses:
+        "200":
+          description: List of SKUs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SKU"
+    post:
+      summary: Create SKU
+      parameters:
+        - $ref: "#/components/parameters/TenantHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SKU"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SKU"
+
+  /inventory/skus/{sku_id}/:
+    get:
+      summary: Retrieve SKU
+      parameters:
+        - $ref: "#/components/parameters/TenantHeader"
+        - name: sku_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: SKU object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SKU"
+
+  /inventory/skus/{sku_id}/stock-adjustments/:
+    post:
+      summary: Adjust SKU stock
+      parameters:
+        - $ref: "#/components/parameters/TenantHeader"
+        - name: sku_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                reason:
+                  type: string
+                  enum: [purchase, sale, return, correction, transfer]
+                batch_id:
+                  type: string
+                  format: uuid
+                  nullable: true
+                reference:
+                  type: string
+                  nullable: true
+                note:
+                  type: string
+                  nullable: true
+      responses:
+        "200":
+          description: Updated SKU after adjustment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SKU"
+
+  /inventory/skus/{sku_id}/batches/:
+    get:
+      summary: List batches for a SKU
+      parameters:
+        - $ref: "#/components/parameters/TenantHeader"
+        - name: sku_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: List of batches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Batch"
+    post:
+      summary: Create batch for a SKU
+      parameters:
+        - $ref: "#/components/parameters/TenantHeader"
+        - name: sku_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Batch"
+      responses:
+        "201":
+          description: Created batch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Batch"
+
+  /inventory/alerts/:
+    get:
+      summary: List alerts
+      parameters:
+        - $ref: "#/components/parameters/TenantHeader"
+      responses:
+        "200":
+          description: List of alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Alert"

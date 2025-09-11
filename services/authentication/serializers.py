@@ -15,23 +15,41 @@ class UserSerializer(serializers.ModelSerializer):
             "is_active",
             "role",
             "avatar",
+            "phone_number",
+            "date_joined",
         ]
         read_only_fields = [
             "id",
             "is_active",
-            "avatar",
+            "date_joined",
         ]
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
+    confirm_password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ["email", "password", "first_name", "last_name", "username"]
+        fields = [
+            "email",
+            "password",
+            "confirm_password",
+            "first_name",
+            "last_name",
+            "username",
+        ]
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs["confirm_password"]:
+            raise serializers.ValidationError("Password confirmation doesn't match")
+        return attrs
 
     def create(self, validated_data):
-        # create user but leave inactive if you require email verification
+        # Remove confirm_password from validated_data
+        validated_data.pop("confirm_password", None)
+
+        # Create user but leave inactive for email verification
         user = User.objects.create_user(
             email=validated_data["email"],
             password=validated_data["password"],
@@ -39,30 +57,46 @@ class RegisterSerializer(serializers.ModelSerializer):
             last_name=validated_data.get("last_name", ""),
             username=validated_data.get("username", ""),
         )
-        user.is_active = False  # require verification on signup
-        user.save()
+        # User is created with is_active=False by default in your model
         return user
 
 
 class LoginSerializer(serializers.Serializer):
-    # why do we use ModelSerializer for signup and Serializer for login(question)
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
         email = attrs.get("email")
         password = attrs.get("password")
-        user = authenticate(
-            request=self.context.get("request"), username=email, password=password
-        )
-        # why do we do this: request=self.context.get('request')(question)
-        if not user:
-            raise serializers.ValidationError(
-                "Invalid Credentials, please check your email/password"
+
+        if email and password:
+            # First check if user exists
+            try:
+                user_obj = User.objects.get(email=email)
+            except User.DoesNotExist:
+                raise serializers.ValidationError(
+                    "No account found with this email address."
+                )
+
+            # Check if user is active
+            if not user_obj.is_active:
+                raise serializers.ValidationError(
+                    "Your account is not active. Please verify your email first."
+                )
+
+            # Now authenticate
+            user = authenticate(
+                request=self.context.get("request"),
+                username=email,  # Use username parameter for authenticate()
+                password=password,
             )
-        if not user.is_active:
-            raise serializers.ValidationError(
-                "Your account is not active, please verify your email first."
-            )
-        attrs["user"] = user
-        return attrs
+
+            if not user:
+                raise serializers.ValidationError(
+                    "Invalid password. Please check your credentials."
+                )
+
+            attrs["user"] = user
+            return attrs
+        else:
+            raise serializers.ValidationError("Both email and password are required.")
