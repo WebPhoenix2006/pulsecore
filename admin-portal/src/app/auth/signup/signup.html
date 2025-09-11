@@ -1,1 +1,71 @@
-<p>signup works!</p>
+<div class="login-container centered p-5">
+  <div class="login-card">
+    <!-- Left: Form -->
+    <div class="login-form-side">
+      <div class="title-image mb-5">
+        <img src="/images/bistropulse-logo.png" alt="bistropulse-logo" />
+      </div>
+
+      <h2 class="form-heading">Sign In</h2>
+      <p class="form-subtext">Access your account to manage your dashboard</p>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <!-- Email Field -->
+        <app-form-field
+          formControlName="email"
+          placeholder="Enter your email"
+          type="email"
+          label="Email"
+          [required]="true"
+          [errorMessage]="getErrorMessage('email')"
+        ></app-form-field>
+
+        <!-- Password Field -->
+        <app-form-field
+          formControlName="password"
+          placeholder="Enter your password"
+          type="password"
+          label="Password"
+          [required]="true"
+          [errorMessage]="getErrorMessage('password')"
+        ></app-form-field>
+
+        <!-- Optional extra fields for a more complete sign-in -->
+        <app-form-field
+          formControlName="rememberMe"
+          type="checkbox"
+          label="Remember me"
+        ></app-form-field>
+
+        <app-form-field
+          formControlName="securityCode"
+          placeholder="Enter your security code"
+          type="text"
+          label="Security Code"
+          [required]="false"
+        ></app-form-field>
+
+        <div class="form-options">
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+
+        <button class="btn-custom-primary large" [disabled]="!form.valid" type="submit">
+          Sign In
+        </button>
+
+        <p class="register-text">
+          Don't have an account?
+          <a routerLink="/auth/login">Sign Up</a>
+        </p>
+      </form>
+    </div>
+
+    <!-- Right: Gradient welcome block -->
+    @if (!isScreenSmall()) {
+    <app-gradient-background
+      title="Welcome Back!"
+      body="Sign in to your account and get quick access to all features, track progress, and manage your profile efficiently."
+    />
+    }
+  </div>
+</div>

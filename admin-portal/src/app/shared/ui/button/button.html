@@ -1,0 +1,9 @@
+<button
+  class="btn-custom-primary"
+  [attr.type]="type()"
+  [class]="size()"
+  [disabled]="!disabled()"
+  [ngClass]="isOutlined() ? 'outlined' : ''"
+>
+  {{ buttonText() }}
+</button>

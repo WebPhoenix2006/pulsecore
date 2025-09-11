@@ -1,0 +1,93 @@
+<div class="form-field-container" [class.has-error]="hasError" [class.disabled]="disabled">
+  <label [for]="fieldId" class="field-label" [class.required]="required">
+    {{ label }}
+    @if (required) {
+    <span class="required-indicator">*</span>
+    }
+  </label>
+
+  <div class="file-upload-container" [class]="fileUploadClass">
+    <!-- IMAGE PREVIEW (like your second image) -->
+    @if (previewType() === 'image') {
+    <div class="image-section">
+      @if (previewUrl()) {
+      <div class="image-preview">
+        <img [src]="previewUrl()" [alt]="fileName() || 'Preview'" />
+      </div>
+      } @else {
+      <div class="image-placeholder" (click)="fileInput.click()">
+        <span class="add-icon">+</span>
+        <span>Add Photo</span>
+      </div>
+      }
+
+      <div class="image-actions">
+        @if (previewUrl()) {
+        <button type="button" class="btn btn-secondary" (click)="fileInput.click()">
+          Change Image
+        </button>
+        <button type="button" class="btn btn-outline" (click)="removeFile()">Remove</button>
+        } @else {
+        <button type="button" class="btn btn-primary" (click)="fileInput.click()">
+          + {{ label || 'Add Image' }}
+        </button>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- DOCUMENT PREVIEW (like your first image) -->
+    @if (previewType() === 'document') {
+    <div class="document-section">
+      <div class="document-preview">
+        <div class="file-info">
+          <span class="file-icon">📄</span>
+          <div class="file-details">
+            <span class="file-name">{{ fileName() }}</span>
+            <span class="file-size">{{ formatFileSize(fileSize()) }}</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn-outline" (click)="removeFile()">Remove</button>
+      </div>
+      <button type="button" class="btn btn-primary" (click)="fileInput.click()">
+        Choose Different File
+      </button>
+    </div>
+    }
+
+    <!-- NO FILE SELECTED -->
+    @if (previewType() === 'none') {
+    <div class="no-file-section">
+      <div
+        class="upload-area"
+        (click)="fileInput.click()"
+        (dragover)="onDragOver($event)"
+        (drop)="onDrop($event)"
+      >
+        <span class="upload-icon">📁</span>
+        <span class="upload-text">Click to upload or drag and drop</span>
+        <span class="upload-hint">{{ getAcceptHint() }}</span>
+      </div>
+      <button type="button" class="btn btn-primary" (click)="fileInput.click()">Choose File</button>
+    </div>
+    }
+
+    <!-- Hidden file input -->
+    <input
+      [id]="fieldId"
+      type="file"
+      [accept]="accept"
+      [disabled]="disabled"
+      (change)="onFileChange($event)"
+      (blur)="onBlur()"
+      hidden
+      #fileInput
+    />
+  </div>
+
+  @if (description) {
+  <p class="field-description">{{ description }}</p>
+  } @if (hasError && errorMessage) {
+  <p class="error-message">{{ errorMessage }}</p>
+  }
+</div>

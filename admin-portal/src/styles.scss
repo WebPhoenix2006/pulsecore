@@ -1,1 +1,104 @@
 /* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  list-style: none;
+}
+
+:root {
+  --bg-color: #f4f4f4;
+  --text-color: black;
+  --secondary-color: #0d6efd;
+  --error-color: #ef4444;
+  --border-color: #d1d5db;
+  --border-focus: #3b82f6;
+  --placeholder-color: #727272;
+  --muted-text: #6b7280;
+  --muted-text-dark: #374151;
+  --muted-text-light: #9ca3af;
+  --white: #ffffff;
+  --gradient-color: linear-gradient(135deg, #3b82f6 40%, purple 100%);
+}
+
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Source Sans Pro', sans-serif !important;
+}
+
+.primary-bg {
+  background: var(--secondary-color);
+}
+
+.gradient-bg {
+  background: var(--gradient-color) !important;
+}
+
+.centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// for global disabled button
+// Custom button
+.btn-custom-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Montserrat Alternates', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--white);
+  background: var(--gradient-color);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  // Hover + active
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  // Disabled
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  // Sizes
+  &.small {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    border-radius: 6px;
+  }
+
+  &.large {
+    padding: 14px 24px;
+    font-size: 1.125rem;
+    border-radius: 10px;
+  }
+
+  // Optional outline variant
+  &.outlined {
+    background: transparent;
+    border: 2px solid var(--secondary-color);
+    color: var(--secondary-color);
+
+    &:hover:not(:disabled) {
+      background: var(--secondary-color);
+      color: var(--white);
+    }
+  }
+}

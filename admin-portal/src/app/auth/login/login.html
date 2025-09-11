@@ -1,1 +1,55 @@
-<p>login works!</p>
+<div class="login-container centered p-5">
+  <div class="login-card">
+    <!-- Left: Form -->
+    <div class="login-form-side">
+      <div class="title-image mb-5">
+        <img src="/images/bistropulse-logo.png" alt="bistropulse-logo" />
+      </div>
+
+      <h2 class="form-heading">Hello!</h2>
+      <p class="form-subtext">Sign in to your account</p>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <app-form-field
+          formControlName="email"
+          placeholder="enter your email"
+          type="email"
+          label="Email"
+          [required]="true"
+          [errorMessage]="getErrorMessage('email')"
+        ></app-form-field>
+
+        <app-form-field
+          formControlName="password"
+          placeholder="enter your password"
+          type="password"
+          label="Password"
+          [required]="true"
+          [errorMessage]="getErrorMessage('password')"
+        ></app-form-field>
+
+        <div class="form-options">
+          <label class="remember-me">
+            <input type="checkbox" />
+            Remember me
+          </label>
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+
+        <cus-btn type="submit" [disabled]="isBtnDisabled" buttonText="Login" [isOutlined]="false" />
+        <p class="register-text">
+          Don’t have an account?
+          <a routerLink="/auth/signup">Create</a>
+        </p>
+      </form>
+    </div>
+
+    <!-- Right: Gradient welcome block -->
+    @if (!isScreenSmall()) {
+    <app-gradient-background
+      title="Welcome Back!"
+      body="Log in to access your dashboard and continue where you left off."
+    />
+    }
+  </div>
+</div>
