@@ -47,6 +47,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
                 "user": UserSerializer(user).data,
+                "tenant_id": str(user.tenant_id),
             }
             return data
         else:

@@ -70,7 +70,6 @@ class LoginSerializer(serializers.Serializer):
         password = attrs.get("password")
 
         if email and password:
-            # First check if user exists
             try:
                 user_obj = User.objects.get(email=email)
             except User.DoesNotExist:
@@ -78,16 +77,14 @@ class LoginSerializer(serializers.Serializer):
                     "No account found with this email address."
                 )
 
-            # Check if user is active
             if not user_obj.is_active:
                 raise serializers.ValidationError(
                     "Your account is not active. Please verify your email first."
                 )
 
-            # Now authenticate
             user = authenticate(
                 request=self.context.get("request"),
-                username=email,  # Use username parameter for authenticate()
+                username=email,
                 password=password,
             )
 
@@ -98,5 +95,5 @@ class LoginSerializer(serializers.Serializer):
 
             attrs["user"] = user
             return attrs
-        else:
-            raise serializers.ValidationError("Both email and password are required.")
+
+        raise serializers.ValidationError("Both email and password are required.")
