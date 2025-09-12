@@ -46,15 +46,22 @@ class SKU(models.Model):
         note=None,
     ):
         """
-        Adjust SKU stock atomically and log adjustment
+        Adjust SKU stock atomically and log adjustment.
+        If `batch` is provided, update batch.remaining_quantity as well.
+        Uses F() expressions for atomic DB updates and refreshes instances
+        from DB so callers see the final numeric values.
         """
         with transaction.atomic():
             if batch:
                 if not self.track_batches:
                     raise ValueError("SKU not configured for batch tracking")
+                # atomic DB update using F()
                 batch.remaining_quantity = models.F("remaining_quantity") + delta
                 batch.save(update_fields=["remaining_quantity"])
+                # important: refresh from db to get concrete integer value
+                batch.refresh_from_db(fields=["remaining_quantity"])
 
+            # update SKU stock atomically and refresh to get concrete value
             self.stock_level = models.F("stock_level") + delta
             self.save(update_fields=["stock_level"])
             self.refresh_from_db(fields=["stock_level"])
@@ -70,6 +77,7 @@ class SKU(models.Model):
                 note=note,
                 created_by=user,
             )
+
             if (
                 self.reorder_threshold is not None
                 and self.stock_level <= self.reorder_threshold
@@ -94,20 +102,14 @@ class Batch(models.Model):
     sku = models.ForeignKey(SKU, on_delete=models.CASCADE, related_name="batches")
     batch_number = models.CharField(max_length=255)
     quantity = models.IntegerField()
-    remaining_quantity = models.IntegerField()
+    remaining_quantity = models.IntegerField(default=0)  # default set
     received_at = models.DateField(blank=True, null=True)
     expiry_date = models.DateField(blank=True, null=True)
     cost_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        indexes = [
-            models.Index(fields=["tenant_id", "expiry_date"]),
-            models.Index(fields=["tenant_id", "sku", "batch_number"]),
-        ]
-
     def save(self, *args, **kwargs):
-        if self.pk is None:
+        if self._state.adding and not self.remaining_quantity:
             self.remaining_quantity = self.quantity
         super().save(*args, **kwargs)
 

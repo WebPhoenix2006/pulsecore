@@ -4,15 +4,21 @@ from .serializers import CategorySerializer, ProductSerializer
 
 
 class TenantScopedMixin:
-    """Ensures queries are tenant-scoped via X-Tenant-ID header."""
+    """Filter queryset by tenant_id from header and auto-set tenant_id on create."""
 
     def get_queryset(self):
+        qs = super().get_queryset()
         tenant_id = self.request.headers.get("X-Tenant-ID")
-        return super().get_queryset().filter(tenant_id=tenant_id)
+        if tenant_id:
+            qs = qs.filter(tenant_id=tenant_id)
+        return qs
 
     def perform_create(self, serializer):
         tenant_id = self.request.headers.get("X-Tenant-ID")
-        serializer.save(tenant_id=tenant_id)
+        if tenant_id:
+            serializer.save(tenant_id=tenant_id)
+        else:
+            raise ValueError("X-Tenant-ID header required")
 
 
 class CategoryViewSet(TenantScopedMixin, viewsets.ModelViewSet):
