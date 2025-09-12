@@ -11,7 +11,7 @@ from .serialiizers import (
     StockAdjustmentCreateSerializer,
     AlertSerializer,
 )
-from catalog.views import TenantScopedMixin
+from main_services.catalog.views import TenantScopedMixin
 
 
 # -----------------------
@@ -56,6 +56,12 @@ class BatchViewSet(TenantScopedMixin, viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["sku", "expiry_date"]
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        sku_id = self.kwargs.get("sku_pk")   # comes from nested router
+        if sku_id:
+            qs = qs.filter(sku_id=sku_id)
+        return qs
 
 # -----------------------
 # StockAdjustment ViewSet

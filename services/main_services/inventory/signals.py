@@ -35,16 +35,26 @@ def batch_expiry_alert(sender, instance, **kwargs):
 # -----------------------
 # Low Stock Alert
 # -----------------------
+from django.db.models import F
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .models import SKU, Alert
+
+
 @receiver(post_save, sender=SKU)
 def low_stock_alert(sender, instance, **kwargs):
+    # Ensure stock_level is an int (not CombinedExpression from F())
+    if isinstance(instance.stock_level, F) or not isinstance(instance.stock_level, int):
+        instance.refresh_from_db(fields=["stock_level"])
+
     if (
         instance.reorder_threshold is not None
         and instance.stock_level <= instance.reorder_threshold
     ):
-        create_alert_if_not_exists(
+        Alert.objects.get_or_create(
             tenant_id=instance.tenant_id,
             sku=instance,
-            alert_type=Alert.Type.LOW_STOCK,
+            type=Alert.Type.LOW_STOCK,
             defaults={
                 "sku_name": instance.name,
                 "current_stock": instance.stock_level,

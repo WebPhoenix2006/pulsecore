@@ -76,7 +76,7 @@ class AlertSerializer(serializers.ModelSerializer):
     class Meta:
         model = Alert
         fields = (
-            "aler_id",
+            "alert_id",
             "sku",
             "sku_name",
             "current_stock",
