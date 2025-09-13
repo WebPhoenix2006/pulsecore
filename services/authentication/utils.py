@@ -5,25 +5,26 @@ from django.core.mail import send_mail
 from .models import OneTimeToken
 
 
-def send_verification_email(user, request=None):
-    token_obj = OneTimeToken.create_token(
-        user, token_type="email_verify", ttl_minutes=60 * 24
-    )
-    # explain this line of code(question)
-    token = token_obj.token
-    # build verification link: frontend would call verify endpoint with token
-    # e.g, https://localhost:4200/verify-email?token=<token> or call backend verify endpoint
-    verify_url = (
-        f"{settings.FRONTEND_BASE_URL}/auth/verify-email?token={token}"
-        if hasattr(settings, "FRONTEND_BASE_URL")
-        else token
-    )
-    subject = "Verify your email"
-    message = f"Welcome! Click the link to verify your email: {verify_url}"
-    from_email = settings.DEFAULT_FROM_EMAIL
-    recipient_list = [user.email]
-    send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-    return token_obj
+def send_verification_email(user, request=None, token=None):
+    """
+    Sends verification email with either a provided token
+    or generates a new one if none is given.
+    """
+    from .models import OneTimeToken  # avoid circular import
+
+    if not token:
+        token_obj = OneTimeToken.create_token(
+            user, token_type="email_verify", ttl_minutes=60
+        )
+        token = token_obj.token
+
+    # Build frontend URL
+    verify_url = f"{settings.FRONTEND_BASE_URL}/auth/verify?token={token}"
+
+    subject = "Verify your PulseCore account"
+    message = f"Click the link to verify your account: {verify_url}"
+
+    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
 
 
 def send_password_reset_email(user):
