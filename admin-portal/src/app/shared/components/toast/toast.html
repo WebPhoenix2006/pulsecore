@@ -1,0 +1,24 @@
+<div class="toast-container">
+  @for (toast of toasts; track toast.id) {
+  <div
+    class="toast"
+    [ngClass]="[toast.type, isRemoving(toast.id) ? 'removing' : '']"
+    (click)="remove(toast.id)"
+    role="alert"
+    [attr.aria-label]="toast.type + ' message: ' + toast.text"
+  >
+    <span class="toast-message">{{ toast.text }}</span>
+
+    <span class="toast-close" (click)="remove(toast.id); $event.stopPropagation()">
+      <i class="fa-solid fa-times"></i>
+    </span>
+
+    <!-- Progress bar with animation end listener -->
+    <div
+      class="toast-progress"
+      [style.animation-duration]="getProgressDuration(toast)"
+      (animationend)="onProgressComplete(toast.id)"
+    ></div>
+  </div>
+  }
+</div>

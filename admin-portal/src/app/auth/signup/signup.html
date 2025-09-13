@@ -10,7 +10,7 @@
       <p class="form-subtext">Access your account to manage your dashboard</p>
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <!-- Email Field -->
+        <!-- Email -->
         <app-form-field
           formControlName="email"
           placeholder="Enter your email"
@@ -20,7 +20,17 @@
           [errorMessage]="getErrorMessage('email')"
         ></app-form-field>
 
-        <!-- Password Field -->
+        <!-- Username -->
+        <app-form-field
+          formControlName="username"
+          placeholder="Enter your username"
+          type="text"
+          label="Username"
+          [required]="true"
+          [errorMessage]="getErrorMessage('username')"
+        ></app-form-field>
+
+        <!-- Password -->
         <app-form-field
           formControlName="password"
           placeholder="Enter your password"
@@ -30,33 +40,56 @@
           [errorMessage]="getErrorMessage('password')"
         ></app-form-field>
 
-        <!-- Optional extra fields for a more complete sign-in -->
+        <!-- Confirm Password -->
         <app-form-field
-          formControlName="rememberMe"
+          formControlName="confirm_password"
+          placeholder="Confirm your password"
+          type="password"
+          label="Confirm Password"
+          [required]="true"
+          [errorMessage]="getErrorMessage('confirm_password')"
+        ></app-form-field>
+
+        <!-- First Name -->
+        <app-form-field
+          formControlName="first_name"
+          placeholder="First Name"
+          type="text"
+          label="First Name"
+          [required]="true"
+          [errorMessage]="getErrorMessage('first_name')"
+        ></app-form-field>
+
+        <!-- Last Name -->
+        <app-form-field
+          formControlName="last_name"
+          placeholder="Last Name"
+          type="text"
+          label="Last Name"
+          [required]="true"
+          [errorMessage]="getErrorMessage('last_name')"
+        ></app-form-field>
+
+        <!-- Phone Number -->
+        <app-form-field
+          formControlName="phone_number"
+          placeholder="Phone Number"
+          type="tel"
+          label="Phone Number"
+          [required]="true"
+          [errorMessage]="getErrorMessage('phone_number')"
+        ></app-form-field>
+
+        <!-- Optional: Remember me -->
+        <app-form-field
           type="checkbox"
           label="Remember me"
+          formControlName="rememberMe"
         ></app-form-field>
-
-        <app-form-field
-          formControlName="securityCode"
-          placeholder="Enter your security code"
-          type="text"
-          label="Security Code"
-          [required]="false"
-        ></app-form-field>
-
-        <div class="form-options">
-          <a href="#" class="forgot-link">Forgot password?</a>
-        </div>
 
         <button class="btn-custom-primary large" [disabled]="!form.valid" type="submit">
-          Sign In
+          Sign Up
         </button>
-
-        <p class="register-text">
-          Don't have an account?
-          <a routerLink="/auth/login">Sign Up</a>
-        </p>
       </form>
     </div>
 

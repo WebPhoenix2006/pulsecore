@@ -7,10 +7,11 @@ import { GradientBackground } from './ui/gradient-background/gradient-background
 import { AuthRoutingModule } from '../auth/auth-routing-module';
 import { Sidebar } from './ui/sidebar/sidebar';
 import { Button } from './ui/button/button';
+import { Toast } from './components/toast/toast';
 
 @NgModule({
-  declarations: [FormField, SmartFileField, GradientBackground, Sidebar, Button],
+  declarations: [FormField, SmartFileField, GradientBackground, Sidebar, Button, Toast],
   imports: [CommonModule, ReactiveFormsModule, AuthRoutingModule],
-  exports: [FormField, SmartFileField, GradientBackground, Button],
+  exports: [FormField, SmartFileField, GradientBackground, Button, Toast],
 })
 export class SharedModule {}

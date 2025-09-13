@@ -22,12 +22,43 @@
   --muted-text-light: #9ca3af;
   --white: #ffffff;
   --gradient-color: linear-gradient(135deg, #3b82f6 40%, purple 100%);
+
+  /* Toast-specific variables for light mode */
+  --toast-bg: #ffffff;
+  --toast-shadow: rgba(0, 0, 0, 0.1);
+  --toast-border: rgba(0, 0, 0, 0.1);
+  --success-color: #10b981;
+  --success-bg: #ecfdf5;
+  --warning-color: #f59e0b;
+  --warning-bg: #fffbeb;
+  --info-color: #3b82f6;
+  --info-bg: #eff6ff;
+  --error-bg: #fef2f2;
+}
+
+/* Dark mode variables */
+[data-theme='dark'] {
+  --bg-color: #1f2937;
+  --text-color: #f9fafb;
+  --border-color: #374151;
+  --placeholder-color: #9ca3af;
+  --muted-text: #d1d5db;
+
+  /* Toast-specific dark mode variables */
+  --toast-bg: #374151;
+  --toast-shadow: rgba(0, 0, 0, 0.3);
+  --toast-border: rgba(255, 255, 255, 0.1);
+  --success-bg: rgba(16, 185, 129, 0.1);
+  --warning-bg: rgba(245, 158, 11, 0.1);
+  --info-bg: rgba(59, 130, 246, 0.1);
+  --error-bg: rgba(239, 68, 68, 0.1);
 }
 
 body {
-  background: var(--bg-color);
-  color: var(--text-color);
+  background: var(--bg-color) !important;
+  color: var(--text-color) !important;
   font-family: 'Source Sans Pro', sans-serif !important;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .primary-bg {
