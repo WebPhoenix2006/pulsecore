@@ -64,35 +64,42 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
 
-    def perform_create(self, serializer):
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         email = serializer.validated_data["email"]
         existing_user = User.objects.filter(email=email).first()
 
         if existing_user:
-            # Fixed: Use is_active instead of is_verified
             if not existing_user.is_active:
                 send_verification_email(existing_user, request=self.request)
-                return existing_user
+                return Response(
+                    {"message": "Verification email re-sent."},
+                    status=status.HTTP_200_OK,
+                )
             else:
                 raise serializers.ValidationError(
                     {"email": "Email already registered and verified."}
                 )
 
         user = serializer.save()
-        send_verification_email(user, request=self.request)
-        return user
 
-    def create(self, request, *args, **kwargs):
-        try:
-            resp = super().create(request, *args, **kwargs)
-            return Response(
-                {
-                    "message": "User created successfully. Please check your email for verification link."
-                },
-                status=status.HTTP_201_CREATED,
-            )
-        except serializers.ValidationError as e:
-            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        # Generate one-time token for email verification
+        token_obj = OneTimeToken.create_token(
+            user, token_type="email_verify", ttl_minutes=60
+        )
+
+        # Send email with frontend link containing token
+        send_verification_email(user, request=self.request, token=token_obj.token)
+
+        return Response(
+            {
+                "message": "User created successfully. Please verify your email.",
+                "verification_token": str(token_obj.token),
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 from rest_framework_simplejwt.exceptions import TokenError
@@ -142,12 +149,13 @@ class LogoutView(APIView):
 class VerifyEmailView(APIView):
     permission_classes = [permissions.AllowAny]
 
-    def get(self, request):
-        token = request.query_params.get("token")
+    def post(self, request):
+        token = request.data.get("token")
         if not token:
             return Response(
                 {"detail": "Token is required"}, status=status.HTTP_400_BAD_REQUEST
             )
+
         try:
             token_obj = OneTimeToken.objects.get(token=token, token_type="email_verify")
         except OneTimeToken.DoesNotExist:
@@ -156,7 +164,7 @@ class VerifyEmailView(APIView):
             )
 
         if token_obj.is_expired():
-            token_obj.delete()  # Clean up expired token
+            token_obj.delete()
             return Response(
                 {"detail": "Token has expired"}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -164,8 +172,7 @@ class VerifyEmailView(APIView):
         user = token_obj.user
         user.is_active = True
         user.save()
-        # delete token after use
-        token_obj.delete()
+        token_obj.delete()  # burn the token
 
         refresh = RefreshToken.for_user(user)
         return Response(
@@ -175,7 +182,7 @@ class VerifyEmailView(APIView):
                 "refresh": str(refresh),
                 "user": UserSerializer(user).data,
             },
-            status=200,
+            status=status.HTTP_200_OK,
         )
 
 

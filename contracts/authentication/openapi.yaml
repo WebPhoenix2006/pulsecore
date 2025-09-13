@@ -20,7 +20,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: [email, password, full_name, tenant_id]
+              required: [email, password, full_name]
               properties:
                 email:
                   type: string
@@ -31,9 +31,12 @@ paths:
                   minLength: 8
                 full_name:
                   type: string
-                tenant_id:
+                username:
                   type: string
-                  description: Organization/tenant identifier
+                first_name:
+                  type: string
+                last_name:
+                  type: string
       responses:
         "201":
           description: User successfully registered
@@ -42,17 +45,45 @@ paths:
               schema:
                 type: object
                 properties:
-                  user_id:
+                  message:
                     type: string
-                  email:
+                  verification_token:
                     type: string
-                  role:
-                    type: string
-                    enum: [Admin, Manager, Viewer]
-                  tenant_id:
-                    type: string
+                    description: One-time token to be used for email verification
         "400":
           description: Validation error
+
+  /auth/verify-email:
+    post:
+      summary: Verify a user’s email with the token
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+                  description: One-time verification token
+      responses:
+        "200":
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                  token:
+                    type: string
+                  refresh:
+                    type: string
+                  user:
+                    $ref: "#/components/schemas/User"
 
   /auth/login:
     post:
@@ -80,15 +111,14 @@ paths:
               schema:
                 type: object
                 properties:
-                  access_token:
+                  access:
                     type: string
-                  refresh_token:
+                  refresh:
                     type: string
-                  token_type:
+                  tenant_id:
                     type: string
-                    example: Bearer
-                  expires_in:
-                    type: integer
+                  user:
+                    $ref: "#/components/schemas/User"
         "401":
           description: Invalid credentials
 
@@ -98,9 +128,22 @@ paths:
       tags: [Authentication]
       security:
         - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh]
+              properties:
+                refresh:
+                  type: string
+                  description: Refresh token to blacklist
       responses:
-        "204":
+        "205":
           description: Logout successful
+        "400":
+          description: Invalid or expired refresh token
 
   /auth/reset-password-request:
     post:
@@ -149,3 +192,32 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        username:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        is_active:
+          type: boolean
+        role:
+          type: string
+          enum: [Admin, Manager, Viewer]
+        avatar:
+          type: string
+          nullable: true
+        phone_number:
+          type: string
+          nullable: true
+        date_joined:
+          type: string
+          format: date-time
