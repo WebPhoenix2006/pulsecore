@@ -8,8 +8,8 @@ import { Component, input } from '@angular/core';
 })
 export class Button {
   type = input<'button' | 'submit'>('button');
-  buttonText = input<string>('Default text');
-  size = input<'small' | 'large' | ''>('');
+  buttonText = input<string | null>(null);
+  size = input<'small' | 'large' | 'full' | ''>('');
 
   isOutlined = input<boolean>(false);
   disabled = input<boolean>(false);

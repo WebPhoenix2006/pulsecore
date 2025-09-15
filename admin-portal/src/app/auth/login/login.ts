@@ -24,22 +24,6 @@ export class Login {
     this.isScreenSmall.set(this.screenInnerWidth() <= 500);
   }
 
-  hobbyOptions: FormFieldOption[] = [
-    { label: 'Coding', value: 'coding' },
-    { label: 'Cooking', value: 'cooking' },
-    { label: 'Gaming', value: 'gaming' },
-    { label: 'Music', value: 'music' },
-    { label: 'Sports', value: 'sports' },
-  ];
-
-  restaurantTypes: FormFieldOption[] = [
-    { value: 'fast-food', label: 'Fast Food' },
-    { value: 'casual', label: 'Casual Dining' },
-    { value: 'fine-dining', label: 'Fine Dining' },
-    { value: 'cafe', label: 'Cafe' },
-    { value: 'bar', label: 'Bar & Grill' },
-  ];
-
   constructor(
     private fb: FormBuilder,
     private validationService: FormValidation // Inject the service

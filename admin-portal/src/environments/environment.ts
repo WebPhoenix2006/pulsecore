@@ -4,5 +4,6 @@ export const Environments = {
   auth: {
     login: `${api_url}/auth/login/`,
     signup: `${api_url}/auth/register/`,
+    verifyEmail: `${api_url}/auth/verify-email/`,
   },
 };

@@ -20,19 +20,6 @@ export class App implements OnInit {
     @Inject(DOCUMENT) private document: Document
   ) {}
 
-  showMessage() {
-    this.toastService.success('Data saved successfully!');
-    setTimeout(() => {
-      this.toastService.error('Something went wrong...');
-    }, 1000);
-    setTimeout(() => {
-      this.toastService.warning('Please check your input!');
-    }, 2000);
-    setTimeout(() => {
-      this.toastService.info('Processing your request...');
-    }, 3000);
-  }
-
   toggleDarkMode() {
     this.isDarkMode.set(!this.isDarkMode());
 
@@ -54,7 +41,5 @@ export class App implements OnInit {
       this.isDarkMode.set(true);
       this.renderer.setAttribute(this.document.documentElement, 'data-theme', 'dark');
     }
-
-    this.showMessage();
   }
 }

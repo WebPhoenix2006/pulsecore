@@ -8,10 +8,11 @@ import { AuthRoutingModule } from '../auth/auth-routing-module';
 import { Sidebar } from './ui/sidebar/sidebar';
 import { Button } from './ui/button/button';
 import { Toast } from './components/toast/toast';
+import { Loader } from './components/loader/loader';
 
 @NgModule({
-  declarations: [FormField, SmartFileField, GradientBackground, Sidebar, Button, Toast],
+  declarations: [FormField, SmartFileField, GradientBackground, Sidebar, Button, Toast, Loader],
   imports: [CommonModule, ReactiveFormsModule, AuthRoutingModule],
-  exports: [FormField, SmartFileField, GradientBackground, Button, Toast],
+  exports: [FormField, SmartFileField, GradientBackground, Button, Toast, Loader],
 })
 export class SharedModule {}

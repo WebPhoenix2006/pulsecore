@@ -52,6 +52,8 @@
   --warning-bg: rgba(245, 158, 11, 0.1);
   --info-bg: rgba(59, 130, 246, 0.1);
   --error-bg: rgba(239, 68, 68, 0.1);
+
+  --shadow: 0 0 15px rgba(0, 0, 0, 0.3);
 }
 
 body {
@@ -91,6 +93,10 @@ body {
   background: var(--gradient-color);
   cursor: pointer;
   transition: all 0.2s ease-in-out;
+
+  &.full {
+    width: 100% !important;
+  }
 
   // Hover + active
   &:hover:not(:disabled) {

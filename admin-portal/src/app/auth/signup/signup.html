@@ -81,15 +81,19 @@
         ></app-form-field>
 
         <!-- Optional: Remember me -->
-        <app-form-field
+        <!-- <app-form-field
           type="checkbox"
           label="Remember me"
           formControlName="rememberMe"
-        ></app-form-field>
+        ></app-form-field> -->
 
-        <button class="btn-custom-primary large" [disabled]="!form.valid" type="submit">
-          Sign Up
-        </button>
+        <cus-btn [disabled]="isDisabled()" type="submit">
+          @if (isLoading()) {
+          <app-loader></app-loader>
+          } @else {
+          {{ buttonText }}
+          }
+        </cus-btn>
       </form>
     </div>
 
