@@ -155,6 +155,7 @@ body {
 // Custom Toast Styles
 .custom-toast {
   background-color: #fff !important;
+  color: var(--info-color);
   border: none !important; // Remove default border
   border-left: 4px solid !important; // Force left border
   border-radius: 8px !important;
