@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { VerifyEmailService } from '../../shared/services/verify-email.service';
 import { RegisterRequestInterface } from '../../interfaces/auth/register-request.interface';
 import { ToastService } from '../../shared/services/toast.service';
+import { AuthResponseInterface } from '../../interfaces/auth/register-response.interface';
 
 @Component({
   selector: 'app-verify',
@@ -40,15 +41,17 @@ export class Verify implements OnInit {
   verifyEmail(token: string | null): void {
     this.isLoading.set(true);
     this.verifyService.verifyEmail(token).subscribe({
-      next: (data: RegisterRequestInterface | null) => {
+      next: (data: AuthResponseInterface | null) => {
         this.isLoading.set(false);
-        this.toastService.success('Email verified successfully', 2000);
+        this.toastService.showSuccess('Email verified successfully', 2000);
         console.log(data);
+        localStorage.setItem('token', data!.token);
+        localStorage.setItem('refresh-token', data!.refresh);
       },
 
       error: (error) => {
         this.isLoading.set(false);
-        this.toastService.error(error.message || 'error verifying email pls try again later');
+        this.toastService.showError(error.message || 'error verifying email pls try again later');
       },
     });
   }

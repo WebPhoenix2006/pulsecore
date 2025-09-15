@@ -2,7 +2,10 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { EMPTY, Observable } from 'rxjs';
 import { RegisterRequestInterface } from '../../interfaces/auth/register-request.interface';
-import { RegisterResponseInterface } from '../../interfaces/auth/register-response.interface';
+import {
+  AuthResponseInterface,
+  RegisterResponseInterface,
+} from '../../interfaces/auth/register-response.interface';
 import { Environments } from '../../../environments/environment';
 
 @Injectable({
@@ -11,7 +14,7 @@ import { Environments } from '../../../environments/environment';
 export class VerifyEmailService {
   constructor(private http: HttpClient) {}
 
-  verifyEmail(token: string | null): Observable<RegisterRequestInterface | null> {
+  verifyEmail(token: string | null): Observable<AuthResponseInterface | null> {
     if (!token) {
       return EMPTY;
     }

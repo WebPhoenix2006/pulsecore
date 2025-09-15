@@ -139,3 +139,222 @@ body {
     }
   }
 }
+
+// Toast Container
+#toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none; // Allow clicks to pass through container
+}
+
+// Custom Toast Styles
+.custom-toast {
+  background-color: #fff !important;
+  border: none !important; // Remove default border
+  border-left: 4px solid !important; // Force left border
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  padding: 0.75rem 1rem !important;
+  min-width: 320px !important;
+  max-width: 400px !important;
+  overflow: hidden !important;
+  pointer-events: auto; // Re-enable clicks on toast
+  position: relative !important;
+
+  // Initial hidden state - slide-in from right
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  &.show {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  &.hide {
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  }
+
+  // Smooth hover effect only when shown
+  &.show:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+    transform: translateX(0) translateY(-2px);
+  }
+}
+
+// Border Colors with !important to override Bootstrap
+.custom-toast.border-success {
+  border-left-color: #28a745 !important;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: #28a745;
+    z-index: 1;
+  }
+}
+
+.custom-toast.border-danger {
+  border-left-color: #dc3545 !important;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: #dc3545;
+    z-index: 1;
+  }
+}
+
+.custom-toast.border-warning {
+  border-left-color: #ffc107 !important;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: #ffc107;
+    z-index: 1;
+  }
+}
+
+.custom-toast.border-primary {
+  border-left-color: #0d6efd !important;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: #0d6efd;
+    z-index: 1;
+  }
+}
+
+// Toast Body Styling
+.custom-toast .toast-body {
+  padding: 0 !important;
+  position: relative;
+  z-index: 2;
+}
+
+.toast-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+// Close button styling
+.custom-toast .btn-close {
+  font-size: 0.8rem;
+  padding: 0.25rem;
+  margin: 0;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+// Hover effect
+.custom-toast:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(-1px);
+}
+
+// Progress bar (optional enhancement)
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: rgba(0, 0, 0, 0.1);
+  width: 100%;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: currentColor;
+    width: 100%;
+    transform: translateX(-100%);
+    animation: toast-progress 3s linear forwards;
+  }
+}
+
+@keyframes toast-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+canvas {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-block;
+  text-transform: capitalize;
+}
+.orange-badge {
+  background-color: #f6913324;
+  color: #f69133;
+}
+
+.red-badge {
+  background-color: #f04d5824;
+  color: #f04d58;
+}
+
+.lightblue-badge {
+  background-color: #2796ae24;
+  color: #2796ae;
+}
+
+.green-badge {
+  background-color: #27ae6024;
+  color: #27ae60;
+}
+
+.darkblue-badge {
+  background-color: #4493fd24;
+  color: #4493fd;
+}
+
+.gray-badge {
+  background-color: #adb5bd;
+  color: #fff;
+}

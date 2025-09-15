@@ -38,20 +38,6 @@ export class Signup implements OnInit {
     this.form.statusChanges.subscribe(() => {
       // Update the signal whenever form status changes
       this.formValid.set(this.form.valid);
-
-      console.log('Form status:', this.form.status);
-      Object.keys(this.form.controls).forEach((key) => {
-        const control = this.form.get(key);
-        console.log(
-          key,
-          '=> value:',
-          control?.value,
-          'valid?',
-          control?.valid,
-          'errors:',
-          control?.errors
-        );
-      });
     });
   }
 
@@ -86,7 +72,7 @@ export class Signup implements OnInit {
     this.signupService.registerUser(data).subscribe({
       next: (value) => {
         localStorage.setItem('email_value', this.form.get('email')?.value);
-        this.toastService.show('request submitted pls verify your account');
+        this.toastService.showSuccess('request submitted pls verify your account');
         this.isLoading.set(false);
         this.router.navigate(['/auth/verify'], {
           queryParams: { token: value.verification_token },
@@ -95,9 +81,9 @@ export class Signup implements OnInit {
 
       error: (err) => {
         console.log(err.message || 'failed to fetch data');
-        this.toastService.show(
+
+        this.toastService.showError(
           err.error?.message || err.message || 'Something went wrong',
-          'error',
           3000
         );
 

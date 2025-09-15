@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Toast } from './toast';
+import { SvgIcons } from './svg-icons';
 
-describe('Toast', () => {
-  let component: Toast;
-  let fixture: ComponentFixture<Toast>;
+describe('SvgIcons', () => {
+  let component: SvgIcons;
+  let fixture: ComponentFixture<SvgIcons>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Toast]
+      declarations: [SvgIcons]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Toast);
+    fixture = TestBed.createComponent(SvgIcons);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
