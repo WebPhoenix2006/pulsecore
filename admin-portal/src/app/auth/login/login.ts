@@ -1,7 +1,17 @@
-import { Component, effect, HostListener, signal } from '@angular/core';
+import { Component, computed, effect, HostListener, OnInit, signal } from '@angular/core';
 import { FormFieldOption } from '../../interfaces/form-field-options';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormValidation } from '../../shared/services/form-validation.service'; // Import the service
+import { LoginService } from '../../services/login.service';
+import { LoginRequestInterface } from '../../interfaces/auth/login.interface';
+import { ToastService } from '../../shared/services/toast.service';
+import { RegisterRequestInterface } from '../../interfaces/auth/register-request.interface';
+import { SlowNetworkService } from '../../shared/services/slow-network.service';
+import {
+  AuthResponseInterface,
+  RegisterResponseInterface,
+} from '../../interfaces/auth/register-response.interface';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -9,14 +19,19 @@ import { FormValidation } from '../../shared/services/form-validation.service'; 
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class Login {
+export class Login implements OnInit {
   form: FormGroup;
   screenInnerWidth = signal<number>(window.innerWidth);
   isScreenSmall = signal<boolean>(false);
   formValid = signal<boolean>(false);
+  isLoading = signal<boolean>(false);
 
-  get isBtnDisabled(): boolean {
-    return this.form.valid;
+  isFormValid = computed(() => !this.formValid() || this.isLoading());
+
+  ngOnInit(): void {
+    this.form.statusChanges.subscribe(() => {
+      this.formValid.set(this.form.valid);
+    });
   }
 
   @HostListener('window:resize')
@@ -27,25 +42,39 @@ export class Login {
 
   constructor(
     private fb: FormBuilder,
-    private validationService: FormValidation // Inject the service
+    private validationService: FormValidation,
+    private loginService: LoginService,
+    private toastService: ToastService,
+    private slowNetwork: SlowNetworkService,
+    private authService: AuthService
   ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email, Validators.minLength(6)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
-
-    effect(() => {
-      console.log(`form is valid state  :`, this.isBtnDisabled);
-    });
   }
 
   onSubmit() {
-    if (this.form.valid) {
-      console.log('Form Data:', this.form.value);
-    } else {
-      console.log('Form is invalid');
-      this.markFormGroupTouched();
-    }
+    this.isLoading.set(true);
+    const data: LoginRequestInterface = this.form.value as LoginRequestInterface;
+    this.slowNetwork.start(() => {
+      if (this.isLoading()) {
+        this.toastService.showWarning('hmm this is taking longer than usual');
+      }
+    });
+
+    this.loginService.loginUser(data).subscribe({
+      next: (data: AuthResponseInterface) => {
+        this.toastService.showSuccess('Logged in successfully');
+        this.authService.setAuth(data.access, data.refresh, data.tenant_id);
+        this.isLoading.set(false);
+        console.log(data);
+      },
+      error: (error) => {
+        this.toastService.showError(error.message || 'Something went wrong. Please try again.');
+        this.isLoading.set(false);
+      },
+    });
   }
 
   private markFormGroupTouched() {

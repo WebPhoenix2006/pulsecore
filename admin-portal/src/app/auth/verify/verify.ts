@@ -4,6 +4,7 @@ import { VerifyEmailService } from '../../shared/services/verify-email.service';
 import { RegisterRequestInterface } from '../../interfaces/auth/register-request.interface';
 import { ToastService } from '../../shared/services/toast.service';
 import { AuthResponseInterface } from '../../interfaces/auth/register-response.interface';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-verify',
@@ -20,7 +21,8 @@ export class Verify implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private verifyService: VerifyEmailService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private authService: AuthService
   ) {}
 
   //  function for getting the email value
@@ -45,8 +47,7 @@ export class Verify implements OnInit {
         this.isLoading.set(false);
         this.toastService.showSuccess('Email verified successfully', 2000);
         console.log(data);
-        localStorage.setItem('token', data!.token);
-        localStorage.setItem('refresh-token', data!.refresh);
+        this.authService.setAuth(data!.access, data!.refresh, data!.tenant_id);
       },
 
       error: (error) => {

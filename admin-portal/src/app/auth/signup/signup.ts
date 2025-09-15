@@ -3,7 +3,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { FormFieldOption } from '../../interfaces/form-field-options';
 import { FormValidation } from '../../shared/services/form-validation.service';
 import { fieldsMatchValidator } from '../../validators/validator';
-import { SignupService } from '../../services/signup';
+import { SignupService } from '../../services/signup.service';
 import { RegisterRequestInterface } from '../../interfaces/auth/register-request.interface';
 import { ToastService } from '../../shared/services/toast.service';
 import { Router } from '@angular/router';

@@ -36,12 +36,11 @@
           <a href="#" class="forgot-link">Forgot password?</a>
         </div>
 
-        <cus-btn
-          type="submit"
-          [disabled]="!isBtnDisabled"
-          buttonText="Login"
-          [isOutlined]="false"
-        />
+        <cus-btn type="submit" [disabled]="isFormValid()" [isOutlined]="false">
+          @if (isLoading()) {
+          <app-loader />
+          } @else { Login }
+        </cus-btn>
         <p class="register-text">
           Don’t have an account?
           <a routerLink="/auth/signup">Create</a>

@@ -5,8 +5,8 @@ export interface RegisterResponseInterface {
   verification_token: string;
 }
 export interface AuthResponseInterface {
-  detail: string;
-  token: string;
   refresh: string;
+  access: string;
   user: User;
+  tenant_id: string;
 }
