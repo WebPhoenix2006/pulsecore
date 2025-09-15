@@ -13,6 +13,7 @@ export class Login {
   form: FormGroup;
   screenInnerWidth = signal<number>(window.innerWidth);
   isScreenSmall = signal<boolean>(false);
+  formValid = signal<boolean>(false);
 
   get isBtnDisabled(): boolean {
     return this.form.valid;
