@@ -1,1 +1,120 @@
-<p>signup works!</p>
+<div class="login-container centered p-5">
+  <div class="login-card">
+    <!-- Left: Form -->
+    <div class="login-form-side">
+      <div class="title-image mb-5">
+        <img src="/images/bistropulse-logo.png" alt="bistropulse-logo" />
+      </div>
+
+      <h2 class="form-heading">Sign In</h2>
+      <p class="form-subtext">Access your account to manage your dashboard</p>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <!-- Email -->
+        <app-form-field
+          formControlName="email"
+          placeholder="Enter your email"
+          type="email"
+          label="Email"
+          [required]="true"
+          [errorMessage]="getErrorMessage('email')"
+        ></app-form-field>
+
+        <!-- Username -->
+        <app-form-field
+          formControlName="username"
+          placeholder="Enter your username"
+          type="text"
+          label="Username"
+          [required]="true"
+          [errorMessage]="getErrorMessage('username')"
+        ></app-form-field>
+
+        <!-- Password -->
+        <app-form-field
+          formControlName="password"
+          placeholder="Enter your password"
+          type="password"
+          label="Password"
+          [required]="true"
+          [errorMessage]="getErrorMessage('password')"
+        ></app-form-field>
+
+        <!-- Confirm Password -->
+        <app-form-field
+          formControlName="confirm_password"
+          placeholder="Confirm your password"
+          type="password"
+          label="Confirm Password"
+          [required]="true"
+          [errorMessage]="getErrorMessage('confirm_password')"
+        ></app-form-field>
+
+        <!-- First Name -->
+        <app-form-field
+          formControlName="first_name"
+          placeholder="First Name"
+          type="text"
+          label="First Name"
+          [required]="true"
+          [errorMessage]="getErrorMessage('first_name')"
+        ></app-form-field>
+
+        <!-- Last Name -->
+        <app-form-field
+          formControlName="last_name"
+          placeholder="Last Name"
+          type="text"
+          label="Last Name"
+          [required]="true"
+          [errorMessage]="getErrorMessage('last_name')"
+        ></app-form-field>
+
+        <!-- Phone Number -->
+        <app-form-field
+          formControlName="phone_number"
+          placeholder="Phone Number"
+          type="tel"
+          label="Phone Number"
+          [required]="true"
+          [errorMessage]="getErrorMessage('phone_number')"
+        ></app-form-field>
+
+        <!-- Optional: Remember me -->
+        <!-- <app-form-field
+          type="checkbox"
+          label="Remember me"
+          formControlName="rememberMe"
+        ></app-form-field> -->
+
+        <cus-btn [disabled]="isDisabled()" type="submit">
+          @if (isLoading()) {
+          <app-loader></app-loader>
+          } @else {
+          {{ buttonText }}
+          }
+        </cus-btn>
+      </form>
+
+      <div class="form-options">
+        <label class="remember-me">
+          <input type="checkbox" />
+          Remember me
+        </label>
+      </div>
+
+      <p class="register-text">
+        Already have an account?
+        <a routerLink="/auth/login">login</a>
+      </p>
+    </div>
+
+    <!-- Right: Gradient welcome block -->
+    @if (!isScreenSmall()) {
+    <app-gradient-background
+      title="Welcome Back!"
+      body="Sign in to your account and get quick access to all features, track progress, and manage your profile efficiently."
+    />
+    }
+  </div>
+</div>

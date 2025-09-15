@@ -1,0 +1,196 @@
+<div class="form-field-container" [class.has-error]="hasError" [class.disabled]="disabled">
+  <!-- Checkbox Field -->
+  @if (isCheckbox) {
+  <div class="checkbox-field">
+    <div class="checkbox-wrapper">
+      <input
+        [id]="fieldId"
+        type="checkbox"
+        class="form-checkbox"
+        [disabled]="disabled"
+        [checked]="value"
+        (change)="onCheckboxChange($event)"
+        (blur)="onBlur()"
+      />
+      <label [for]="fieldId" class="checkbox-label">
+        {{ label }}
+        @if (required) {
+        <span class="required-indicator">*</span>
+        }
+      </label>
+    </div>
+    @if (description) {
+    <p class="field-description">{{ description }}</p>
+    } @if (hasError && errorMessage) {
+    <p class="error-message">{{ errorMessage }}</p>
+    }
+  </div>
+  }
+
+  <!-- Multi-select Field -->
+  @if (isMultiselect) {
+  <div class="multiselect-field">
+    <label class="field-label" [class.required]="required">
+      {{ label }}
+      @if (required) {
+      <span class="required-indicator">*</span>
+      }
+    </label>
+    <div class="multiselect-options">
+      @for (option of options; track option.value) {
+      <div class="multiselect-option">
+        <input
+          [id]="fieldId + '_' + option.value"
+          type="checkbox"
+          class="form-checkbox"
+          [disabled]="disabled || option.disabled"
+          [checked]="isMultiSelectChecked(option.value)"
+          (change)="onMultiSelectChange(option.value, $event)"
+        />
+        <label [for]="fieldId + '_' + option.value" class="checkbox-label">
+          {{ option.label }}
+        </label>
+      </div>
+      }
+    </div>
+    @if (description) {
+    <p class="field-description">{{ description }}</p>
+    } @if (hasError && errorMessage) {
+    <p class="error-message">{{ errorMessage }}</p>
+    }
+  </div>
+  }
+
+  <!-- Standard Field -->
+  @if (isStandardField) {
+  <div class="standard-field">
+    <label [for]="fieldId" class="field-label" [class.required]="required">
+      {{ label }}
+      @if (required) {
+      <span class="required-indicator">*</span>
+      }
+    </label>
+
+    <div class="input-container">
+      @switch (type) { @case ('text') {
+      <input
+        [id]="fieldId"
+        type="text"
+        class="form-input"
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        [value]="value"
+        (input)="onInput($event)"
+        (blur)="onBlur()"
+      />
+      } @case ('email') {
+      <input
+        [id]="fieldId"
+        type="email"
+        class="form-input"
+        [placeholder]="placeholder || 'Enter email address'"
+        [disabled]="disabled"
+        [value]="value"
+        (input)="onInput($event)"
+        (blur)="onBlur()"
+      />
+      } @case ('password') {
+      <div class="password-container">
+        <input
+          [id]="fieldId"
+          [type]="showPassword ? 'text' : 'password'"
+          class="form-input password-input"
+          [placeholder]="placeholder || '••••••••'"
+          [disabled]="disabled"
+          [value]="value"
+          (input)="onInput($event)"
+          (blur)="onBlur()"
+        />
+        <button
+          type="button"
+          class="password-toggle"
+          (click)="togglePassword()"
+          [disabled]="disabled"
+        >
+          @if (showPassword) {
+          <i class="fa-solid fa-eye"></i>
+          } @else {
+          <i class="fa-solid fa-eye-slash"></i>
+          }
+        </button>
+      </div>
+      } @case ('number') {
+      <input
+        [id]="fieldId"
+        type="number"
+        class="form-input"
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        [min]="minValue"
+        [max]="maxValue"
+        [step]="stepValue"
+        [value]="value"
+        (input)="onInput($event)"
+        (blur)="onBlur()"
+      />
+      } @case ('date') {
+      <input
+        [id]="fieldId"
+        type="date"
+        class="form-input"
+        [disabled]="disabled"
+        [min]="minDate"
+        [max]="maxDate"
+        [value]="value"
+        (input)="onInput($event)"
+        (blur)="onBlur()"
+      />
+      } @case ('tel') {
+      <input
+        [id]="fieldId"
+        type="tel"
+        class="form-input"
+        [placeholder]="placeholder || '+1 (555) 123-4567'"
+        [disabled]="disabled"
+        [value]="value"
+        (input)="onInput($event)"
+        (blur)="onBlur()"
+      />
+      } @case ('textarea') {
+      <textarea
+        [id]="fieldId"
+        class="form-textarea"
+        [placeholder]="placeholder"
+        [disabled]="disabled"
+        [rows]="rows"
+        (input)="onInput($event)"
+        (blur)="onBlur()"
+        >{{ value }}</textarea
+      >
+      } @case ('select') {
+      <select
+        [id]="fieldId"
+        class="form-select"
+        [disabled]="disabled"
+        [value]="value"
+        (change)="onSelectChange($event)"
+        (blur)="onBlur()"
+      >
+        <option value="" disabled>{{ placeholder || 'Select an option' }}</option>
+        @for (option of options; track option.value) {
+        <option [value]="option.value" [disabled]="option.disabled">
+          {{ option.label }}
+        </option>
+        }
+      </select>
+      } }
+    </div>
+
+    @if (description) {
+    <p class="field-description">{{ description }}</p>
+    } @if (hasError && errorMessage) {
+    <p class="error-message">{{ errorMessage }}</p>
+    }
+  </div>
+  }
+</div>

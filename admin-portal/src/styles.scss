@@ -1,1 +1,360 @@
 /* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  list-style: none;
+}
+
+:root {
+  --bg-color: #f4f4f4;
+  --text-color: black;
+  --secondary-color: #0d6efd;
+  --error-color: #ef4444;
+  --border-color: #d1d5db;
+  --border-focus: #3b82f6;
+  --placeholder-color: #727272;
+  --muted-text: #6b7280;
+  --muted-text-dark: #374151;
+  --muted-text-light: #9ca3af;
+  --white: #ffffff;
+  --gradient-color: linear-gradient(135deg, #3b82f6 40%, purple 100%);
+
+  /* Toast-specific variables for light mode */
+  --toast-bg: #ffffff;
+  --toast-shadow: rgba(0, 0, 0, 0.1);
+  --toast-border: rgba(0, 0, 0, 0.1);
+  --success-color: #10b981;
+  --success-bg: #ecfdf5;
+  --warning-color: #f59e0b;
+  --warning-bg: #fffbeb;
+  --info-color: #3b82f6;
+  --info-bg: #eff6ff;
+  --error-bg: #fef2f2;
+}
+
+/* Dark mode variables */
+[data-theme='dark'] {
+  --bg-color: #1f2937;
+  --text-color: #f9fafb;
+  --border-color: #374151;
+  --placeholder-color: #9ca3af;
+  --muted-text: #d1d5db;
+
+  /* Toast-specific dark mode variables */
+  --toast-bg: #374151;
+  --toast-shadow: rgba(0, 0, 0, 0.3);
+  --toast-border: rgba(255, 255, 255, 0.1);
+  --success-bg: rgba(16, 185, 129, 0.1);
+  --warning-bg: rgba(245, 158, 11, 0.1);
+  --info-bg: rgba(59, 130, 246, 0.1);
+  --error-bg: rgba(239, 68, 68, 0.1);
+
+  --shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+body {
+  background: var(--bg-color) !important;
+  color: var(--text-color) !important;
+  font-family: 'Source Sans Pro', sans-serif !important;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.primary-bg {
+  background: var(--secondary-color);
+}
+
+.gradient-bg {
+  background: var(--gradient-color) !important;
+}
+
+.centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// for global disabled button
+// Custom button
+.btn-custom-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Montserrat Alternates', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--white);
+  background: var(--gradient-color);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &.full {
+    width: 100% !important;
+  }
+
+  // Hover + active
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  // Disabled
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  // Sizes
+  &.small {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    border-radius: 6px;
+  }
+
+  &.large {
+    padding: 14px 24px;
+    font-size: 1.125rem;
+    border-radius: 10px;
+  }
+
+  // Optional outline variant
+  &.outlined {
+    background: transparent;
+    border: 2px solid var(--secondary-color);
+    color: var(--secondary-color);
+
+    &:hover:not(:disabled) {
+      background: var(--secondary-color);
+      color: var(--white);
+    }
+  }
+}
+
+// Toast Container
+#toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none; // Allow clicks to pass through container
+}
+
+// Custom Toast Styles
+.custom-toast {
+  background-color: #fff !important;
+  border: none !important; // Remove default border
+  border-left: 4px solid !important; // Force left border
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  padding: 0.75rem 1rem !important;
+  min-width: 320px !important;
+  max-width: 400px !important;
+  overflow: hidden !important;
+  pointer-events: auto; // Re-enable clicks on toast
+  position: relative !important;
+
+  // Initial hidden state - slide-in from right
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  &.show {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  &.hide {
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  }
+
+  // Smooth hover effect only when shown
+  &.show:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+    transform: translateX(0) translateY(-2px);
+  }
+}
+
+// Border Colors with !important to override Bootstrap
+.custom-toast.border-success {
+  border-left-color: #28a745 !important;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: #28a745;
+    z-index: 1;
+  }
+}
+
+.custom-toast.border-danger {
+  border-left-color: #dc3545 !important;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: #dc3545;
+    z-index: 1;
+  }
+}
+
+.custom-toast.border-warning {
+  border-left-color: #ffc107 !important;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: #ffc107;
+    z-index: 1;
+  }
+}
+
+.custom-toast.border-primary {
+  border-left-color: #0d6efd !important;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: #0d6efd;
+    z-index: 1;
+  }
+}
+
+// Toast Body Styling
+.custom-toast .toast-body {
+  padding: 0 !important;
+  position: relative;
+  z-index: 2;
+}
+
+.toast-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+// Close button styling
+.custom-toast .btn-close {
+  font-size: 0.8rem;
+  padding: 0.25rem;
+  margin: 0;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+// Hover effect
+.custom-toast:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(-1px);
+}
+
+// Progress bar (optional enhancement)
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: rgba(0, 0, 0, 0.1);
+  width: 100%;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: currentColor;
+    width: 100%;
+    transform: translateX(-100%);
+    animation: toast-progress 3s linear forwards;
+  }
+}
+
+@keyframes toast-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+canvas {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-block;
+  text-transform: capitalize;
+}
+.orange-badge {
+  background-color: #f6913324;
+  color: #f69133;
+}
+
+.red-badge {
+  background-color: #f04d5824;
+  color: #f04d58;
+}
+
+.lightblue-badge {
+  background-color: #2796ae24;
+  color: #2796ae;
+}
+
+.green-badge {
+  background-color: #27ae6024;
+  color: #27ae60;
+}
+
+.darkblue-badge {
+  background-color: #4493fd24;
+  color: #4493fd;
+}
+
+.gray-badge {
+  background-color: #adb5bd;
+  color: #fff;
+}

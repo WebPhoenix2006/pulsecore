@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { Signup } from './signup/signup';
 import { Login } from './login/login';
+import { Verify } from './verify/verify';
 
 const routes: Routes = [
   {
@@ -11,6 +12,10 @@ const routes: Routes = [
   {
     path: 'login',
     component: Login,
+  },
+  {
+    path: 'verify',
+    component: Verify,
   },
   {
     path: '',

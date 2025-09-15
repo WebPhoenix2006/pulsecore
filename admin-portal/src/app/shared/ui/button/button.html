@@ -1,0 +1,12 @@
+<button
+  class="btn-custom-primary"
+  [attr.type]="type()"
+  [class]="size()"
+  [disabled]="disabled()"
+  [ngClass]="isOutlined() ? 'outlined' : ''"
+>
+  @if (buttonText()) {
+  {{ buttonText() }}
+  }
+  <ng-content> </ng-content>
+</button>

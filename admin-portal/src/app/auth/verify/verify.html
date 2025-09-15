@@ -1,0 +1,21 @@
+<div id="centering" class="container-fluid centered">
+  <div class="content-wrapper">
+    <div class="content-heading centered">
+      <span class="icon">
+        <img src="/images/email.png" alt="verify logo" class="img-fluid" />
+      </span>
+      <h1 class="info-text">Verify Your Email</h1>
+    </div>
+
+    <p class="content-text">
+      You have entered the email <b>{{ emailValue() }}</b> as your email address for your account
+      please click the link to verify your email
+    </p>
+
+    <cus-btn size="full" (click)="verifyEmail(token())" [disabled]="isLoading()">
+      @if(isLoading()) {
+      <app-loader />
+      } @else {Verify your email}
+    </cus-btn>
+  </div>
+</div>
