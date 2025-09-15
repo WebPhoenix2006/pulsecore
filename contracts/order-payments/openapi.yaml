@@ -1,0 +1,266 @@
+openapi: 3.0.3
+info:
+  title: PulseCore Orders & Payments API
+  version: 1.0.0
+  description: API for managing orders, returns, and Paystack payments (Phase C).
+
+servers:
+  - url: http://localhost:8000/api
+    description: Local development server
+
+paths:
+  /orders/:
+    post:
+      summary: Create a new order
+      parameters:
+        - in: header
+          name: X-Tenant-ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderCreate"
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+    get:
+      summary: List all orders
+      parameters:
+        - in: header
+          name: X-Tenant-ID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+
+  /orders/{order_id}/:
+    get:
+      summary: Retrieve an order
+      parameters:
+        - in: path
+          name: order_id
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Tenant-ID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+    patch:
+      summary: Update order status or payment status
+      parameters:
+        - in: path
+          name: order_id
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Tenant-ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderUpdate"
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/{order_id}/return/:
+    post:
+      summary: Log a return for an order
+      parameters:
+        - in: path
+          name: order_id
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Tenant-ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReturnCreate"
+      responses:
+        "201":
+          description: Return logged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Return"
+
+  /payments/paystack/initialize/:
+    post:
+      summary: Initialize a Paystack transaction
+      parameters:
+        - in: header
+          name: X-Tenant-ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaystackPaymentInit"
+      responses:
+        "201":
+          description: Transaction initialized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaystackPaymentResponse"
+
+  /payments/paystack/verify/{reference}/:
+    get:
+      summary: Verify a Paystack transaction
+      parameters:
+        - in: path
+          name: reference
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Tenant-ID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaystackVerification"
+
+components:
+  schemas:
+    OrderCreate:
+      type: object
+      required: [customer_name, items, total_amount]
+      properties:
+        customer_name:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              sku_id: { type: string }
+              quantity: { type: integer }
+        total_amount:
+          type: number
+          format: float
+        payment_status:
+          type: string
+          enum: [unpaid, paid]
+        status:
+          type: string
+          enum: [pending, processing, delivered, cancelled]
+
+    Order:
+      type: object
+      properties:
+        order_id: { type: string }
+        customer_name: { type: string }
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              sku_id: { type: string }
+              quantity: { type: integer }
+        total_amount: { type: number, format: float }
+        payment_status: { type: string }
+        status: { type: string }
+        created_at: { type: string, format: date-time }
+
+    OrderUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, processing, delivered, cancelled]
+        payment_status:
+          type: string
+          enum: [unpaid, paid, refunded]
+
+    ReturnCreate:
+      type: object
+      required: [reason, restock]
+      properties:
+        reason: { type: string }
+        restock: { type: boolean }
+
+    Return:
+      type: object
+      properties:
+        return_id: { type: string }
+        order_id: { type: string }
+        reason: { type: string }
+        restock: { type: boolean }
+        created_at: { type: string, format: date-time }
+
+    PaystackPaymentInit:
+      type: object
+      required: [order_id, amount, currency, customer_email]
+      properties:
+        order_id: { type: string }
+        amount: { type: number, format: float }
+        currency: { type: string, example: "NGN" }
+        customer_email: { type: string }
+
+    PaystackPaymentResponse:
+      type: object
+      properties:
+        authorization_url: { type: string }
+        access_code: { type: string }
+        reference: { type: string }
+
+    PaystackVerification:
+      type: object
+      properties:
+        reference: { type: string }
+        status: { type: string, enum: [success, failed] }
+        amount: { type: number, format: float }
+        paid_at: { type: string, format: date-time }
+        channel: { type: string }
