@@ -217,3 +217,5 @@ LOGGING = {
         },
     },
 }
+
+PAYSTACK_SECRET_KEY = config("PAYSTACK_SECRET_KEY")

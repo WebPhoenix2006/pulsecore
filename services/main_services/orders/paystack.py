@@ -1,12 +1,13 @@
-# services/orders/paystack.py
 import os
+from django.conf import settings
+
 import requests
 
 
 class PaystackClient:
     def __init__(self):
         self.base_url = "https://api.paystack.co"
-        self.secret_key = os.getenv("PAYSTACK_SECRET_KEY", "test_key")
+        self.secret_key = settings.PAYSTACK_SECRET_KEY  # <- use Django settings
 
         if not self.secret_key:
             raise ValueError("PAYSTACK_SECRET_KEY not set in environment variables")
