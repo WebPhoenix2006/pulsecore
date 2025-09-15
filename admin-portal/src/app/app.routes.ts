@@ -5,8 +5,8 @@ export const routes: Routes = [
   { path: '', redirectTo: 'auth', pathMatch: 'full' },
   { path: 'auth', loadChildren: () => import('./auth/auth-module').then((m) => m.AuthModule) },
   {
-    path: 'restaurants',
-    loadChildren: () => import('./restaurants/restaurants-module').then((m) => m.RestaurantsModule),
+    path: 'catalog',
+    loadChildren: () => import('./catalog/catalog-module').then((m) => m.CatalogModule),
     canActivate: [authGuard],
   },
 ];
