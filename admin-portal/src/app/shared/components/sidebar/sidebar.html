@@ -1,0 +1,130 @@
+<div class="sidebar-parent">
+  <div class="sidebar">
+    <!-- Header with Logo -->
+    <div class="header">
+      <div class="logo">
+        <img src="/images/bistropulse-logo.png" alt="BistroPulse Logo" />
+        <!-- <span class="app-title">BistroPulse</span> -->
+      </div>
+    </div>
+
+    <!-- User Info Section -->
+    <div class="user-info">
+      <div class="user-avatar">
+        <i class="bi bi-person-circle"></i>
+      </div>
+      <div class="user-details">
+        <div class="user-name">Restaurant Manager</div>
+        <div class="user-role">Administrator</div>
+      </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <div class="sidebar-nav">
+      <div class="nav-container">
+        <!-- Menu Items -->
+        <div class="menu-list">
+          <!-- Loop through menu items -->
+          <div *ngFor="let item of menuItems" class="menu-item">
+            <!-- Items with children (accordion) -->
+            <div *ngIf="item.children && item.children.length > 0" class="accordion-item">
+              <!-- Accordion Header -->
+              <div class="accordion-header">
+                <button
+                  class="menu-link accordion-trigger"
+                  [class.active]="hasActiveChild(item)"
+                  [class.expanded]="isAccordionActive(item.id)"
+                  (click)="toggleAccordion(item.id)"
+                  type="button"
+                >
+                  <div class="menu-icon">
+                    <i [class]="item.icon"></i>
+                  </div>
+
+                  <span class="menu-label">{{ item.label }}</span>
+
+                  <div class="menu-badge" *ngIf="item.badge">
+                    <span class="badge">{{ item.badge }}</span>
+                  </div>
+
+                  <div class="accordion-arrow">
+                    <i class="bi bi-chevron-right" [class.rotated]="isAccordionActive(item.id)"></i>
+                  </div>
+                </button>
+              </div>
+
+              <!-- Accordion Body -->
+              <div class="accordion-body" [class.show]="isAccordionActive(item.id)">
+                <div class="submenu-list">
+                  <div *ngFor="let child of item.children" class="submenu-item">
+                    <button
+                      class="menu-link submenu-link"
+                      [class.active]="isRouteActive(child.route!)"
+                      (click)="navigateTo(child.route!)"
+                    >
+                      <div class="menu-icon">
+                        <i [class]="child.icon"></i>
+                      </div>
+
+                      <span class="menu-label">{{ child.label }}</span>
+
+                      <div class="menu-badge" *ngIf="child.badge">
+                        <span class="badge">{{ child.badge }}</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Simple menu items (no children) -->
+            <div *ngIf="!item.children || item.children.length === 0" class="simple-item">
+              <button
+                class="menu-link"
+                [class.active]="isRouteActive(item.route!)"
+                (click)="navigateTo(item.route!)"
+              >
+                <div class="menu-icon">
+                  <i [class]="item.icon"></i>
+                </div>
+
+                <span class="menu-label">{{ item.label }}</span>
+
+                <div class="menu-badge" *ngIf="item.badge">
+                  <span class="badge">{{ item.badge }}</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <div class="action-buttons">
+        <button class="action-btn" title="New Order">
+          <i class="bi bi-plus-circle"></i>
+          <span>New Order</span>
+        </button>
+        <button class="action-btn" title="Help">
+          <i class="bi bi-question-circle"></i>
+          <span>Help</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <div class="footer-actions">
+        <button class="footer-btn" (click)="onLogout()" title="Logout">
+          <i class="bi bi-box-arrow-right"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+      <div class="footer-info">
+        <small class="text-muted">v1.2.0</small>
+      </div>
+    </div>
+  </div>
+</div>

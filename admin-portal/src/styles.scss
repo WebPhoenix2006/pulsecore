@@ -61,6 +61,7 @@ body {
   color: var(--text-color) !important;
   font-family: 'Source Sans Pro', sans-serif !important;
   transition: background-color 0.2s ease, color 0.2s ease;
+  overflow-x: hidden;
 }
 
 .primary-bg {
