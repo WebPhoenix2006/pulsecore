@@ -1,4 +1,119 @@
-.main-content {
+.layout-parent {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.body {
+  width: calc(100% - 5rem);
+  margin-left: 5rem;
+  z-index: 0;
   position: relative;
-  left: 280px;
+  top: 0;
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94); // Match sidebar transition
+  height: 100vh;
+  padding: 3rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &.body-trimmed {
+    width: calc(100% - 16.5625rem);
+    margin-left: 16.5625rem;
+  }
+
+  &.body-md-screen {
+    width: calc(100% - 5rem);
+    margin-left: 5rem;
+  }
+
+  // Add smooth scroll behavior
+  scroll-behavior: smooth;
+
+  // Custom scrollbar styling
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--border-color);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--muted-text);
+    border-radius: 4px;
+
+    &:hover {
+      background: var(--secondary-color);
+    }
+  }
+
+  // Responsive adjustments
+  @media (max-width: 768px) {
+    width: 100%;
+    margin-left: 0;
+    padding: 1.5rem;
+
+    &.body-trimmed,
+    &.body-md-screen {
+      width: 100%;
+      margin-left: 0;
+    }
+  }
+
+  @media (max-width: 576px) {
+    padding: 1rem;
+  }
+}
+
+// Add a backdrop for mobile when sidebar is open
+.mobile-backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  &.show {
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+}
+
+// Loading state for content transitions
+.body-content {
+  opacity: 1;
+  transform: translateX(0);
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  &.loading {
+    opacity: 0.7;
+    transform: translateX(10px);
+  }
+}
+
+// Prevent horizontal scroll on the main container
+html,
+body {
+  overflow-x: hidden;
+}
+
+// Ensure proper z-index stacking
+.layout-parent {
+  position: relative;
+  z-index: 0;
+}
+
+// Add focus styles for accessibility
+.body:focus-within {
+  outline: 2px solid var(--secondary-color);
+  outline-offset: -2px;
 }

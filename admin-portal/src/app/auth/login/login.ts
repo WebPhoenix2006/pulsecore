@@ -12,6 +12,7 @@ import {
   RegisterResponseInterface,
 } from '../../interfaces/auth/register-response.interface';
 import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -46,7 +47,8 @@ export class Login implements OnInit {
     private loginService: LoginService,
     private toastService: ToastService,
     private slowNetwork: SlowNetworkService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email, Validators.minLength(6)]],
@@ -68,7 +70,7 @@ export class Login implements OnInit {
         this.toastService.showSuccess('Logged in successfully');
         this.authService.setAuth(data.access, data.refresh, data.tenant_id);
         this.isLoading.set(false);
-        console.log(data);
+        this.router.navigateByUrl('catalog');
       },
       error: (error) => {
         this.toastService.showError(error.message || 'Something went wrong. Please try again.');

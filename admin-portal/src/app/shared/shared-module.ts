@@ -1,8 +1,19 @@
+// shared/shared.module.ts
+
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
+// PrimeNG Modules - Add these to fix the p-tag errors
+import { TableModule } from 'primeng/table';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
+
+// Your Components
 import { FormField } from './components/form-field/form-field';
 import { SmartFileField } from './components/smart-file-field/smart-file-field';
 import { GradientBackground } from './ui/gradient-background/gradient-background';
@@ -10,10 +21,49 @@ import { Button } from './ui/button/button';
 import { Loader } from './components/loader/loader';
 import { SvgIcons } from './components/svg-icons/svg-icons';
 import { Sidebar } from './components/sidebar/sidebar';
+import { ReusableDataTable } from './components/reusable-data-table/reusable-data-table';
+import { SpecialH1 } from './components/special-h1/special-h1';
 
 @NgModule({
-  declarations: [FormField, SmartFileField, GradientBackground, Button, Loader, SvgIcons, Sidebar],
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  exports: [FormField, SmartFileField, GradientBackground, Button, Loader, Sidebar],
+  declarations: [
+    FormField,
+    SmartFileField,
+    GradientBackground,
+    Button,
+    Loader,
+    SvgIcons,
+    Sidebar,
+    ReusableDataTable,
+    SpecialH1,
+  ],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    RouterModule,
+    // PrimeNG Modules
+    TableModule,
+    CardModule,
+    ButtonModule,
+    InputTextModule,
+    TagModule,
+    TooltipModule,
+  ],
+  exports: [
+    FormField,
+    SmartFileField,
+    GradientBackground,
+    Button,
+    Loader,
+    Sidebar,
+    ReusableDataTable,
+    // Export PrimeNG modules so they can be used in pages that import SharedModule
+    TableModule,
+    CardModule,
+    ButtonModule,
+    InputTextModule,
+    TagModule,
+    TooltipModule,
+  ],
 })
 export class SharedModule {}
