@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "main_services.catalog",
     "main_services.inventory",
     "main_services.orders",
+    "main_services.suppliers",
 ]
 
 MIDDLEWARE = [
