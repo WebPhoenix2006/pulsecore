@@ -6,5 +6,6 @@ export const Environments = {
     signup: `${api_url}/auth/register/`,
     verifyEmail: `${api_url}/auth/verify-email/`,
     logout: `${api_url}/auth/logout/`,
+    refreshToken: `${api_url}/auth/token/refresh/`,
   },
 };
