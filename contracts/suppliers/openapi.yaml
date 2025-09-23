@@ -1,0 +1,351 @@
+openapi: 3.0.3
+info:
+  title: PulseCore — Suppliers & Purchase Orders API
+  version: "1.0.0"
+  description: |
+    Suppliers and Purchase Orders API for PulseCore MVP.
+    Row-level multi-tenancy: every request must include `X-Tenant-ID` (UUID).
+servers:
+  - url: http://localhost:8000
+    description: Local Dev
+  - url: https://api.example.com
+    description: Production
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    X-Tenant-ID:
+      name: X-Tenant-ID
+      in: header
+      required: true
+      description: Tenant UUID. All queries are filtered by this tenant_id.
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    UUID:
+      type: string
+      format: uuid
+
+    SupplierBase:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        address:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+      required:
+        - name
+
+    Supplier:
+      allOf:
+        - $ref: "#/components/schemas/SupplierBase"
+        - type: object
+          properties:
+            supplier_id:
+              $ref: "#/components/schemas/UUID"
+            tenant_id:
+              $ref: "#/components/schemas/UUID"
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    POItem:
+      type: object
+      properties:
+        sku_id:
+          $ref: "#/components/schemas/UUID"
+        name:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+        unit_cost:
+          type: number
+          format: float
+      required:
+        - sku_id
+        - quantity
+        - unit_cost
+
+    PurchaseOrderBase:
+      type: object
+      properties:
+        supplier_id:
+          $ref: "#/components/schemas/UUID"
+        reference:
+          type: string
+        status:
+          type: string
+          enum: [draft, pending, placed, received, cancelled]
+          default: draft
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/POItem"
+        expected_delivery_date:
+          type: string
+          format: date
+        metadata:
+          type: object
+          additionalProperties: true
+      required:
+        - supplier_id
+        - items
+
+    PurchaseOrder:
+      allOf:
+        - $ref: "#/components/schemas/PurchaseOrderBase"
+        - type: object
+          properties:
+            po_id:
+              $ref: "#/components/schemas/UUID"
+            tenant_id:
+              $ref: "#/components/schemas/UUID"
+            total_cost:
+              type: number
+              format: float
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    Error:
+      type: object
+      properties:
+        detail:
+          type: string
+
+paths:
+  /api/suppliers/:
+    get:
+      summary: List suppliers
+      parameters:
+        - $ref: "#/components/parameters/X-Tenant-ID"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of suppliers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Supplier"
+
+    post:
+      summary: Create supplier
+      parameters:
+        - $ref: "#/components/parameters/X-Tenant-ID"
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SupplierBase"
+      responses:
+        "201":
+          description: Supplier created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supplier"
+
+  /api/suppliers/{supplier_id}/:
+    get:
+      summary: Retrieve supplier
+      parameters:
+        - $ref: "#/components/parameters/X-Tenant-ID"
+        - name: supplier_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Supplier object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supplier"
+
+    put:
+      summary: Update supplier
+      parameters:
+        - $ref: "#/components/parameters/X-Tenant-ID"
+        - name: supplier_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SupplierBase"
+      responses:
+        "200":
+          description: Supplier updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supplier"
+
+    delete:
+      summary: Delete supplier
+      parameters:
+        - $ref: "#/components/parameters/X-Tenant-ID"
+        - name: supplier_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: Deleted
+
+  /api/purchase-orders/:
+    get:
+      summary: List purchase orders
+      parameters:
+        - $ref: "#/components/parameters/X-Tenant-ID"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of purchase orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PurchaseOrder"
+
+    post:
+      summary: Create purchase order
+      parameters:
+        - $ref: "#/components/parameters/X-Tenant-ID"
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PurchaseOrderBase"
+      responses:
+        "201":
+          description: Purchase order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PurchaseOrder"
+
+  /api/purchase-orders/{po_id}/:
+    get:
+      summary: Retrieve purchase order
+      parameters:
+        - $ref: "#/components/parameters/X-Tenant-ID"
+        - name: po_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Purchase order object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PurchaseOrder"
+
+    patch:
+      summary: Update purchase order (status or items)
+      parameters:
+        - $ref: "#/components/parameters/X-Tenant-ID"
+        - name: po_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Updated purchase order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PurchaseOrder"
+
+    delete:
+      summary: Delete purchase order
+      parameters:
+        - $ref: "#/components/parameters/X-Tenant-ID"
+        - name: po_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: Deleted
+
+  /api/purchase-orders/{po_id}/pdf/:
+    get:
+      summary: Export PO as PDF
+      parameters:
+        - $ref: "#/components/parameters/X-Tenant-ID"
+        - name: po_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UUID"
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: PDF file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
