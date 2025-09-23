@@ -165,7 +165,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 FRONTEND_BASE_URL = "http://localhost:4200"
 
 # Email settings
-DEFAULT_FROM_EMAIL = config("EMAIL_HOST_USER", default="noreply@yourdomain.com")
+DEFAULT_FROM_EMAIL = config(
+    "EMAIL_HOST_USER", default="noreply@yourdomain.com")
 
 # Email backend configuration
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

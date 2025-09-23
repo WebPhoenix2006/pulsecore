@@ -74,6 +74,7 @@ export class Login implements OnInit {
       },
       error: (error) => {
         this.toastService.showError(error.message || 'Something went wrong. Please try again.');
+        console.log(error.message);
         this.isLoading.set(false);
       },
     });
