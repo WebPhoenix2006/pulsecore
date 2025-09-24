@@ -57,9 +57,9 @@ export class AuthService {
   }
 
   logout(): Observable<LogoutResponseInterface> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('refresh-token');
     const data = {
-      token: token,
+      refresh: token,
     };
     return this.http.post<LogoutResponseInterface>(Environments.auth.logout, data, {
       responseType: 'text' as 'json',
