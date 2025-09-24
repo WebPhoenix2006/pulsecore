@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "main_services.inventory",
     "main_services.orders",
     "main_services.suppliers",
+    "main_services.riders",
 ]
 
 MIDDLEWARE = [
@@ -165,8 +166,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 FRONTEND_BASE_URL = "http://localhost:4201"
 
 # Email settings
-DEFAULT_FROM_EMAIL = config(
-    "EMAIL_HOST_USER", default="noreply@yourdomain.com")
+DEFAULT_FROM_EMAIL = config("EMAIL_HOST_USER", default="noreply@yourdomain.com")
 
 # Email backend configuration
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
