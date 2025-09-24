@@ -6,12 +6,19 @@ import { Signup } from './signup/signup';
 import { RouterModule } from '@angular/router';
 import { Login } from './login/login';
 import { SharedModule } from '../shared/shared-module';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Verify } from './verify/verify';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 
 @NgModule({
   declarations: [Signup, Login, Verify, ForgotPasswordComponent],
-  imports: [CommonModule, RouterModule, AuthRoutingModule, SharedModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    AuthRoutingModule,
+    SharedModule,
+    ReactiveFormsModule,
+    FormsModule,
+  ],
 })
 export class AuthModule {}
