@@ -7,5 +7,24 @@ export const Environments = {
     verifyEmail: `${api_url}/auth/verify-email/`,
     logout: `${api_url}/auth/logout/`,
     refreshToken: `${api_url}/auth/token/refresh/`,
+    passwordReset: `${api_url}/auth/password-reset/`,
+    passwordResetConfirm: `${api_url}/auth/password-reset/confirm/`,
+    currentUser: `${api_url}/auth/user/`,
+  },
+  catalog: {
+    categories: `${api_url}/catalog/categories/`,
+    products: `${api_url}/catalog/products/`,
+  },
+  orders: {
+    orders: `${api_url}/orders/`,
+    paystackInit: `${api_url}/orders/payments/paystack/initialize/`,
+    paystackVerify: `${api_url}/orders/payments/paystack/verify/`,
+  },
+  suppliers: {
+    suppliers: `${api_url}/suppliers/suppliers/`,
+    purchaseOrders: `${api_url}/suppliers/purchase-orders/`,
+  },
+  inventory: {
+    inventory: `${api_url}/inventory/`,
   },
 };

@@ -57,9 +57,9 @@ export class AuthService {
   }
 
   logout(): Observable<LogoutResponseInterface> {
-    const token = localStorage.getItem('refresh-token');
+    const token = localStorage.getItem('token');
     const data = {
-      refresh: token,
+      token: token,
     };
     return this.http.post<LogoutResponseInterface>(Environments.auth.logout, data, {
       responseType: 'text' as 'json',
@@ -70,8 +70,7 @@ export class AuthService {
     if (this.isRefreshing) {
       return this.refreshTokenSubject.pipe(
         catchError((error) => {
-          this.logout();
-          return throwError(error);
+          return throwError(() => error);
         })
       );
     }
@@ -80,27 +79,27 @@ export class AuthService {
     const refreshToken = this.getRefreshToken();
 
     if (!refreshToken) {
-      this.clearAuth();
-      this.router.navigateByUrl('/auth/login');
-      return throwError('No refresh token available');
+      this.isRefreshing = false;
+      return throwError(() => new Error('No refresh token available'));
     }
 
-    return this.http.post<TokenRefreshResponse>(Environments.auth.refreshToken, {
-      refresh: refreshToken
-    }).pipe(
-      tap((response) => {
-        this.isRefreshing = false;
-        localStorage.setItem(this.accessKey, response.access);
-        this.refreshTokenSubject.next(response.access);
-      }),
-      catchError((error) => {
-        this.isRefreshing = false;
-        this.clearAuth();
-        this.router.navigateByUrl('/auth/login');
-        return throwError(error);
-      }),
-      map((response) => response.access)
-    );
+    return this.http
+      .post<TokenRefreshResponse>(Environments.auth.refreshToken, {
+        refresh: refreshToken,
+      })
+      .pipe(
+        tap((response) => {
+          this.isRefreshing = false;
+          localStorage.setItem(this.accessKey, response.access);
+          this.refreshTokenSubject.next(response.access);
+        }),
+        catchError((error) => {
+          this.isRefreshing = false;
+          this.refreshTokenSubject.next(null);
+          return throwError(() => error);
+        }),
+        map((response) => response.access)
+      );
   }
 
   clearAuth() {
@@ -118,12 +117,30 @@ export class AuthService {
     if (this.isTokenExpired(token)) {
       const refreshToken = this.getRefreshToken();
       if (!refreshToken || this.isTokenExpired(refreshToken)) {
-        this.clearAuth();
+        // Don't automatically clear auth here, let the interceptor handle it
         return false;
       }
+      // Token expired but refresh token is valid - still considered authenticated
       return true;
     }
 
     return true;
+  }
+
+  // Password reset functionality
+  requestPasswordReset(email: string): Observable<any> {
+    return this.http.post<any>(Environments.auth.passwordReset, { email });
+  }
+
+  confirmPasswordReset(token: string, password: string): Observable<any> {
+    return this.http.post<any>(Environments.auth.passwordResetConfirm, {
+      token,
+      password,
+    });
+  }
+
+  // Get current user
+  getCurrentUser(): Observable<any> {
+    return this.http.get<any>(Environments.auth.currentUser);
   }
 }

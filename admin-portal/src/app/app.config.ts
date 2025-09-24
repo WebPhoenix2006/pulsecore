@@ -1,6 +1,5 @@
 import {
   ApplicationConfig,
-  inject,
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
 } from '@angular/core';
@@ -9,8 +8,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { AuthInterceptor } from './interceptors/auth.interceptor';
-import { AuthService } from './services/auth.service';
+import { authInterceptor } from './interceptors/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,29 +17,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     provideRouter(routes),
     provideHttpClient(
-      withInterceptors([
-        (req, next) => {
-          const authService = inject(AuthService);
-          let headers: { [key: string]: string } = {
-            Accept: 'application/json',
-          };
-
-          if (!(req.body instanceof FormData)) {
-            headers['Content-Type'] = 'application/json';
-          }
-
-          const token = authService.getToken();
-          if (token) {
-            headers['Authorization'] = `Bearer ${token.trim()}`;
-          }
-
-          const authReq = req.clone({
-            setHeaders: headers,
-          });
-
-          return next(authReq);
-        },
-      ])
+      withInterceptors([authInterceptor])
     ),
   ],
 };
