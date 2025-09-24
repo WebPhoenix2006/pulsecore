@@ -2,6 +2,7 @@ import { TableConfig } from '../../interfaces/table-config.interface';
 
 export const categoryTableConfig: TableConfig = {
   title: 'Categories',
+  idField: 'id',
   description: 'Manage product categories for your catalog',
   entityName: 'Category',
   showCreateButton: true,
@@ -19,7 +20,7 @@ export const categoryTableConfig: TableConfig = {
       type: 'text',
       sortable: true,
       filterable: true,
-      width: '25%'
+      width: '25%',
     },
     {
       field: 'description',
@@ -27,7 +28,7 @@ export const categoryTableConfig: TableConfig = {
       type: 'text',
       sortable: true,
       filterable: true,
-      width: '40%'
+      width: '40%',
     },
     {
       field: 'created_at',
@@ -35,7 +36,7 @@ export const categoryTableConfig: TableConfig = {
       type: 'date',
       sortable: true,
       filterable: false,
-      width: '15%'
+      width: '15%',
     },
     {
       field: 'updated_at',
@@ -43,8 +44,8 @@ export const categoryTableConfig: TableConfig = {
       type: 'date',
       sortable: true,
       filterable: false,
-      width: '15%'
-    }
+      width: '15%',
+    },
   ],
 
   actions: [
@@ -52,20 +53,20 @@ export const categoryTableConfig: TableConfig = {
       type: 'view',
       icon: 'fas fa-eye',
       label: 'View Details',
-      severity: 'info'
+      severity: 'info',
     },
     {
       type: 'edit',
       icon: 'fas fa-edit',
       label: 'Edit Category',
-      severity: 'primary'
+      severity: 'primary',
     },
     {
       type: 'delete',
       icon: 'fas fa-trash',
       label: 'Delete Category',
-      severity: 'danger'
-    }
+      severity: 'danger',
+    },
   ],
 
   formFields: [
@@ -75,7 +76,7 @@ export const categoryTableConfig: TableConfig = {
       type: 'text',
       required: true,
       placeholder: 'Enter category name',
-      description: 'A unique name for this category'
+      description: 'A unique name for this category',
     },
     {
       field: 'description',
@@ -83,7 +84,7 @@ export const categoryTableConfig: TableConfig = {
       type: 'textarea',
       required: false,
       placeholder: 'Enter category description (optional)',
-      description: 'Provide a detailed description of this category'
-    }
-  ]
+      description: 'Provide a detailed description of this category',
+    },
+  ],
 };

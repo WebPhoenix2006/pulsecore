@@ -20,7 +20,18 @@ export interface TableAction {
 export interface FormFieldConfig {
   field: string;
   label: string;
-  type: 'text' | 'email' | 'password' | 'number' | 'textarea' | 'select' | 'checkbox' | 'date' | 'tel' | 'file' | 'multiselect';
+  type:
+    | 'text'
+    | 'email'
+    | 'password'
+    | 'number'
+    | 'textarea'
+    | 'select'
+    | 'checkbox'
+    | 'date'
+    | 'tel'
+    | 'file'
+    | 'multiselect';
   required?: boolean;
   placeholder?: string;
   options?: { label: string; value: any }[];
@@ -31,6 +42,7 @@ export interface FormFieldConfig {
 
 export interface TableConfig {
   title: string;
+  idField?: string;
   description?: string;
   entityName: string;
   columns: TableColumn[];

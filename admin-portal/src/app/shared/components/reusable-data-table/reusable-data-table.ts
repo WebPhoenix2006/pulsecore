@@ -1,14 +1,19 @@
 import { Component, input, output, computed, signal, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ConfirmationService } from 'primeng/api';
-import { TableConfig, TableData, TableAction, FormFieldConfig } from '../../../interfaces/table-config.interface';
+import {
+  TableConfig,
+  TableData,
+  TableAction,
+  FormFieldConfig,
+} from '../../../interfaces/table-config.interface';
 
 @Component({
   selector: 'app-reusable-data-table',
   standalone: false,
   templateUrl: './reusable-data-table.html',
   styleUrl: './reusable-data-table.scss',
-  providers: [ConfirmationService]
+  providers: [ConfirmationService],
 })
 export class ReusableDataTable implements OnInit {
   // Inputs
@@ -41,10 +46,13 @@ export class ReusableDataTable implements OnInit {
     const search = this.searchTerm().toLowerCase();
     if (!search) return this.data();
 
-    return this.data().filter(item =>
-      this.config().columns.some(col =>
-        col.filterable !== false &&
-        String(item[col.field] || '').toLowerCase().includes(search)
+    return this.data().filter((item) =>
+      this.config().columns.some(
+        (col) =>
+          col.filterable !== false &&
+          String(item[col.field] || '')
+            .toLowerCase()
+            .includes(search)
       )
     );
   });
@@ -59,10 +67,7 @@ export class ReusableDataTable implements OnInit {
   totalRecords = computed(() => this.filteredData().length);
   totalPages = computed(() => Math.ceil(this.totalRecords() / this.rowsPerPage()));
 
-  constructor(
-    private fb: FormBuilder,
-    private confirmationService: ConfirmationService
-  ) {}
+  constructor(private fb: FormBuilder, private confirmationService: ConfirmationService) {}
 
   ngOnInit() {
     this.initializeForm();
@@ -72,7 +77,7 @@ export class ReusableDataTable implements OnInit {
   initializeForm() {
     const formControls: any = {};
 
-    this.config().formFields.forEach(field => {
+    this.config().formFields.forEach((field) => {
       const validators = [];
       if (field.required) validators.push(Validators.required);
       if (field.type === 'email') validators.push(Validators.email);
@@ -124,7 +129,7 @@ export class ReusableDataTable implements OnInit {
       this.isSubmitting.set(true);
       this.onEdit.emit({
         id: this.selectedItem()!['id'],
-        data: this.entityForm.value
+        data: this.entityForm.value,
       });
     } else {
       this.markFormGroupTouched();
@@ -132,14 +137,17 @@ export class ReusableDataTable implements OnInit {
   }
 
   handleDelete(item: TableData) {
+    const idField = this.config().idField || 'id';
+    const itemId = item[idField];
+
     this.confirmationService.confirm({
       message: `Are you sure you want to delete this ${this.config().entityName.toLowerCase()}?`,
       header: `Delete ${this.config().entityName}`,
       icon: 'fas fa-exclamation-triangle',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
-        this.onDelete.emit(item['id']);
-      }
+        this.onDelete.emit(itemId);
+      },
     });
   }
 
@@ -188,7 +196,7 @@ export class ReusableDataTable implements OnInit {
 
   // Utility methods
   private markFormGroupTouched() {
-    Object.keys(this.entityForm.controls).forEach(key => {
+    Object.keys(this.entityForm.controls).forEach((key) => {
       this.entityForm.get(key)?.markAsTouched();
     });
   }

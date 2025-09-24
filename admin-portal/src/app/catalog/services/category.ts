@@ -1,31 +1,25 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Category, CreateCategoryRequest, UpdateCategoryRequest, PaginatedResponse } from '../../interfaces/category.interface';
+import {
+  Category,
+  CreateCategoryRequest,
+  UpdateCategoryRequest,
+  PaginatedResponse,
+} from '../../interfaces/category.interface';
 import { Environments } from '../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CategoryService {
-
   constructor(private http: HttpClient) {}
 
   // Headers are now handled by the interceptor
 
   // Get all categories with pagination
-  getCategories(page: number = 1, pageSize: number = 10, search?: string): Observable<PaginatedResponse<Category>> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('page_size', pageSize.toString());
-
-    if (search) {
-      params = params.set('search', search);
-    }
-
-    return this.http.get<PaginatedResponse<Category>>(Environments.catalog.categories, {
-      params
-    });
+  getCategories(): Observable<PaginatedResponse<Category>> {
+    return this.http.get<PaginatedResponse<Category>>(Environments.catalog.categories);
   }
 
   // Get single category by ID

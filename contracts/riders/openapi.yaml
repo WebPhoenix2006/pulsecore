@@ -1,0 +1,557 @@
+openapi: 3.0.3
+info:
+  title: Riders & Dispatch Management API
+  description: API for managing riders and dispatch operations
+  version: 1.0.0
+
+paths:
+  /api/riders/riders/:
+    get:
+      summary: List all riders
+      tags:
+        - Riders
+      parameters:
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of riders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Rider'
+    post:
+      summary: Create a new rider
+      tags:
+        - Riders
+      parameters:
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiderCreate'
+      responses:
+        '201':
+          description: Rider created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rider'
+
+  /api/riders/riders/{rider_id}/:
+    get:
+      summary: Get rider by ID
+      tags:
+        - Riders
+      parameters:
+        - name: rider_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Rider details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rider'
+    put:
+      summary: Update rider
+      tags:
+        - Riders
+      parameters:
+        - name: rider_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RiderUpdate'
+      responses:
+        '200':
+          description: Rider updated successfully
+    delete:
+      summary: Delete rider
+      tags:
+        - Riders
+      parameters:
+        - name: rider_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Rider deleted successfully
+
+  /api/riders/dispatch/:
+    get:
+      summary: List all dispatch orders
+      tags:
+        - Dispatch
+      parameters:
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, assigned, in_progress, delivered, cancelled]
+        - name: rider_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of dispatch orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DispatchOrder'
+    post:
+      summary: Create a new dispatch order
+      tags:
+        - Dispatch
+      parameters:
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DispatchOrderCreate'
+      responses:
+        '201':
+          description: Dispatch order created successfully
+
+  /api/riders/dispatch/{dispatch_id}/:
+    get:
+      summary: Get dispatch order by ID
+      tags:
+        - Dispatch
+      parameters:
+        - name: dispatch_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Dispatch order details
+    put:
+      summary: Update dispatch order
+      tags:
+        - Dispatch
+      parameters:
+        - name: dispatch_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DispatchOrderUpdate'
+      responses:
+        '200':
+          description: Dispatch order updated successfully
+
+  /api/riders/dispatch/{dispatch_id}/assign/:
+    post:
+      summary: Assign dispatch order to rider
+      tags:
+        - Dispatch
+      parameters:
+        - name: dispatch_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rider_id:
+                  type: string
+                  format: uuid
+              required:
+                - rider_id
+      responses:
+        '200':
+          description: Dispatch order assigned successfully
+
+components:
+  schemas:
+    Rider:
+      type: object
+      properties:
+        rider_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        license_number:
+          type: string
+        vehicle_type:
+          type: string
+          enum: [motorcycle, bicycle, car, van, truck]
+        vehicle_plate:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        location:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+            longitude:
+              type: number
+              format: double
+        rating:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 5
+        metadata:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    RiderCreate:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        license_number:
+          type: string
+        vehicle_type:
+          type: string
+          enum: [motorcycle, bicycle, car, van, truck]
+        vehicle_plate:
+          type: string
+        metadata:
+          type: object
+          default: {}
+      required:
+        - first_name
+        - last_name
+        - email
+        - phone
+        - vehicle_type
+
+    RiderUpdate:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        license_number:
+          type: string
+        vehicle_type:
+          type: string
+          enum: [motorcycle, bicycle, car, van, truck]
+        vehicle_plate:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        location:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+            longitude:
+              type: number
+              format: double
+        metadata:
+          type: object
+
+    DispatchOrder:
+      type: object
+      properties:
+        dispatch_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        rider:
+          $ref: '#/components/schemas/Rider'
+        order_id:
+          type: string
+          format: uuid
+        customer_name:
+          type: string
+        customer_phone:
+          type: string
+        pickup_address:
+          type: string
+        delivery_address:
+          type: string
+        pickup_location:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+            longitude:
+              type: number
+              format: double
+        delivery_location:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+            longitude:
+              type: number
+              format: double
+        status:
+          type: string
+          enum: [pending, assigned, in_progress, delivered, cancelled]
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        estimated_duration:
+          type: integer
+        actual_duration:
+          type: integer
+        distance:
+          type: number
+          format: double
+        notes:
+          type: string
+        metadata:
+          type: object
+        assigned_at:
+          type: string
+          format: date-time
+        picked_up_at:
+          type: string
+          format: date-time
+        delivered_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    DispatchOrderCreate:
+      type: object
+      properties:
+        order_id:
+          type: string
+          format: uuid
+        customer_name:
+          type: string
+        customer_phone:
+          type: string
+        pickup_address:
+          type: string
+        delivery_address:
+          type: string
+        pickup_location:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+            longitude:
+              type: number
+              format: double
+        delivery_location:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+            longitude:
+              type: number
+              format: double
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+          default: medium
+        estimated_duration:
+          type: integer
+        distance:
+          type: number
+          format: double
+        notes:
+          type: string
+        metadata:
+          type: object
+          default: {}
+      required:
+        - order_id
+        - customer_name
+        - customer_phone
+        - pickup_address
+        - delivery_address
+
+    DispatchOrderUpdate:
+      type: object
+      properties:
+        customer_name:
+          type: string
+        customer_phone:
+          type: string
+        pickup_address:
+          type: string
+        delivery_address:
+          type: string
+        pickup_location:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+            longitude:
+              type: number
+              format: double
+        delivery_location:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+            longitude:
+              type: number
+              format: double
+        status:
+          type: string
+          enum: [pending, assigned, in_progress, delivered, cancelled]
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        estimated_duration:
+          type: integer
+        actual_duration:
+          type: integer
+        distance:
+          type: number
+          format: double
+        notes:
+          type: string
+        metadata:
+          type: object

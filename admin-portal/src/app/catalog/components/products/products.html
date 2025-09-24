@@ -1,1 +1,15 @@
-<p>Products</p>
+<!-- catalog/pages/products/products.component.html -->
+<div class="products-page">
+  <app-reusable-data-table
+    #dataTable
+    [config]="tableConfig"
+    [data]="products()"
+    [loading]="loading()"
+    (onCreate)="onCreateProduct($event)"
+    (onEdit)="onEditProduct($event)"
+    (onDelete)="onDeleteProduct($event)"
+    (onView)="onViewProduct($event)"
+    (onCustomAction)="onCustomAction($event)"
+  >
+  </app-reusable-data-table>
+</div>
