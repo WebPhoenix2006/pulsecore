@@ -2,6 +2,8 @@ from pathlib import Path
 from datetime import timedelta
 import os
 from decouple import config
+from corsheaders.defaults import default_headers
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -188,6 +190,11 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "X-Tenant-ID",
+]
+
 
 # Media files
 MEDIA_URL = "/media/"
