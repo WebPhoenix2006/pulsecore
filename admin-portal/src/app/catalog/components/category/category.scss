@@ -1,0 +1,9 @@
+.categories-page {
+  padding: 1rem;
+  min-height: 100vh;
+  background: var(--bg-color);
+
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+  }
+}

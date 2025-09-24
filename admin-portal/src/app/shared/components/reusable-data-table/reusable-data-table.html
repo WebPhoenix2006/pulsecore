@@ -1,4 +1,278 @@
-<div class="table-header">
-  <cus-h1 [text]="title()" />
-  <p class="description-text">{{ text() }}</p>
+<!-- Confirmation Dialog -->
+<p-confirmDialog></p-confirmDialog>
+
+<!-- Main table wrapper -->
+<div class="table-container">
+  <!-- Table header -->
+  <div class="table-header">
+    <div class="header-content">
+      <div class="title-section">
+        <cus-h1 [text]="config().title" />
+        <p class="description-text" *ngIf="config().description">{{ config().description }}</p>
+      </div>
+
+      <div class="action-section">
+        <!-- Search -->
+        <div class="search-wrapper" *ngIf="config().showSearch !== false">
+          <span class="p-input-icon-left">
+            <i class="fas fa-search"></i>
+            <input
+              type="text"
+              pInputText
+              [placeholder]="config().searchPlaceholder || 'Search...'"
+              (input)="onSearch($event)"
+              [value]="searchTerm()"
+              class="search-input"
+            />
+          </span>
+        </div>
+
+        <!-- Create button -->
+        <cus-btn
+          *ngIf="config().showCreateButton !== false"
+          [buttonText]="'Add ' + config().entityName"
+          [size]="'large'"
+          (click)="openCreateModal()"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div class="loading-container" *ngIf="loading()">
+    <p-progressSpinner></p-progressSpinner>
+    <p>Loading...</p>
+  </div>
+
+  <!-- Data table -->
+  <div class="table-content" *ngIf="!loading()">
+    <div class="table-wrapper">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th *ngFor="let col of config().columns" [style.width]="col.width || 'auto'">
+              {{ col.header }}
+            </th>
+            <th *ngIf="config().actions.length > 0" style="width: 150px">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody *ngIf="paginatedData().length > 0; else emptyTable">
+          <tr *ngFor="let item of paginatedData()">
+            <td *ngFor="let col of config().columns">
+              <!-- Text column -->
+              <span *ngIf="col.type === 'text' || col.type === 'number'">
+                {{ formatCellValue(item, col) }}
+              </span>
+
+              <!-- Date column -->
+              <span *ngIf="col.type === 'date'" class="date-cell">
+                {{ formatCellValue(item, col) }}
+              </span>
+
+              <!-- Badge column -->
+              <span
+                *ngIf="col.type === 'badge'"
+                class="status-badge"
+                [ngClass]="getBadgeDetails(item, col).severity + '-badge'"
+              >
+                {{ getBadgeDetails(item, col).value }}
+              </span>
+
+              <!-- Image column -->
+              <img
+                *ngIf="col.type === 'image' && item[col.field]"
+                [src]="item[col.field]"
+                [alt]="col.header"
+                class="table-image"
+              />
+            </td>
+            <td *ngIf="config().actions.length > 0">
+              <div class="action-buttons">
+                <button
+                  *ngFor="let action of config().actions"
+                  type="button"
+                  class="action-btn btn-custom-primary small"
+                  [ngClass]="action.severity || 'primary'"
+                  [title]="action.label"
+                  (click)="handleAction(action, item)"
+                  [style.display]="action.visible ? (action.visible(item) ? 'inline-flex' : 'none') : 'inline-flex'"
+                >
+                  <i [class]="action.icon"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Empty state -->
+      <ng-template #emptyTable>
+        <div class="empty-state">
+          <div class="empty-content">
+            <i class="fas fa-inbox empty-icon"></i>
+            <h3>{{ config().emptyMessage || 'No data found' }}</h3>
+            <p *ngIf="config().emptyDescription">{{ config().emptyDescription }}</p>
+            <cus-btn
+              *ngIf="config().showCreateButton !== false"
+              [buttonText]="'Create ' + config().entityName"
+              (click)="openCreateModal()"
+            />
+          </div>
+        </div>
+      </ng-template>
+
+      <!-- Simple pagination -->
+      <div class="pagination" *ngIf="config().showPaginator !== false && totalRecords() > rowsPerPage()">
+        <button
+          type="button"
+          class="btn-custom-primary small"
+          [disabled]="currentPage() === 0"
+          (click)="goToPage(currentPage() - 1)"
+        >
+          Previous
+        </button>
+        <span class="page-info">
+          Page {{ currentPage() + 1 }} of {{ totalPages() }}
+          ({{ totalRecords() }} total)
+        </span>
+        <button
+          type="button"
+          class="btn-custom-primary small"
+          [disabled]="currentPage() >= totalPages() - 1"
+          (click)="goToPage(currentPage() + 1)"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- Create Modal -->
+<p-dialog
+  [header]="'Create ' + config().entityName"
+  [(visible)]="showCreateModal"
+  [modal]="true"
+  [style]="{width: '600px'}"
+  [draggable]="false"
+  [resizable]="false"
+  (onHide)="closeModals()"
+>
+  <form [formGroup]="entityForm" (ngSubmit)="handleCreate()" class="entity-form">
+    <div class="form-grid">
+      <div *ngFor="let field of config().formFields" class="form-field">
+        <app-form-field
+          [label]="field.label"
+          [type]="field.type"
+          [placeholder]="field.placeholder || ''"
+          [required]="field.required || false"
+          [options]="field.options || []"
+          [description]="field.description || ''"
+          [errorMessage]="getFieldError(field.field)"
+          [formControlName]="field.field"
+        ></app-form-field>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button
+        type="button"
+        pButton
+        label="Cancel"
+        class="p-button-secondary"
+        (click)="closeModals()"
+        [disabled]="isSubmitting()"
+      ></button>
+      <button
+        type="submit"
+        pButton
+        [label]="isSubmitting() ? 'Creating...' : 'Create'"
+        class="p-button-primary"
+        [disabled]="isSubmitting()"
+        [loading]="isSubmitting()"
+      ></button>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- Edit Modal -->
+<p-dialog
+  [header]="'Edit ' + config().entityName"
+  [(visible)]="showEditModal"
+  [modal]="true"
+  [style]="{width: '600px'}"
+  [draggable]="false"
+  [resizable]="false"
+  (onHide)="closeModals()"
+>
+  <form [formGroup]="entityForm" (ngSubmit)="handleEdit()" class="entity-form">
+    <div class="form-grid">
+      <div *ngFor="let field of config().formFields" class="form-field">
+        <app-form-field
+          [label]="field.label"
+          [type]="field.type"
+          [placeholder]="field.placeholder || ''"
+          [required]="field.required || false"
+          [options]="field.options || []"
+          [description]="field.description || ''"
+          [errorMessage]="getFieldError(field.field)"
+          [formControlName]="field.field"
+        ></app-form-field>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button
+        type="button"
+        pButton
+        label="Cancel"
+        class="p-button-secondary"
+        (click)="closeModals()"
+        [disabled]="isSubmitting()"
+      ></button>
+      <button
+        type="submit"
+        pButton
+        [label]="isSubmitting() ? 'Updating...' : 'Update'"
+        class="p-button-primary"
+        [disabled]="isSubmitting()"
+        [loading]="isSubmitting()"
+      ></button>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- View Modal -->
+<p-dialog
+  [header]="'View ' + config().entityName"
+  [(visible)]="showViewModal"
+  [modal]="true"
+  [style]="{width: '600px'}"
+  [draggable]="false"
+  [resizable]="false"
+  (onHide)="closeModals()"
+>
+  <div class="view-content" *ngIf="selectedItem()">
+    <div class="view-grid">
+      <div *ngFor="let field of config().formFields" class="view-field">
+        <label class="view-label">{{ field.label }}:</label>
+        <div class="view-value">
+          <span *ngIf="field.type === 'date'">{{ selectedItem()![field.field] | date }}</span>
+          <span *ngIf="field.type !== 'date'">{{ selectedItem()![field.field] || 'N/A' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-actions">
+    <button
+      type="button"
+      pButton
+      label="Close"
+      class="p-button-secondary"
+      (click)="closeModals()"
+    ></button>
+  </div>
+</p-dialog>

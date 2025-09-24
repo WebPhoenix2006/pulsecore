@@ -1,1 +1,13 @@
-<p>Categories</p>
+<div class="categories-page">
+  <app-reusable-data-table
+    #dataTable
+    [config]="tableConfig"
+    [data]="categories()"
+    [loading]="loading()"
+    (onCreate)="onCreateCategory($event)"
+    (onEdit)="onEditCategory($event)"
+    (onDelete)="onDeleteCategory($event)"
+    (onView)="onViewCategory($event)"
+    (onCustomAction)="onCustomAction($event)">
+  </app-reusable-data-table>
+</div>

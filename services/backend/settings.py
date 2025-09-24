@@ -162,7 +162,7 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-FRONTEND_BASE_URL = "http://localhost:4200"
+FRONTEND_BASE_URL = "http://localhost:4201"
 
 # Email settings
 DEFAULT_FROM_EMAIL = config(
@@ -183,6 +183,8 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
     "http://127.0.0.1:4200",
+    "http://localhost:4201",
+    "http://127.0.0.1:4201",
 ]
 
 CORS_ALLOW_CREDENTIALS = True

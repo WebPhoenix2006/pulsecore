@@ -12,6 +12,11 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
+import { DialogModule } from 'primeng/dialog';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { CheckboxModule } from 'primeng/checkbox';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ConfirmationService } from 'primeng/api';
 
 // Your Components
 import { FormField } from './components/form-field/form-field';
@@ -48,6 +53,10 @@ import { SpecialH1 } from './components/special-h1/special-h1';
     InputTextModule,
     TagModule,
     TooltipModule,
+    DialogModule,
+    ConfirmDialogModule,
+    CheckboxModule,
+    ProgressSpinnerModule,
   ],
   exports: [
     FormField,
@@ -57,6 +66,7 @@ import { SpecialH1 } from './components/special-h1/special-h1';
     Loader,
     Sidebar,
     ReusableDataTable,
+    SpecialH1,
     // Export PrimeNG modules so they can be used in pages that import SharedModule
     TableModule,
     CardModule,
@@ -64,6 +74,13 @@ import { SpecialH1 } from './components/special-h1/special-h1';
     InputTextModule,
     TagModule,
     TooltipModule,
+    DialogModule,
+    ConfirmDialogModule,
+    CheckboxModule,
+    ProgressSpinnerModule,
   ],
+  providers: [
+    ConfirmationService
+  ]
 })
 export class SharedModule {}

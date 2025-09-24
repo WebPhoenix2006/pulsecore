@@ -4,7 +4,10 @@
       "Bash(npm install:*)",
       "Bash(npm run build:*)",
       "Bash(npx tsc:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(npm cache clean:*)",
+      "Bash(ng serve:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": [],
     "ask": []

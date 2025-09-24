@@ -1,6 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+@import '@fortawesome/fontawesome-free/css/all.css';
 
 * {
   margin: 0;
@@ -10,50 +11,64 @@
 }
 
 :root {
-  --bg-color: #f4f4f4;
-  --text-color: black;
-  --secondary-color: #0d6efd;
+  --bg-color: #f8fafc;
+  --text-color: #1e293b;
+  --secondary-color: #6366f1;
+  --accent-color: #8b5cf6;
   --error-color: #ef4444;
-  --border-color: #d1d5db;
-  --border-focus: #3b82f6;
-  --placeholder-color: #727272;
-  --muted-text: #6b7280;
-  --muted-text-dark: #374151;
-  --muted-text-light: #9ca3af;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --info-color: #06b6d4;
+  --border-color: #e2e8f0;
+  --border-focus: #6366f1;
+  --placeholder-color: #64748b;
+  --muted-text: #64748b;
+  --muted-text-dark: #475569;
+  --muted-text-light: #94a3b8;
   --white: #ffffff;
-  --gradient-color: linear-gradient(135deg, #3b82f6 40%, purple 100%);
+  --card-bg: #ffffff;
+  --surface-color: #f1f5f9;
+  --gradient-color: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 
   /* Toast-specific variables for light mode */
   --toast-bg: #ffffff;
   --toast-shadow: rgba(0, 0, 0, 0.1);
   --toast-border: rgba(0, 0, 0, 0.1);
-  --success-color: #10b981;
   --success-bg: #ecfdf5;
-  --warning-color: #f59e0b;
   --warning-bg: #fffbeb;
-  --info-color: #3b82f6;
-  --info-bg: #eff6ff;
+  --info-bg: #f0f9ff;
   --error-bg: #fef2f2;
 }
 
 /* Dark mode variables */
 [data-theme='dark'] {
-  --bg-color: #1f2937;
-  --text-color: #f9fafb;
-  --border-color: #374151;
-  --placeholder-color: #9ca3af;
-  --muted-text: #d1d5db;
+  --bg-color: #0f172a;
+  --text-color: #f1f5f9;
+  --secondary-color: #6366f1;
+  --accent-color: #8b5cf6;
+  --border-color: #334155;
+  --border-focus: #6366f1;
+  --placeholder-color: #64748b;
+  --muted-text: #94a3b8;
+  --muted-text-dark: #cbd5e1;
+  --muted-text-light: #64748b;
+  --card-bg: #1e293b;
+  --surface-color: #334155;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
 
   /* Toast-specific dark mode variables */
-  --toast-bg: #374151;
+  --toast-bg: #1e293b;
   --toast-shadow: rgba(0, 0, 0, 0.3);
   --toast-border: rgba(255, 255, 255, 0.1);
   --success-bg: rgba(16, 185, 129, 0.1);
   --warning-bg: rgba(245, 158, 11, 0.1);
-  --info-bg: rgba(59, 130, 246, 0.1);
+  --info-bg: rgba(6, 182, 212, 0.1);
   --error-bg: rgba(239, 68, 68, 0.1);
-
-  --shadow: 0 0 15px rgba(0, 0, 0, 0.3);
 }
 
 body {
@@ -324,39 +339,49 @@ canvas {
 }
 
 .status-badge {
-  padding: 4px 12px;
-  border-radius: 3px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  display: inline-block;
-  text-transform: capitalize;
-}
-.orange-badge {
-  background-color: #f6913324;
-  color: #f69133;
-}
-
-.red-badge {
-  background-color: #f04d5824;
-  color: #f04d58;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  border: 1px solid transparent;
 }
 
-.lightblue-badge {
-  background-color: #2796ae24;
-  color: #2796ae;
+.success-badge {
+  background-color: var(--success-bg);
+  color: var(--success-color);
+  border-color: rgba(16, 185, 129, 0.2);
 }
 
-.green-badge {
-  background-color: #27ae6024;
-  color: #27ae60;
+.error-badge {
+  background-color: var(--error-bg);
+  color: var(--error-color);
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
-.darkblue-badge {
-  background-color: #4493fd24;
-  color: #4493fd;
+.warning-badge {
+  background-color: var(--warning-bg);
+  color: var(--warning-color);
+  border-color: rgba(245, 158, 11, 0.2);
 }
 
-.gray-badge {
-  background-color: #adb5bd;
-  color: #fff;
+.info-badge {
+  background-color: var(--info-bg);
+  color: var(--info-color);
+  border-color: rgba(6, 182, 212, 0.2);
+}
+
+.primary-badge {
+  background-color: rgba(99, 102, 241, 0.1);
+  color: var(--secondary-color);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.secondary-badge {
+  background-color: var(--surface-color);
+  color: var(--muted-text-dark);
+  border-color: var(--border-color);
 }
