@@ -23,6 +23,7 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
+  // Store authentication tokens and tenant ID after successful login
   setAuth(access: string, refresh: string, tenantId: string) {
     localStorage.setItem(this.accessKey, access);
     localStorage.setItem(this.refreshKey, refresh);
@@ -35,6 +36,13 @@ export class AuthService {
 
   getRefreshToken(): string | null {
     return localStorage.getItem(this.refreshKey);
+  }
+
+  // Get the current user's tenant ID (required for multi-tenant API calls)
+  getTenantId(): string | null {
+    const tenantId = localStorage.getItem(this.tenantId);
+    console.log(tenantId);
+    return localStorage.getItem(this.tenantId);
   }
 
   isTokenExpired(token: string): boolean {
