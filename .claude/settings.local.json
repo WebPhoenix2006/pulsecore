@@ -7,7 +7,9 @@
       "Bash(npm run lint)",
       "Bash(npm cache clean:*)",
       "Bash(ng serve:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(npx sass:*)",
+      "Bash(npx ng build:*)"
     ],
     "deny": [],
     "ask": []

@@ -13,6 +13,7 @@ import { ToastService } from '../../../shared/services/toast.service';
 import { CategoryService } from '../../services/category';
 import { Category } from '../../../interfaces/category.interface';
 import { ProductService } from '../../services/product';
+import { DataTableHelperService } from '../../../shared/services/data-table-helper.service';
 
 @Component({
   selector: 'app-products',
@@ -31,7 +32,8 @@ export class Products implements OnInit {
   constructor(
     private productService: ProductService,
     private categoryService: CategoryService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private dataTableHelper: DataTableHelperService
   ) {}
 
   ngOnInit() {
@@ -59,14 +61,28 @@ export class Products implements OnInit {
     this.loading.set(true);
     this.productService.getProducts().subscribe({
       next: (response: PaginatedResponse<Product>) => {
-        const enriched: Product[] = response.results.map((prod) => ({
-          ...prod,
-          category_name: this.categories.find((c) => c.id === prod.category)?.name || '—',
-        }));
-        this.products.set(enriched);
+        // Transform the paginated response
+        const transformedResponse = this.dataTableHelper.transformPaginatedResponse(response);
+
+        // Enrich product data with category names and formatted values
+        const enrichedProducts = this.dataTableHelper.enrichProductData(
+          transformedResponse.data,
+          this.categories
+        );
+
+        this.products.set(enrichedProducts);
         this.loading.set(false);
+
+        // Log the response structure for debugging
+        console.log('Products API Response:', {
+          totalRecords: transformedResponse.totalRecords,
+          hasNext: transformedResponse.hasNext,
+          hasPrevious: transformedResponse.hasPrevious,
+          sampleData: enrichedProducts.slice(0, 2) // First 2 items for inspection
+        });
       },
-      error: () => {
+      error: (error) => {
+        console.error('Failed to load products:', error);
         this.toastService.showError('Failed to load products');
         this.loading.set(false);
       },
@@ -75,24 +91,40 @@ export class Products implements OnInit {
 
   onCreateProduct(data: TableData) {
     this.loading.set(true);
-    const payload: CreateProductRequest = {
-      name: data['name'],
-      category: data['category'] || undefined,
-      price: data['price'],
-      barcode: data['barcode'] || undefined,
-      batch_number: data['batch_number'] || undefined,
-      expiry_date: data['expiry_date'] || undefined,
-    };
+
+    // Validate required fields
+    const validation = this.dataTableHelper.validateRequiredFields(data, ['name', 'price']);
+    if (!validation.isValid) {
+      this.toastService.showError(`Missing required fields: ${validation.missingFields.join(', ')}`);
+      this.dataTable.onOperationError();
+      this.loading.set(false);
+      return;
+    }
+
+    // Transform form data for API
+    const payload: CreateProductRequest = this.dataTableHelper.transformFormDataForApi(data, [
+      'category_name', 'created_at', 'updated_at', 'sku_id' // Exclude computed/readonly fields
+    ]);
+
+    console.log('Creating product with payload:', payload);
 
     this.productService.createProduct(payload).subscribe({
       next: (created: Product) => {
-        this.products.update((p) => [...p, created]);
+        // Enrich the created product with category name
+        const enrichedCreated = {
+          ...created,
+          category_name: this.categories.find(c => c.id === created.category)?.name || '—'
+        };
+
+        this.products.update((p) => [...p, enrichedCreated]);
         this.dataTable.onOperationSuccess();
         this.toastService.showSuccess('Product created successfully!');
         this.loading.set(false);
+        console.log('Product created:', enrichedCreated);
       },
-      error: () => {
-        this.toastService.showError('Failed to create product');
+      error: (error) => {
+        console.error('Failed to create product:', error);
+        this.toastService.showError(`Failed to create product: ${error.error?.message || error.message}`);
         this.dataTable.onOperationError();
         this.loading.set(false);
       },
@@ -101,24 +133,31 @@ export class Products implements OnInit {
 
   onEditProduct(event: { id: string; data: TableData }) {
     this.loading.set(true);
-    const updateData: UpdateProductRequest = {
-      name: event.data['name'],
-      category: event.data['category'] || undefined,
-      price: event.data['price'],
-      barcode: event.data['barcode'] || undefined,
-      batch_number: event.data['batch_number'] || undefined,
-      expiry_date: event.data['expiry_date'] || undefined,
-    };
+
+    // Transform form data for API, excluding computed/readonly fields
+    const updateData: UpdateProductRequest = this.dataTableHelper.transformFormDataForApi(event.data, [
+      'category_name', 'created_at', 'updated_at', 'sku_id' // Exclude computed/readonly fields
+    ]);
+
+    console.log('Updating product with ID:', event.id, 'Data:', updateData);
 
     this.productService.updateProduct(event.id, updateData).subscribe({
       next: (updated: Product) => {
-        this.products.update((p) => p.map((prod) => (prod.sku_id === event.id ? updated : prod)));
+        // Enrich the updated product with category name
+        const enrichedUpdated = {
+          ...updated,
+          category_name: this.categories.find(c => c.id === updated.category)?.name || '—'
+        };
+
+        this.products.update((p) => p.map((prod) => (prod.sku_id === event.id ? enrichedUpdated : prod)));
         this.dataTable.onOperationSuccess();
         this.toastService.showSuccess('Product updated successfully!');
         this.loading.set(false);
+        console.log('Product updated:', enrichedUpdated);
       },
-      error: () => {
-        this.toastService.showError('Failed to update product');
+      error: (error) => {
+        console.error('Failed to update product:', error);
+        this.toastService.showError(`Failed to update product: ${error.error?.message || error.message}`);
         this.dataTable.onOperationError();
         this.loading.set(false);
       },
@@ -127,14 +166,18 @@ export class Products implements OnInit {
 
   onDeleteProduct(id: string) {
     this.loading.set(true);
+    console.log('Deleting product with ID:', id);
+
     this.productService.deleteProduct(id).subscribe({
       next: () => {
         this.products.update((p) => p.filter((prod) => prod.sku_id !== id));
         this.toastService.showSuccess('Product deleted successfully!');
         this.loading.set(false);
+        console.log('Product deleted successfully:', id);
       },
-      error: () => {
-        this.toastService.showError('Failed to delete product');
+      error: (error) => {
+        console.error('Failed to delete product:', error);
+        this.toastService.showError(`Failed to delete product: ${error.error?.message || error.message}`);
         this.loading.set(false);
       },
     });

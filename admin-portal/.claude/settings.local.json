@@ -4,7 +4,10 @@
       "Read(//c/Users/hp/Desktop/pulsecore//**)",
       "Read(//c/Users/hp/Desktop/pulsecore/**)",
       "Bash(cat:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run:*)",
+      "Bash(npx ng build:*)"
     ],
     "deny": [],
     "ask": []
