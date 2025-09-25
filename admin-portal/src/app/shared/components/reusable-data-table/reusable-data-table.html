@@ -328,16 +328,23 @@
 
                 <!-- More actions dropdown -->
                 <div class="action-dropdown" *ngIf="getMoreActions(item).length > 0">
+                  <!-- Invisible backdrop to prevent hover events on rows below -->
+                  <div
+                    class="dropdown-backdrop"
+                    *ngIf="activeDropdown() === getItemId(item)"
+                    (click)="activeDropdown.set(null)"
+                  ></div>
+
                   <button
                     type="button"
                     class="action-btn more-actions-trigger"
-                    [class.active]="activeDropdown === getItemId(item)"
-                    (click)="toggleActionDropdown(item)"
+                    [class.active]="activeDropdown() === getItemId(item)"
+                    (click)="toggleActionDropdown(item); $event.stopPropagation()"
                   >
                     <i class="fas fa-ellipsis-v"></i>
                   </button>
 
-                  <div class="action-menu" [class.show]="activeDropdown === getItemId(item)">
+                  <div class="action-menu" [ngClass]="{'show': activeDropdown() === getItemId(item)}">
                     <button
                       *ngFor="let action of getMoreActions(item)"
                       type="button"
@@ -519,20 +526,22 @@
     (ngSubmit)="handleCreate()"
     class="entity-form"
   >
-    <div class="form-grid">
-      <div *ngFor="let field of config().formFields" class="form-field">
-        <app-form-field
-          [label]="field.label"
-          [type]="field.type"
-          [placeholder]="field.placeholder || ''"
-          [required]="field.required || false"
-          [options]="field.options || []"
-          [description]="field.description || ''"
-          [errorMessage]="getFieldError(field.field)"
-          [formControlName]="field.field"
-        ></app-form-field>
+    <app-custom-scrollbar maxHeight="400px" class="modal-scroll-container">
+      <div class="form-grid">
+        <div *ngFor="let field of config().formFields" class="form-field">
+          <app-form-field
+            [label]="field.label"
+            [type]="field.type"
+            [placeholder]="field.placeholder || ''"
+            [required]="field.required || false"
+            [options]="field.options || []"
+            [description]="field.description || ''"
+            [errorMessage]="getFieldError(field.field)"
+            [formControlName]="field.field"
+          ></app-form-field>
+        </div>
       </div>
-    </div>
+    </app-custom-scrollbar>
 
     <div class="modal-actions">
       <button
@@ -581,20 +590,22 @@
     (ngSubmit)="handleEdit()"
     class="entity-form"
   >
-    <div class="form-grid">
-      <div *ngFor="let field of config().formFields" class="form-field">
-        <app-form-field
-          [label]="field.label"
-          [type]="field.type"
-          [placeholder]="field.placeholder || ''"
-          [required]="field.required || false"
-          [options]="field.options || []"
-          [description]="field.description || ''"
-          [errorMessage]="getFieldError(field.field)"
-          [formControlName]="field.field"
-        ></app-form-field>
+    <app-custom-scrollbar maxHeight="400px" class="modal-scroll-container">
+      <div class="form-grid">
+        <div *ngFor="let field of config().formFields" class="form-field">
+          <app-form-field
+            [label]="field.label"
+            [type]="field.type"
+            [placeholder]="field.placeholder || ''"
+            [required]="field.required || false"
+            [options]="field.options || []"
+            [description]="field.description || ''"
+            [errorMessage]="getFieldError(field.field)"
+            [formControlName]="field.field"
+          ></app-form-field>
+        </div>
       </div>
-    </div>
+    </app-custom-scrollbar>
 
     <div class="modal-actions">
       <button
@@ -627,29 +638,31 @@
   [resizable]="false"
   (onHide)="closeModals()"
 >
-  <div class="view-content" *ngIf="selectedItem()">
-    <!-- Check for empty form fields -->
-    <div *ngIf="config().formFields.length === 0" class="empty-form-state">
-      <div class="empty-form-content">
-        <i class="fas fa-eye-slash empty-form-icon"></i>
-        <h3>No Fields to Display</h3>
-        <p>
-          This entity doesn't have any fields configured for display. Please configure form fields
-          to show detailed information.
-        </p>
+  <app-custom-scrollbar maxHeight="500px" class="modal-scroll-container">
+    <div class="view-content" *ngIf="selectedItem()">
+      <!-- Check for empty form fields -->
+      <div *ngIf="config().formFields.length === 0" class="empty-form-state">
+        <div class="empty-form-content">
+          <i class="fas fa-eye-slash empty-form-icon"></i>
+          <h3>No Fields to Display</h3>
+          <p>
+            This entity doesn't have any fields configured for display. Please configure form fields
+            to show detailed information.
+          </p>
+        </div>
       </div>
-    </div>
 
-    <div *ngIf="config().formFields.length > 0" class="view-grid">
-      <div *ngFor="let field of config().formFields" class="view-field">
-        <label class="view-label">{{ field.label }}:</label>
-        <div class="view-value">
-          <span *ngIf="field.type === 'date'">{{ selectedItem()?.[field.field] | date }}</span>
-          <span *ngIf="field.type !== 'date'">{{ selectedItem()?.[field.field] || 'N/A' }}</span>
+      <div *ngIf="config().formFields.length > 0" class="view-grid">
+        <div *ngFor="let field of config().formFields" class="view-field">
+          <label class="view-label">{{ field.label }}:</label>
+          <div class="view-value">
+            <span *ngIf="field.type === 'date'">{{ selectedItem()?.[field.field] | date }}</span>
+            <span *ngIf="field.type !== 'date'">{{ selectedItem()?.[field.field] || 'N/A' }}</span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </app-custom-scrollbar>
 
   <div class="modal-actions">
     <button

@@ -9,4 +9,9 @@ export const routes: Routes = [
     loadChildren: () => import('./catalog/catalog-module').then((m) => m.CatalogModule),
     canActivate: [authGuard],
   },
+  {
+    path: 'inventory',
+    loadChildren: () => import('./inventory/inventory-module').then((m) => m.InventoryModule),
+    canActivate: [authGuard],
+  },
 ];

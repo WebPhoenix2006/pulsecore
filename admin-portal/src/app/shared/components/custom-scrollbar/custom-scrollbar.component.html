@@ -1,0 +1,15 @@
+<div
+  class="custom-scrollbar-container"
+  #scrollContainer
+  [style.max-height]="maxHeight"
+  [style.--scrollbar-width]="scrollbarWidth"
+  [style.--thumb-color]="thumbColor"
+  [style.--track-color]="trackColor"
+  [style.--border-radius]="borderRadius"
+  [class.hide-scrollbar]="!showScrollbar"
+  (scroll)="onScroll($event)"
+>
+  <div class="scroll-content">
+    <ng-content></ng-content>
+  </div>
+</div>

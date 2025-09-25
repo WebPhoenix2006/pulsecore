@@ -15,6 +15,7 @@ export interface TableColumn {
 
 export interface TableAction {
   type: 'view' | 'edit' | 'delete' | 'custom';
+  key?: string;
   icon: string;
   label: string;
   severity?: 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'danger';

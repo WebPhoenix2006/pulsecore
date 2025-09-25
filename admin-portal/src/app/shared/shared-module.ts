@@ -28,6 +28,7 @@ import { SvgIcons } from './components/svg-icons/svg-icons';
 import { Sidebar } from './components/sidebar/sidebar';
 import { ReusableDataTable } from './components/reusable-data-table/reusable-data-table';
 import { SpecialH1 } from './components/special-h1/special-h1';
+import { CustomScrollbarComponent } from './components/custom-scrollbar/custom-scrollbar.component';
 
 @NgModule({
   declarations: [
@@ -46,6 +47,7 @@ import { SpecialH1 } from './components/special-h1/special-h1';
     ReactiveFormsModule,
     FormsModule,
     RouterModule,
+    CustomScrollbarComponent, // Import the standalone component
     // PrimeNG Modules
     TableModule,
     CardModule,
@@ -67,6 +69,7 @@ import { SpecialH1 } from './components/special-h1/special-h1';
     Sidebar,
     ReusableDataTable,
     SpecialH1,
+    CustomScrollbarComponent,
     // Export PrimeNG modules so they can be used in pages that import SharedModule
     TableModule,
     CardModule,

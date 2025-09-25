@@ -1,0 +1,15 @@
+<!-- inventory/components/alerts/alerts.component.html -->
+<div class="alerts-page">
+  <app-reusable-data-table
+    #dataTable
+    [config]="tableConfig"
+    [data]="alerts()"
+    [loading]="loading()"
+    (onCreate)="onCreateAlert($event)"
+    (onEdit)="onEditAlert($event)"
+    (onDelete)="onDeleteAlert($event)"
+    (onView)="onViewAlert($event)"
+    (onCustomAction)="onCustomAction($event)"
+  >
+  </app-reusable-data-table>
+</div>

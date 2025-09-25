@@ -116,6 +116,25 @@ export class Sidebar implements OnInit, OnDestroy {
         badge: '5',
       },
       {
+        id: 'inventory',
+        label: 'Inventory',
+        icon: 'ri-apps-2-line',
+        children: [
+          {
+            id: 'skus',
+            label: 'SKUs',
+            icon: 'ri-price-tag-3-line',
+            route: '/inventory/skus',
+          },
+          {
+            id: 'alerts',
+            label: 'Alerts',
+            icon: 'ri-archive-2-line',
+            route: '/inventory/alerts',
+          },
+        ],
+      },
+      {
         id: 'catalog',
         label: 'Catalog',
         icon: 'ri-apps-2-line',

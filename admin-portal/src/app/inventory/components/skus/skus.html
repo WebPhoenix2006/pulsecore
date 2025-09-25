@@ -1,0 +1,15 @@
+<!-- inventory/components/skus/skus.component.html -->
+<div class="skus-page">
+  <app-reusable-data-table
+    #dataTable
+    [config]="tableConfig"
+    [data]="skus()"
+    [loading]="loading()"
+    (onCreate)="onCreateSku($event)"
+    (onEdit)="onEditSku($event)"
+    (onDelete)="onDeleteSku($event)"
+    (onView)="onViewSku($event)"
+    (onCustomAction)="onCustomAction($event)"
+  >
+  </app-reusable-data-table>
+</div>
