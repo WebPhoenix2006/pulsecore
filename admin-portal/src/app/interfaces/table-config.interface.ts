@@ -1,11 +1,16 @@
 export interface TableColumn {
   field: string;
   header: string;
-  type: 'text' | 'number' | 'date' | 'badge' | 'image' | 'custom';
+  type: 'text' | 'number' | 'date' | 'badge' | 'image' | 'user' | 'custom';
   sortable?: boolean;
   filterable?: boolean;
   width?: string;
   badgeMapping?: { [key: string]: { severity: string; value: string } };
+  // For user type columns
+  imageField?: string;
+  metaField?: string;
+  // For custom columns
+  templateName?: string;
 }
 
 export interface TableAction {
@@ -56,6 +61,10 @@ export interface TableConfig {
   pageSize?: number;
   showPaginator?: boolean;
   apiEndpoint?: string;
+  // Enhanced features
+  allowSelection?: boolean;
+  showStats?: boolean;
+  showActiveCount?: boolean;
 }
 
 export interface TableData {

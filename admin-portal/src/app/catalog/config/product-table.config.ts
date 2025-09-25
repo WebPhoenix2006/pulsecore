@@ -12,14 +12,56 @@ export const productTableConfig: TableConfig = {
   emptyDescription: 'Start by adding your first product.',
   pageSize: 10,
   showPaginator: true,
+  // Enhanced features
+  allowSelection: true,
+  showStats: true,
+  showActiveCount: false,
 
   columns: [
-    { field: 'name', header: 'Name', type: 'text', sortable: true, filterable: true },
-    { field: 'category_name', header: 'Category', type: 'text' },
-    { field: 'price', header: 'Price', type: 'number', sortable: true },
-    { field: 'barcode', header: 'Barcode', type: 'text' },
-    { field: 'batch_number', header: 'Batch No.', type: 'text' },
-    { field: 'expiry_date', header: 'Expiry Date', type: 'date' },
+    {
+      field: 'name',
+      header: 'Product Name',
+      type: 'text',
+      sortable: true,
+      filterable: true,
+      width: '25%'
+    },
+    {
+      field: 'category_name',
+      header: 'Category',
+      type: 'text',
+      sortable: true,
+      filterable: true,
+      width: '15%'
+    },
+    {
+      field: 'price',
+      header: 'Price',
+      type: 'number',
+      sortable: true,
+      width: '12%'
+    },
+    {
+      field: 'barcode',
+      header: 'Barcode',
+      type: 'text',
+      filterable: true,
+      width: '15%'
+    },
+    {
+      field: 'batch_number',
+      header: 'Batch No.',
+      type: 'text',
+      filterable: true,
+      width: '15%'
+    },
+    {
+      field: 'expiry_date',
+      header: 'Expiry Date',
+      type: 'date',
+      sortable: true,
+      width: '18%'
+    },
   ],
 
   actions: [

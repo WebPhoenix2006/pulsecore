@@ -1,21 +1,138 @@
 <!-- Confirmation Dialog -->
 <p-confirmDialog></p-confirmDialog>
 
+<!-- Action Dialog -->
+<p-dialog
+  [header]="actionDialogConfig.title"
+  [(visible)]="showActionDialog"
+  [modal]="true"
+  [style]="{ width: actionDialogConfig.width || '500px' }"
+  [draggable]="false"
+  [resizable]="false"
+  (onHide)="closeActionDialog()"
+>
+  <div class="action-dialog-content">
+    <!-- View Action Content -->
+    <div *ngIf="actionDialogConfig.type === 'view'" class="view-content">
+      <div class="view-grid">
+        <div *ngFor="let col of config().columns" class="view-field">
+          <label class="view-label">{{ col.header }}:</label>
+          <div class="view-value">
+            <span *ngIf="col.type === 'date'">
+              {{ selectedItem()?.[col.field] | date: 'medium' }}
+            </span>
+            <span
+              *ngIf="col.type === 'badge'"
+              class="status-badge"
+              [ngClass]="getBadgeDetails(selectedItem(), col).severity + '-badge'"
+            >
+              {{ getBadgeDetails(selectedItem(), col).value || 'N/A' }}
+            </span>
+            <span *ngIf="col.type === 'user'">
+              {{ selectedItem()?.[col.field] || 'N/A' }}
+            </span>
+            <span *ngIf="col.type === 'image'" class="image-value">
+              <img
+                *ngIf="selectedItem()?.[col.field]"
+                [src]="selectedItem()?.[col.field]"
+                [alt]="col.header"
+                class="view-image"
+                (error)="handleImageError($event)"
+              />
+              <span *ngIf="!selectedItem()?.[col.field]">No image</span>
+            </span>
+            <span *ngIf="col.type === 'text' || col.type === 'number'">
+              {{ formatCellValue(selectedItem(), col) }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Action Content -->
+    <div *ngIf="actionDialogConfig.type === 'custom'" class="custom-action-content">
+      <div class="action-message" [innerHTML]="actionDialogConfig.message"></div>
+    </div>
+
+    <!-- Form Action Content (Edit) -->
+    <div *ngIf="actionDialogConfig.type === 'form'" class="form-content">
+      <form [formGroup]="entityForm" class="entity-form">
+        <div class="form-grid">
+          <div *ngFor="let field of config().formFields" class="form-field">
+            <app-form-field
+              [label]="field.label"
+              [type]="field.type"
+              [placeholder]="field.placeholder || ''"
+              [required]="field.required || false"
+              [options]="field.options || []"
+              [description]="field.description || ''"
+              [errorMessage]="getFieldError(field.field)"
+              [formControlName]="field.field"
+            ></app-form-field>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-actions">
+    <button
+      type="button"
+      pButton
+      label="Cancel"
+      class="p-button-secondary"
+      (click)="closeActionDialog()"
+      [disabled]="isSubmitting()"
+      *ngIf="actionDialogConfig.showCancel !== false"
+    ></button>
+
+    <button
+      *ngFor="let btn of actionDialogConfig.buttons"
+      type="button"
+      pButton
+      [label]="(btn.loading && isSubmitting() ? (btn.loadingLabel || btn.label) : btn.label)"
+      [class]="'p-button-' + (btn.severity || 'primary')"
+      [disabled]="isSubmitting() || (btn.disabled || false)"
+      [loading]="(btn.loading || false) && isSubmitting()"
+      (click)="handleActionDialogButton(btn)"
+    ></button>
+  </div>
+</p-dialog>
+
 <!-- Main table wrapper -->
 <div class="table-container">
-  <!-- Table header -->
+  <!-- Enhanced Table header -->
   <div class="table-header">
     <div class="header-content">
       <div class="title-section">
-        <cus-h1 [text]="config().title" />
+        <div class="title-wrapper">
+          <cus-h1 [text]="config().title" class="table-title" />
+          <div class="title-accent"></div>
+        </div>
         <p class="description-text" *ngIf="config().description">{{ config().description }}</p>
+
+        <!-- Enhanced stats section -->
+        <div class="stats-row" *ngIf="config().showStats !== false">
+          <div class="stat-item">
+            <span class="stat-value">{{ totalRecords() }}</span>
+            <span class="stat-label">Total {{ config().entityName }}s</span>
+          </div>
+          <div class="stat-item" *ngIf="filteredData().length !== totalRecords()">
+            <span class="stat-value">{{ filteredData().length }}</span>
+            <span class="stat-label">Filtered</span>
+          </div>
+          <div class="stat-item" *ngIf="config().showActiveCount">
+            <span class="stat-value">{{ getActiveCount() }}</span>
+            <span class="stat-label">Active</span>
+          </div>
+        </div>
       </div>
 
       <div class="action-section">
-        <!-- Search -->
+        <!-- Enhanced Search -->
         <div class="search-wrapper" *ngIf="config().showSearch !== false">
-          <span class="p-input-icon-left">
-            <i class="fas fa-search"></i>
+          <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
             <input
               type="text"
               pInputText
@@ -24,143 +141,384 @@
               [value]="searchTerm()"
               class="search-input"
             />
-          </span>
+            <button *ngIf="searchTerm()" type="button" class="search-clear" (click)="clearSearch()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
         </div>
 
-        <!-- Create button -->
-        <cus-btn
-          *ngIf="config().showCreateButton !== false"
-          [buttonText]="'Add ' + config().entityName"
-          [size]="'large'"
-          (click)="openCreateModal()"
-        />
+        <!-- Enhanced Actions -->
+        <div class="header-actions">
+          <!-- Bulk Actions -->
+          <div class="bulk-actions" *ngIf="selectedItems().length > 0">
+            <span class="selected-count">{{ selectedItems().length }} selected</span>
+            <button type="button" class="btn-secondary small" (click)="clearSelection()">
+              Clear
+            </button>
+          </div>
+
+          <!-- Create button -->
+          <cus-btn
+            *ngIf="config().showCreateButton !== false"
+            [buttonText]="'Add ' + config().entityName"
+            [size]="'large'"
+            (click)="openCreateModal()"
+            class="create-button"
+          />
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Loading state -->
-  <div class="loading-container" *ngIf="loading()">
-    <p-progressSpinner></p-progressSpinner>
-    <p>Loading...</p>
+  @if (loading()) {
+  <!-- Enhanced Loading state -->
+  <div class="loading-container">
+    <div class="loading-content">
+      <div class="loading-spinner">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring"></div>
+      </div>
+      <p class="loading-text">Loading {{ config().entityName }}s...</p>
+      <div class="loading-progress">
+        <div class="progress-bar"></div>
+      </div>
+    </div>
   </div>
+  }
 
-  <!-- Data table -->
+  <!-- Enhanced Data table -->
   <div class="table-content" *ngIf="!loading()">
     <div class="table-wrapper">
       <table class="custom-table">
         <thead>
-          <tr>
-            <th *ngFor="let col of config().columns" [style.width]="col.width || 'auto'">
-              {{ col.header }}
+          <tr class="table-header-row">
+            <!-- Selection checkbox -->
+            <th class="select-column" *ngIf="config().allowSelection">
+              <div class="checkbox-wrapper">
+                <input
+                  type="checkbox"
+                  class="table-checkbox header-checkbox"
+                  [checked]="isAllSelected()"
+                  [indeterminate]="isSomeSelected()"
+                  (change)="toggleAllSelection($event)"
+                />
+              </div>
             </th>
-            <th *ngIf="config().actions.length > 0" style="width: 150px">
-              Actions
+
+            <!-- Enhanced column headers -->
+            <th
+              *ngFor="let col of config().columns"
+              [style.width]="col.width || 'auto'"
+              [class]="'column-' + col.field"
+              [class.sortable]="col.sortable !== false"
+            >
+              <div class="header-cell">
+                <span class="header-text">{{ col.header }}</span>
+                <div class="header-icons">
+                  <i
+                    *ngIf="col.sortable !== false"
+                    class="fas fa-sort header-sort"
+                    [class.fa-sort-up]="sortField() === col.field && sortOrder() === 1"
+                    [class.fa-sort-down]="sortField() === col.field && sortOrder() === -1"
+                    (click)="sortData(col.field)"
+                  ></i>
+                  <i
+                    *ngIf="col.filterable"
+                    class="fas fa-filter header-filter"
+                    [class.active]="hasColumnFilter(col.field)"
+                    (click)="toggleColumnFilter(col.field)"
+                  ></i>
+                </div>
+              </div>
+            </th>
+
+            <th *ngIf="config().actions.length > 0" class="actions-column">
+              <div class="header-cell">
+                <span class="header-text">Actions</span>
+              </div>
             </th>
           </tr>
         </thead>
-        <tbody *ngIf="paginatedData().length > 0; else emptyTable">
-          <tr *ngFor="let item of paginatedData()">
-            <td *ngFor="let col of config().columns">
+
+        <tbody *ngIf="paginatedData().length > 0; else enhancedEmptyTable">
+          <tr
+            *ngFor="let item of paginatedData(); let i = index"
+            class="table-row"
+            [class.selected]="isItemSelected(item)"
+            [class.highlighted]="isItemHighlighted(item)"
+          >
+            <!-- Selection checkbox -->
+            <td class="select-cell" *ngIf="config().allowSelection">
+              <div class="checkbox-wrapper">
+                <input
+                  type="checkbox"
+                  class="table-checkbox"
+                  [checked]="isItemSelected(item)"
+                  (change)="toggleItemSelection(item, $event)"
+                />
+              </div>
+            </td>
+
+            <!-- Enhanced data cells -->
+            <td *ngFor="let col of config().columns" [class]="'cell-' + col.field">
               <!-- Text column -->
-              <span *ngIf="col.type === 'text' || col.type === 'number'">
-                {{ formatCellValue(item, col) }}
+              <span *ngIf="col.type === 'text' || col.type === 'number'" class="cell-text">
+                {{ formatCellValue(item, col) || 'N/A' }}
               </span>
 
               <!-- Date column -->
-              <span *ngIf="col.type === 'date'" class="date-cell">
-                {{ formatCellValue(item, col) }}
+              <span *ngIf="col.type === 'date'" class="cell-date">
+                <i class="fas fa-calendar-alt date-icon"></i>
+                {{ formatCellValue(item, col) || 'N/A' }}
               </span>
 
-              <!-- Badge column -->
+              <!-- Enhanced Badge column -->
               <span
                 *ngIf="col.type === 'badge'"
-                class="status-badge"
+                class="status-badge enhanced-badge"
                 [ngClass]="getBadgeDetails(item, col).severity + '-badge'"
               >
+                <span class="badge-indicator"></span>
                 {{ getBadgeDetails(item, col).value }}
               </span>
 
-              <!-- Image column -->
-              <img
-                *ngIf="col.type === 'image' && item[col.field]"
-                [src]="item[col.field]"
-                [alt]="col.header"
-                class="table-image"
-              />
+              <!-- Enhanced Image column -->
+              <div *ngIf="col.type === 'image'" class="image-cell">
+                <img
+                  *ngIf="item[col.field]"
+                  [src]="item[col.field]"
+                  [alt]="col.header"
+                  class="table-image"
+                  (error)="handleImageError($event)"
+                />
+                <span *ngIf="!item[col.field]" class="no-image">N/A</span>
+              </div>
+
+              <!-- User/Profile column -->
+              <div *ngIf="col.type === 'user'" class="user-cell">
+                <img
+                  [src]="(col.imageField && item[col.imageField]) || getDefaultAvatar(item)"
+                  [alt]="item[col.field] || 'User'"
+                  class="user-avatar"
+                  (error)="handleImageError($event)"
+                />
+                <div class="user-info">
+                  <span class="user-name">{{ item[col.field] || 'N/A' }}</span>
+                  <span class="user-meta" *ngIf="col.metaField && item[col.metaField]">{{ item[col.metaField] }}</span>
+                </div>
+              </div>
             </td>
-            <td *ngIf="config().actions.length > 0">
-              <div class="action-buttons">
+
+            <!-- Enhanced Actions -->
+            <td *ngIf="config().actions.length > 0" class="actions-cell">
+              <div class="action-buttons enhanced-actions">
+                <!-- Quick actions (max 2) -->
                 <button
-                  *ngFor="let action of config().actions"
+                  *ngFor="let action of getQuickActions(item); let actionIndex = index"
                   type="button"
-                  class="action-btn btn-custom-primary small"
-                  [ngClass]="action.severity || 'primary'"
+                  class="action-btn quick-action"
+                  [ngClass]="getActionClass(action)"
                   [title]="action.label"
-                  (click)="handleAction(action, item)"
-                  [style.display]="action.visible ? (action.visible(item) ? 'inline-flex' : 'none') : 'inline-flex'"
+                  (click)="handleEnhancedAction(action, item)"
+                  [style.display]="isActionVisible(action, item) ? 'inline-flex' : 'none'"
                 >
                   <i [class]="action.icon"></i>
                 </button>
+
+                <!-- More actions dropdown -->
+                <div class="action-dropdown" *ngIf="getMoreActions(item).length > 0">
+                  <button
+                    type="button"
+                    class="action-btn more-actions-trigger"
+                    [class.active]="activeDropdown === getItemId(item)"
+                    (click)="toggleActionDropdown(item)"
+                  >
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+
+                  <div class="action-menu" [class.show]="activeDropdown === getItemId(item)">
+                    <button
+                      *ngFor="let action of getMoreActions(item)"
+                      type="button"
+                      class="action-menu-item"
+                      [class]="getActionMenuClass(action)"
+                      [style.display]="isActionVisible(action, item) ? 'block' : 'none'"
+                      (click)="handleEnhancedAction(action, item)"
+                    >
+                      <i [class]="action.icon"></i>
+                      <span>{{ action.label }}</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
 
-      <!-- Empty state -->
-      <ng-template #emptyTable>
-        <div class="empty-state">
+      <!-- Enhanced Empty state -->
+      <ng-template #enhancedEmptyTable>
+        <div class="empty-state enhanced-empty">
           <div class="empty-content">
-            <i class="fas fa-inbox empty-icon"></i>
-            <h3>{{ config().emptyMessage || 'No data found' }}</h3>
-            <p *ngIf="config().emptyDescription">{{ config().emptyDescription }}</p>
-            <cus-btn
-              *ngIf="config().showCreateButton !== false"
-              [buttonText]="'Create ' + config().entityName"
-              (click)="openCreateModal()"
-            />
+            <div class="empty-illustration">
+              <div class="empty-icon-container">
+                <i class="fas fa-inbox empty-icon"></i>
+                <div class="icon-accent"></div>
+              </div>
+            </div>
+
+            <div class="empty-text">
+              <h3>{{ getEmptyStateTitle() }}</h3>
+              <p>{{ getEmptyStateMessage() }}</p>
+            </div>
+
+            <div class="empty-actions">
+              <cus-btn
+                *ngIf="config().showCreateButton !== false && !searchTerm()"
+                [buttonText]="'Create Your First ' + config().entityName"
+                (click)="openCreateModal()"
+                class="empty-create-btn"
+              />
+
+              <button
+                *ngIf="searchTerm()"
+                type="button"
+                class="btn-custom-primary outlined"
+                (click)="clearSearch()"
+              >
+                <i class="fas fa-times"></i>
+                Clear Search
+              </button>
+
+              <button
+                *ngIf="hasActiveFilters()"
+                type="button"
+                class="btn-custom-primary outlined"
+                (click)="clearAllFilters()"
+              >
+                <i class="fas fa-filter-circle-xmark"></i>
+                Clear Filters
+              </button>
+            </div>
           </div>
         </div>
       </ng-template>
 
-      <!-- Simple pagination -->
-      <div class="pagination" *ngIf="config().showPaginator !== false && totalRecords() > rowsPerPage()">
-        <button
-          type="button"
-          class="btn-custom-primary small"
-          [disabled]="currentPage() === 0"
-          (click)="goToPage(currentPage() - 1)"
-        >
-          Previous
-        </button>
-        <span class="page-info">
-          Page {{ currentPage() + 1 }} of {{ totalPages() }}
-          ({{ totalRecords() }} total)
-        </span>
-        <button
-          type="button"
-          class="btn-custom-primary small"
-          [disabled]="currentPage() >= totalPages() - 1"
-          (click)="goToPage(currentPage() + 1)"
-        >
-          Next
-        </button>
+      <!-- Enhanced pagination -->
+      <div
+        class="pagination enhanced-pagination"
+        *ngIf="config().showPaginator !== false && totalRecords() > rowsPerPage()"
+      >
+        <div class="pagination-info">
+          <span class="records-info">
+            Showing {{ getPaginationStart() }} - {{ getPaginationEnd() }} of {{ totalRecords() }}
+            {{ config().entityName }}s
+          </span>
+        </div>
+
+        <div class="pagination-controls">
+          <button
+            type="button"
+            class="pagination-btn"
+            [disabled]="currentPage() === 0"
+            (click)="goToFirstPage()"
+            title="First page"
+          >
+            <i class="fas fa-angle-double-left"></i>
+          </button>
+
+          <button
+            type="button"
+            class="pagination-btn"
+            [disabled]="currentPage() === 0"
+            (click)="goToPage(currentPage() - 1)"
+            title="Previous page"
+          >
+            <i class="fas fa-angle-left"></i>
+          </button>
+
+          <div class="page-numbers">
+            <button
+              *ngFor="let page of getVisiblePages()"
+              type="button"
+              class="page-btn"
+              [class.active]="page === currentPage() + 1"
+              (click)="goToPage(page - 1)"
+            >
+              {{ page }}
+            </button>
+          </div>
+
+          <button
+            type="button"
+            class="pagination-btn"
+            [disabled]="currentPage() >= totalPages() - 1"
+            (click)="goToPage(currentPage() + 1)"
+            title="Next page"
+          >
+            <i class="fas fa-angle-right"></i>
+          </button>
+
+          <button
+            type="button"
+            class="pagination-btn"
+            [disabled]="currentPage() >= totalPages() - 1"
+            (click)="goToLastPage()"
+            title="Last page"
+          >
+            <i class="fas fa-angle-double-right"></i>
+          </button>
+        </div>
+
+        <div class="pagination-size">
+          <label for="pageSizeSelect">Rows per page:</label>
+          <select
+            id="pageSizeSelect"
+            class="page-size-select"
+            [value]="rowsPerPage()"
+            (change)="changePageSize($event)"
+          >
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Existing modals remain the same -->
 <!-- Create Modal -->
 <p-dialog
   [header]="'Create ' + config().entityName"
   [(visible)]="showCreateModal"
   [modal]="true"
-  [style]="{width: '600px'}"
+  [style]="{ width: '600px' }"
   [draggable]="false"
   [resizable]="false"
   (onHide)="closeModals()"
 >
-  <form [formGroup]="entityForm" (ngSubmit)="handleCreate()" class="entity-form">
+  <!-- Check for empty form fields -->
+  <div *ngIf="config().formFields.length === 0" class="empty-form-state">
+    <div class="empty-form-content">
+      <i class="fas fa-exclamation-triangle empty-form-icon"></i>
+      <h3>No Form Fields Configured</h3>
+      <p>
+        This entity doesn't have any form fields configured. Please add form fields to enable
+        creation.
+      </p>
+    </div>
+  </div>
+
+  <form
+    *ngIf="config().formFields.length > 0"
+    [formGroup]="entityForm"
+    (ngSubmit)="handleCreate()"
+    class="entity-form"
+  >
     <div class="form-grid">
       <div *ngFor="let field of config().formFields" class="form-field">
         <app-form-field
@@ -185,14 +543,12 @@
         (click)="closeModals()"
         [disabled]="isSubmitting()"
       ></button>
-      <button
+      <cus-btn
         type="submit"
-        pButton
-        [label]="isSubmitting() ? 'Creating...' : 'Create'"
+        [buttonText]="isSubmitting() ? 'Creating...' : 'Create'"
         class="p-button-primary"
-        [disabled]="isSubmitting()"
-        [loading]="isSubmitting()"
-      ></button>
+        [disabled]="isSubmitting() || !entityForm.valid"
+      ></cus-btn>
     </div>
   </form>
 </p-dialog>
@@ -202,12 +558,29 @@
   [header]="'Edit ' + config().entityName"
   [(visible)]="showEditModal"
   [modal]="true"
-  [style]="{width: '600px'}"
+  [style]="{ width: '600px' }"
   [draggable]="false"
   [resizable]="false"
   (onHide)="closeModals()"
 >
-  <form [formGroup]="entityForm" (ngSubmit)="handleEdit()" class="entity-form">
+  <!-- Check for empty form fields -->
+  <div *ngIf="config().formFields.length === 0" class="empty-form-state">
+    <div class="empty-form-content">
+      <i class="fas fa-exclamation-triangle empty-form-icon"></i>
+      <h3>No Form Fields Configured</h3>
+      <p>
+        This entity doesn't have any form fields configured. Please add form fields to enable
+        editing.
+      </p>
+    </div>
+  </div>
+
+  <form
+    *ngIf="config().formFields.length > 0"
+    [formGroup]="entityForm"
+    (ngSubmit)="handleEdit()"
+    class="entity-form"
+  >
     <div class="form-grid">
       <div *ngFor="let field of config().formFields" class="form-field">
         <app-form-field
@@ -237,7 +610,7 @@
         pButton
         [label]="isSubmitting() ? 'Updating...' : 'Update'"
         class="p-button-primary"
-        [disabled]="isSubmitting()"
+        [disabled]="isSubmitting() || !entityForm.valid"
         [loading]="isSubmitting()"
       ></button>
     </div>
@@ -249,18 +622,30 @@
   [header]="'View ' + config().entityName"
   [(visible)]="showViewModal"
   [modal]="true"
-  [style]="{width: '600px'}"
+  [style]="{ width: '600px' }"
   [draggable]="false"
   [resizable]="false"
   (onHide)="closeModals()"
 >
   <div class="view-content" *ngIf="selectedItem()">
-    <div class="view-grid">
+    <!-- Check for empty form fields -->
+    <div *ngIf="config().formFields.length === 0" class="empty-form-state">
+      <div class="empty-form-content">
+        <i class="fas fa-eye-slash empty-form-icon"></i>
+        <h3>No Fields to Display</h3>
+        <p>
+          This entity doesn't have any fields configured for display. Please configure form fields
+          to show detailed information.
+        </p>
+      </div>
+    </div>
+
+    <div *ngIf="config().formFields.length > 0" class="view-grid">
       <div *ngFor="let field of config().formFields" class="view-field">
         <label class="view-label">{{ field.label }}:</label>
         <div class="view-value">
-          <span *ngIf="field.type === 'date'">{{ selectedItem()![field.field] | date }}</span>
-          <span *ngIf="field.type !== 'date'">{{ selectedItem()![field.field] || 'N/A' }}</span>
+          <span *ngIf="field.type === 'date'">{{ selectedItem()?.[field.field] | date }}</span>
+          <span *ngIf="field.type !== 'date'">{{ selectedItem()?.[field.field] || 'N/A' }}</span>
         </div>
       </div>
     </div>

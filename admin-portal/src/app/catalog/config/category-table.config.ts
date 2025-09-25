@@ -12,6 +12,10 @@ export const categoryTableConfig: TableConfig = {
   emptyDescription: 'Create your first category to get started organizing your products',
   pageSize: 10,
   showPaginator: true,
+  // Enhanced features
+  allowSelection: true,
+  showStats: true,
+  showActiveCount: false,
 
   columns: [
     {
