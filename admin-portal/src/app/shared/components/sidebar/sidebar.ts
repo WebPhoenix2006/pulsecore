@@ -282,13 +282,26 @@ export class Sidebar implements OnInit, OnDestroy {
         this.toaster.showSuccess('Logged out successfully');
         this.isLoading.set(false);
         this.slowNetwork.clear();
-        this.authService.clearAuth();
+        // Auth is already cleared in the service, just navigate
         this.router.navigateByUrl('/auth/login');
       },
       error: (err) => {
         this.slowNetwork.clear();
         this.isLoading.set(false);
-        this.toaster.showError(err.message || 'Something went wrong, please try again later');
+
+        // Check if it's a token-related error and handle gracefully
+        if (err.message && (
+          err.message.includes('refresh token') ||
+          err.message.includes('invalid') ||
+          err.message.includes('expired')
+        )) {
+          this.toaster.showSuccess('Logged out successfully');
+          this.router.navigateByUrl('/auth/login');
+        } else {
+          this.toaster.showError(err.message || 'Logout completed, but with warnings');
+          // Still navigate to login even on error
+          this.router.navigateByUrl('/auth/login');
+        }
       },
     });
   }

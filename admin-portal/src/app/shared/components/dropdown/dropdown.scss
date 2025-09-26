@@ -1,0 +1,418 @@
+@use "../../../../styles.scss" as *;
+
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+
+  // Enhanced ellipsis variant
+  &.ellipsis .dropdown {
+    background: linear-gradient(135deg, var(--surface-color) 0%, var(--card-bg) 100%);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 100%
+      );
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover {
+      background: var(--secondary-color);
+      color: var(--white);
+      border-color: var(--secondary-color);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+      transform: translateY(-2px) scale(1.05);
+
+      &::before {
+        opacity: 1;
+      }
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.95);
+    }
+
+    &.active {
+      background: var(--secondary-color);
+      color: var(--white);
+      border-color: var(--secondary-color);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+
+      &::before {
+        opacity: 1;
+      }
+    }
+
+    .dots {
+      font-size: 1rem;
+      transition: transform 0.3s ease;
+    }
+
+    &.active .dots {
+      transform: rotate(90deg);
+    }
+  }
+
+  // Enhanced regular dropdown
+  .dropdown {
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, var(--card-bg) 0%, var(--surface-color) 100%);
+    border: 2px solid var(--border-color);
+    color: var(--text-color);
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 100%
+      );
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover {
+      background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
+      color: var(--white);
+      border-color: var(--secondary-color);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.25);
+      transform: translateY(-2px);
+
+      &::before {
+        opacity: 1;
+      }
+
+      .arrow {
+        transform: rotate(180deg);
+      }
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    &.active {
+      background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
+      color: var(--white);
+      border-color: var(--secondary-color);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);
+
+      &::before {
+        opacity: 1;
+      }
+
+      .arrow {
+        transform: rotate(180deg);
+      }
+    }
+
+    .arrow {
+      font-size: 0.875rem;
+      transition: transform 0.3s ease;
+    }
+
+    .dots {
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+  }
+
+  // Enhanced dropdown menu with fixed positioning to escape stacking context
+  .dropdownmenu {
+    position: fixed !important; // Fixed positioning escapes any stacking contexts
+    top: 0; // Will be overridden by Angular style binding
+    left: 0; // Will be overridden by Angular style binding
+    margin: 0;
+    list-style-type: none;
+    padding: 0.75rem 0;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    width: 200px; // Fixed width to match TypeScript calculation
+    max-height: 300px; // Max height to prevent overflow
+    overflow-y: auto; // Allow scrolling if too many items
+    overflow-x: hidden; // Prevent horizontal overflow
+    z-index: 999999 !important; // Extremely high z-index since we're using fixed positioning
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+    // Custom scrollbar for the dropdown menu
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: var(--surface-color);
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--secondary-color);
+      border-radius: 4px;
+      border: 1px solid var(--surface-color);
+
+      &:hover {
+        background: var(--accent-color);
+      }
+    }
+
+    // Firefox scrollbar
+    scrollbar-width: thin;
+    scrollbar-color: var(--secondary-color) var(--surface-color);
+
+    // No arrow indicator since position is calculated dynamically
+
+    &.show {
+      opacity: 1 !important;
+      transform: translateY(0) scale(1) !important;
+      pointer-events: auto !important;
+      visibility: visible !important;
+    }
+
+    li {
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.75rem !important;
+      padding: 0.875rem 1.25rem !important;
+      cursor: pointer !important;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      border-radius: 8px !important;
+      margin: 0 0.5rem !important;
+      color: var(--text-color) !important;
+      font-size: 0.9rem !important;
+      font-weight: 500 !important;
+      position: relative !important;
+      pointer-events: auto !important;
+      user-select: none !important;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: transparent;
+        border-radius: 2px;
+        transition: background 0.2s ease;
+      }
+
+      &:hover {
+        background: linear-gradient(
+          135deg,
+          var(--surface-color) 0%,
+          rgba(99, 102, 241, 0.05) 100%
+        );
+        color: var(--secondary-color);
+        transform: translateX(4px);
+
+        &::before {
+          background: var(--secondary-color);
+        }
+
+        svg-icons,
+        i {
+          transform: scale(1.1);
+        }
+      }
+
+      // Enhanced icon styling
+      svg-icons,
+      i {
+        width: 18px;
+        text-align: center;
+        font-size: 0.9rem;
+        transition: transform 0.2s ease;
+        color: inherit;
+      }
+
+      span {
+        font-weight: 500;
+        letter-spacing: 0.25px;
+        flex: 1;
+      }
+
+      // Variant colors for different actions
+      &.danger {
+        &:hover {
+          background: linear-gradient(
+            135deg,
+            rgba(239, 68, 68, 0.1) 0%,
+            rgba(239, 68, 68, 0.05) 100%
+          );
+          color: var(--error-color);
+
+          &::before {
+            background: var(--error-color);
+          }
+        }
+      }
+
+      &.success {
+        &:hover {
+          background: linear-gradient(
+            135deg,
+            rgba(16, 185, 129, 0.1) 0%,
+            rgba(16, 185, 129, 0.05) 100%
+          );
+          color: var(--success-color);
+
+          &::before {
+            background: var(--success-color);
+          }
+        }
+      }
+
+      &.warning {
+        &:hover {
+          background: linear-gradient(
+            135deg,
+            rgba(245, 158, 11, 0.1) 0%,
+            rgba(245, 158, 11, 0.05) 100%
+          );
+          color: var(--warning-color);
+
+          &::before {
+            background: var(--warning-color);
+          }
+        }
+      }
+
+      &.info {
+        &:hover {
+          background: linear-gradient(
+            135deg,
+            rgba(6, 182, 212, 0.1) 0%,
+            rgba(6, 182, 212, 0.05) 100%
+          );
+          color: var(--info-color);
+
+          &::before {
+            background: var(--info-color);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Dark mode adjustments
+[data-theme='dark'] {
+  .dropdown-container {
+    .dropdown {
+      background: linear-gradient(135deg, var(--card-bg) 0%, var(--surface-color) 100%);
+      border-color: var(--border-color);
+      color: var(--text-color);
+
+      &:hover,
+      &.active {
+        background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
+        border-color: var(--secondary-color);
+      }
+    }
+
+    &.ellipsis .dropdown {
+      background: linear-gradient(135deg, var(--surface-color) 0%, var(--card-bg) 100%);
+      border-color: var(--border-color);
+
+      &:hover,
+      &.active {
+        background: var(--secondary-color);
+        border-color: var(--secondary-color);
+      }
+    }
+
+    .dropdownmenu {
+      background: var(--card-bg);
+      border-color: var(--border-color);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+
+      li {
+        color: var(--text-color);
+
+        &:hover {
+          background: linear-gradient(
+            135deg,
+            var(--surface-color) 0%,
+            rgba(99, 102, 241, 0.1) 100%
+          );
+          color: var(--secondary-color);
+        }
+      }
+    }
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .dropdown-container {
+    .dropdown,
+    &.ellipsis .dropdown {
+      border-width: 3px;
+    }
+
+    .dropdownmenu {
+      border-width: 3px;
+
+      li {
+        border: 1px solid transparent;
+
+        &:hover {
+          border-color: currentColor;
+        }
+      }
+    }
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .dropdown-container {
+    .dropdown,
+    &.ellipsis .dropdown,
+    .dropdownmenu,
+    .dropdownmenu li {
+      transition: none;
+    }
+
+    .dropdown .arrow,
+    &.ellipsis .dropdown .dots {
+      transition: none;
+    }
+  }
+}

@@ -69,12 +69,43 @@
   --warning-bg: rgba(245, 158, 11, 0.1);
   --info-bg: rgba(6, 182, 212, 0.1);
   --error-bg: rgba(239, 68, 68, 0.1);
+
+  /* PrimeNG Design Token Overrides */
+  --p-primary-50: rgba(99, 102, 241, 0.05);
+  --p-primary-100: rgba(99, 102, 241, 0.1);
+  --p-primary-200: rgba(99, 102, 241, 0.2);
+  --p-primary-300: rgba(99, 102, 241, 0.3);
+  --p-primary-400: rgba(99, 102, 241, 0.4);
+  --p-primary-500: #6366f1;
+  --p-primary-600: #5b61f0;
+  --p-primary-700: #4f56ee;
+  --p-primary-800: #434bec;
+  --p-primary-900: #3740e9;
+  --p-primary-950: rgba(99, 102, 241, 0.95);
+
+  --p-surface-0: #1e293b;
+  --p-surface-50: #334155;
+  --p-surface-100: #475569;
+  --p-surface-200: #64748b;
+  --p-surface-300: #94a3b8;
+  --p-surface-400: #cbd5e1;
+  --p-surface-500: #e2e8f0;
+  --p-surface-600: #f1f5f9;
+  --p-surface-700: #f8fafc;
+  --p-surface-800: #ffffff;
+  --p-surface-900: #ffffff;
+  --p-surface-950: #ffffff;
+
+  --p-content-color: #f1f5f9;
+  --p-text-color: #f1f5f9;
+  --p-text-muted-color: #94a3b8;
+  --p-border-color: #334155;
 }
 
 body {
   background: var(--bg-color) !important;
   color: var(--text-color) !important;
-  font-family: 'Source Sans Pro', sans-serif !important;
+  font-family: 'Montserrat', sans-serif !important;
   transition: background-color 0.2s ease, color 0.2s ease;
   overflow-x: hidden;
 }
@@ -338,6 +369,74 @@ canvas {
   opacity: 0 !important;
 }
 
+// Global PrimeNG overrides to ensure our custom styling works
+.p-datatable {
+  background: transparent !important;
+  border: none !important;
+
+  .p-datatable-header {
+    display: none !important;
+  }
+
+  .p-datatable-wrapper {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+  }
+}
+
+// Override PrimeNG default theme for our custom tables
+.custom-prime-table.p-datatable {
+  .p-datatable-thead > tr > th {
+    background: var(--p-surface-50) !important;
+    color: var(--p-text-color) !important;
+    border: none !important;
+    border-bottom: 2px solid var(--p-primary-500) !important;
+    padding: 0.7rem;
+    .header-cell {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      .header-icons {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+    }
+    .column-filter {
+      display: none;
+    }
+  }
+
+  .p-datatable-tbody > tr > td {
+    background: var(--p-surface-0) !important;
+    color: var(--p-text-color) !important;
+    border: none !important;
+    border-bottom: 1px solid var(--p-border-color) !important;
+    padding: 1rem;
+    &.cell-date {
+      .cell-date {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+    }
+  }
+
+  // .p-datatable-tbody > tr:hover {
+  //   background: var(--p-primary-500) !important;
+  //   cursor: pointer;
+  // }
+
+  .p-datatable-tbody > tr.p-highlight td {
+    background: var(--p-primary-100) !important;
+  }
+
+  .p-paginator {
+    background: var(--p-surface-50) !important;
+    border-top: 1px solid var(--p-border-color) !important;
+  }
+}
+
 .status-badge {
   padding: 6px 12px;
   border-radius: 6px;
@@ -384,4 +483,22 @@ canvas {
   background-color: var(--surface-color);
   color: var(--muted-text-dark);
   border-color: var(--border-color);
+}
+
+// Dialog Styles
+
+p-dialog {
+  .p-dialog-header,
+  .p-dialog-content {
+    background-color: var(--bg-color);
+    padding: 2rem;
+  }
+  .p-dialog-header {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+  .p-dialog-content {
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+  }
 }

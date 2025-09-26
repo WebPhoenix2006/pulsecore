@@ -1,0 +1,47 @@
+<div class="dropdown-container" [class.ellipsis]="ellipsis">
+  <div class="dropdown" [class.active]="isOpen" (click)="toggleDropdown($event)">
+    <ng-container *ngIf="ellipsis; else normalToggle">
+      <span class="dots">⋮</span>
+    </ng-container>
+
+    <ng-template #normalToggle>
+      <span>{{ placeholder }}</span>
+      <i class="fas fa-chevron-down arrow"></i>
+    </ng-template>
+  </div>
+
+  <!-- Portal-style dropdown menu positioned with fixed positioning -->
+  <ul
+    class="dropdownmenu"
+    [class.show]="isOpen"
+    [style.top.px]="dropdownPosition.top"
+    [style.left.px]="dropdownPosition.left"
+    *ngIf="isOpen">
+    <li *ngFor="let option of options"
+        (click)="selectOption(option, $event)"
+        [class.danger]="option.value === 'delete' || option.value === 'remove'"
+        [class.warning]="option.value === 'edit' || option.value === 'update'"
+        [class.success]="option.value === 'approve' || option.value === 'activate'"
+        [class.info]="option.value === 'view' || option.value === 'details'">
+      <ng-container [ngSwitch]="option.iconPosition || 'left'">
+        <!-- Icon on the left -->
+        <ng-container *ngSwitchCase="'left'">
+          <svg-icons *ngIf="option.icon" [name]="option.icon" class="icon-left"></svg-icons>
+          <span>{{ option.label }}</span>
+        </ng-container>
+
+        <!-- Icon on the right -->
+        <ng-container *ngSwitchCase="'right'">
+          <span>{{ option.label }}</span>
+          <svg-icons *ngIf="option.icon" [name]="option.icon" class="icon-right"></svg-icons>
+        </ng-container>
+
+        <!-- No position specified (default to left) -->
+        <ng-container *ngSwitchDefault>
+          <svg-icons *ngIf="option.icon" [name]="option.icon" class="icon-left"></svg-icons>
+          <span>{{ option.label }}</span>
+        </ng-container>
+      </ng-container>
+    </li>
+  </ul>
+</div>

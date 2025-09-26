@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-svg-icons',
+  selector: 'svg-icons',
   standalone: false,
   templateUrl: './svg-icons.html',
-  styleUrl: './svg-icons.scss'
+  styleUrl: './svg-icons.scss',
 })
 export class SvgIcons {
-
+  @Input() name: string = '';
 }

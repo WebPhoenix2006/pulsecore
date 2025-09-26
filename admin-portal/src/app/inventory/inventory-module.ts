@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
 
 import { InventoryRoutingModule } from './inventory-routing-module';
 import { Skus } from './components/skus/skus';
@@ -10,6 +11,6 @@ import { Layout } from './layout/layout';
 
 @NgModule({
   declarations: [Skus, Alerts, Layout],
-  imports: [CommonModule, InventoryRoutingModule, SharedModule],
+  imports: [CommonModule, InventoryRoutingModule, SharedModule, ReactiveFormsModule],
 })
 export class InventoryModule {}

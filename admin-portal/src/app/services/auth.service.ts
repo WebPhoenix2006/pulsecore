@@ -65,13 +65,33 @@ export class AuthService {
   }
 
   logout(): Observable<LogoutResponseInterface> {
-    const token = localStorage.getItem('token');
+    const refreshToken = this.getRefreshToken();
+
+    if (!refreshToken) {
+      // If no refresh token, still clear local storage and redirect
+      this.clearAuth();
+      this.router.navigate(['/auth/login']);
+      return throwError(() => new Error('No refresh token available'));
+    }
+
     const data = {
-      refresh: token,
+      refresh: refreshToken,
     };
+
     return this.http.post<LogoutResponseInterface>(Environments.auth.logout, data, {
       responseType: 'text' as 'json',
-    });
+    }).pipe(
+      tap(() => {
+        // Clear auth on successful logout
+        this.clearAuth();
+      }),
+      catchError((error) => {
+        // Even if logout fails on backend, clear local storage
+        console.warn('Logout request failed, but clearing local storage:', error);
+        this.clearAuth();
+        return throwError(() => error);
+      })
+    );
   }
 
   refreshAccessToken(): Observable<string> {

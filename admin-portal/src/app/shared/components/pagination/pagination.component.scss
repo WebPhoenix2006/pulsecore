@@ -1,0 +1,22 @@
+.pagination {
+  display: flex;
+  gap: 8px;
+  margin-top: 1rem;
+
+  button {
+    padding: 5px 10px;
+    background-color: white;
+    border: 1px solid #ccc;
+    cursor: pointer;
+
+    &.second-active {
+      background-color: #007bff;
+      color: white;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}

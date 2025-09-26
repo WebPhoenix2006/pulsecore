@@ -1,13 +1,13 @@
-import { Component, signal, OnInit, ViewChild } from '@angular/core';
-import { TableConfig, TableData } from '../../../interfaces/table-config.interface';
-import { ReusableDataTable } from '../../../shared/components/reusable-data-table/reusable-data-table';
+import { Component, signal, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { TableColumn, TableAction } from '../../../shared/components/prime-data-table/prime-data-table';
 import { ToastService } from '../../../shared/services/toast.service';
 import { Alert, CreateAlertRequest, UpdateAlertRequest } from '../../../interfaces/alert.interface';
 import { AlertService } from '../../services/alert.service';
-import { alertTableConfig } from '../../config/alert-table.config';
 import { SKUService } from '../../services/sku.service';
 import { SKU } from '../../../interfaces/sku.interface';
 import { PaginatedResponse } from '../../../interfaces/product.interface';
+import { FormFieldOption } from '../../../interfaces/form-field-options';
 
 @Component({
   selector: 'app-alerts',
@@ -16,18 +16,114 @@ import { PaginatedResponse } from '../../../interfaces/product.interface';
   styleUrl: './alerts.scss'
 })
 export class Alerts implements OnInit {
-  @ViewChild(ReusableDataTable) dataTable!: ReusableDataTable;
-
-  tableConfig: TableConfig = alertTableConfig;
   alerts = signal<Alert[]>([]);
   skus: SKU[] = [];
   loading = signal(false);
+  selectedAlerts: Alert[] = [];
+
+  // Form properties
+  modalVisible = false;
+  viewModalVisible = false;
+  alertForm!: FormGroup;
+  skuOptions: FormFieldOption[] = [];
+  selectedAlert: Alert | null = null;
+  alertTypeOptions: FormFieldOption[] = [
+    { label: 'Low Stock', value: 'low_stock' },
+    { label: 'Batch Expiry', value: 'batch_expiry' }
+  ];
+
+  tableColumns: TableColumn[] = [
+    {
+      field: 'type',
+      header: 'Alert Type',
+      sortable: true,
+      filterable: true,
+      type: 'status',
+      width: '15%'
+    },
+    {
+      field: 'sku_name',
+      header: 'Product',
+      sortable: true,
+      filterable: true,
+      type: 'text',
+      width: '25%'
+    },
+    {
+      field: 'current_stock',
+      header: 'Current Stock',
+      sortable: true,
+      type: 'text',
+      width: '15%'
+    },
+    {
+      field: 'threshold',
+      header: 'Threshold',
+      sortable: true,
+      type: 'text',
+      width: '15%'
+    },
+    {
+      field: 'created_at',
+      header: 'Created',
+      sortable: true,
+      type: 'date',
+      width: '15%'
+    },
+    {
+      field: 'acknowledged',
+      header: 'Status',
+      sortable: true,
+      type: 'status',
+      width: '10%'
+    },
+    {
+      field: 'actions',
+      header: 'Actions',
+      type: 'actions',
+      width: '120px'
+    }
+  ];
+
+  tableActions: TableAction[] = [
+    {
+      label: 'View Details',
+      value: 'view',
+      icon: 'eye',
+      iconPosition: 'left',
+      action: (rowData) => this.onViewAlert(rowData)
+    },
+    {
+      label: 'Acknowledge',
+      value: 'acknowledge',
+      icon: 'check',
+      iconPosition: 'left',
+      action: (rowData) => this.acknowledgeAlert(rowData.alert_id)
+    },
+    {
+      label: 'Dismiss',
+      value: 'dismiss',
+      icon: 'times',
+      iconPosition: 'left',
+      action: (rowData) => this.dismissAlert(rowData.alert_id)
+    },
+    {
+      label: 'View SKU',
+      value: 'view-sku',
+      icon: 'external-link',
+      iconPosition: 'left',
+      action: (rowData) => this.viewSKU(rowData.sku_id)
+    }
+  ];
 
   constructor(
     private alertService: AlertService,
     private skuService: SKUService,
-    private toastService: ToastService
-  ) {}
+    private toastService: ToastService,
+    private fb: FormBuilder
+  ) {
+    this.initializeForm();
+  }
 
   ngOnInit() {
     this.loadSKUs();
@@ -38,13 +134,10 @@ export class Alerts implements OnInit {
     this.skuService.getSKUs().subscribe({
       next: (response: PaginatedResponse<SKU>) => {
         this.skus = response.results;
-        const skuField = this.tableConfig.formFields.find((f) => f.field === 'sku_id');
-        if (skuField) {
-          skuField.options = this.skus.map((sku) => ({
-            value: sku.sku_id,
-            label: `${sku.name} (${sku.sku_code})`,
-          }));
-        }
+        this.skuOptions = this.skus.map(sku => ({
+          label: `${sku.name} (${sku.sku_code || 'N/A'})`,
+          value: sku.sku_id
+        }));
       },
       error: () => this.toastService.showError('Failed to load SKUs'),
     });
@@ -69,62 +162,54 @@ export class Alerts implements OnInit {
     });
   }
 
-  onCreateAlert(data: TableData) {
-    this.loading.set(true);
-    const payload: CreateAlertRequest = {
-      sku_id: data['sku_id'],
-      type: data['type'] as 'low_stock' | 'batch_expiry',
-      threshold: data['threshold'] || undefined,
-    };
-
-    this.alertService.createAlert(payload).subscribe({
-      next: (created: Alert) => {
-        this.alerts.update((a) => [...a, created]);
-        this.dataTable.onOperationSuccess();
-        this.toastService.showSuccess('Alert created successfully!');
-        this.loading.set(false);
-      },
-      error: () => {
-        this.toastService.showError('Failed to create alert');
-        this.dataTable.onOperationError();
-        this.loading.set(false);
-      },
+  private initializeForm() {
+    this.alertForm = this.fb.group({
+      sku: ['', [Validators.required]],
+      type: ['', [Validators.required]],
+      threshold: ['']
     });
   }
 
-  onEditAlert(event: { id: string; data: TableData }) {
-    this.loading.set(true);
+  // Form control getters
+  get skuControl() { return this.alertForm.get('sku') as FormControl; }
+  get typeControl() { return this.alertForm.get('type') as FormControl; }
+  get thresholdControl() { return this.alertForm.get('threshold') as FormControl; }
 
-    // Debug logging to check the ID
-    console.log('Alert Edit event:', event);
-    console.log('Alert Event ID:', event.id);
+  onCreateAlert() {
+    this.alertForm.reset();
+    this.modalVisible = true;
+  }
 
-    const updateData: UpdateAlertRequest = {
-      acknowledged: event.data['acknowledged'],
-      acknowledged_by: event.data['acknowledged_by'],
-      acknowledged_at: event.data['acknowledged_at'],
-    };
+  onEditAlert(alert: Alert) {
+    // Note: Alerts typically can't be edited, only acknowledged/dismissed
+    this.toastService.showInfo(`Alert ${alert.type} can only be acknowledged or dismissed`);
+  }
 
-    // Use the correct ID from the event
-    const alertId = event.id;
-    if (!alertId) {
-      this.toastService.showError('Alert ID is missing');
-      this.loading.set(false);
+  onSubmitAlert() {
+    if (this.alertForm.invalid) {
       return;
     }
 
-    this.alertService.updateAlert(alertId, updateData).subscribe({
-      next: (updated: Alert) => {
-        this.alerts.update((a) => a.map((alert) => (alert.alert_id === alertId ? updated : alert)));
-        this.dataTable.onOperationSuccess();
-        this.toastService.showSuccess('Alert updated successfully!');
+    const formValue = this.alertForm.value;
+    const alertData: CreateAlertRequest = {
+      sku_id: formValue.sku,
+      type: formValue.type,
+      threshold: formValue.threshold ? parseInt(formValue.threshold) : undefined
+    };
+
+    this.loading.set(true);
+
+    this.alertService.createAlert(alertData).subscribe({
+      next: (newAlert) => {
+        this.loadAlerts(); // Reload to get updated data
+        this.toastService.showSuccess('Alert created successfully!');
+        this.modalVisible = false;
         this.loading.set(false);
       },
-      error: () => {
-        this.toastService.showError('Failed to update alert');
-        this.dataTable.onOperationError();
+      error: (error) => {
+        this.toastService.showError(`Failed to create alert: ${error.error?.message || error.message}`);
         this.loading.set(false);
-      },
+      }
     });
   }
 
@@ -143,35 +228,68 @@ export class Alerts implements OnInit {
     });
   }
 
-  onViewAlert(alert: TableData) {
-    this.toastService.showInfo(`Viewing details for alert: ${alert['type']}`);
+  onViewAlert(alert: Alert) {
+    this.selectedAlert = alert;
+    this.viewModalVisible = true;
   }
 
-  onCustomAction(event: { action: string; item: TableData }) {
-    const alert = event.item as Alert;
-
-    switch (event.action) {
-      case 'acknowledge':
-        this.acknowledgeAlert(alert.alert_id);
-        break;
-      case 'dismiss':
-        this.dismissAlert(alert.alert_id);
-        break;
-      case 'view-sku':
-        this.viewSKU(alert.sku_id);
-        break;
-      default:
-        this.toastService.showInfo(`Custom action: ${event.action}`);
-    }
+  onRefreshData() {
+    this.loadAlerts();
   }
 
-  private acknowledgeAlert(alertId: string) {
+  onExportData() {
+    const csvData = this.generateAlertCSV();
+    this.downloadCSV(csvData, 'alerts.csv');
+    this.toastService.showSuccess('Alerts exported successfully!');
+  }
+
+  private generateAlertCSV(): string {
+    const headers = ['Alert ID', 'Type', 'SKU Name', 'Current Stock', 'Threshold', 'Status', 'Acknowledged By', 'Acknowledged At', 'Created At'];
+    const rows = this.alerts().map(alert => [
+      alert.alert_id || '',
+      alert.type,
+      alert.sku_name || '',
+      alert.current_stock?.toString() || '',
+      alert.threshold?.toString() || '',
+      alert.acknowledged ? 'Acknowledged' : 'Pending',
+      alert.acknowledged_by || '',
+      alert.acknowledged_at || '',
+      alert.created_at || ''
+    ]);
+
+    return [headers, ...rows]
+      .map(row => row.map(field => `"${field}"`).join(','))
+      .join('\n');
+  }
+
+  private downloadCSV(data: string, filename: string): void {
+    const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  onSelectionChange(selectedRows: Alert[]) {
+    this.selectedAlerts = selectedRows;
+    console.log('Selected alerts:', selectedRows);
+  }
+
+  acknowledgeAlert(alertId: string) {
     this.alertService.acknowledgeAlert(alertId, {
       acknowledged_by: 'current-user-id' // TODO: Get from auth service
     }).subscribe({
       next: (updated: Alert) => {
         this.alerts.update((a) => a.map((alert) => (alert.alert_id === alertId ? updated : alert)));
         this.toastService.showSuccess('Alert acknowledged successfully!');
+        if (this.selectedAlert && this.selectedAlert.alert_id === alertId) {
+          this.selectedAlert = updated;
+        }
+        this.viewModalVisible = false;
       },
       error: () => {
         this.toastService.showError('Failed to acknowledge alert');
@@ -192,7 +310,13 @@ export class Alerts implements OnInit {
   }
 
   private viewSKU(skuId: string) {
-    // TODO: Navigate to SKU details or implement SKU viewing
-    this.toastService.showInfo(`Navigating to SKU: ${skuId}`);
+    // Find the SKU from the loaded SKUs
+    const sku = this.skus.find(s => s.sku_id === skuId);
+    if (sku) {
+      // Show SKU details in a toast with more information
+      this.toastService.showInfo(`SKU: ${sku.name} | Code: ${sku.sku_code || 'N/A'} | Stock: ${sku.stock_level || 'N/A'}`);
+    } else {
+      this.toastService.showInfo(`SKU ID: ${skuId} - Navigate to SKU details`);
+    }
   }
 }

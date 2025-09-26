@@ -1,0 +1,316 @@
+<div class="prime-table-container">
+  <!-- Enhanced table header -->
+  <div class="table-header">
+    <div class="header-content">
+      <div class="title-section">
+        <div class="title-wrapper" *ngIf="tableTitle">
+          <h2 class="table-title">{{ tableTitle }}</h2>
+          <div class="title-accent"></div>
+        </div>
+        <p class="description-text" *ngIf="tableDescription">{{ tableDescription }}</p>
+        <div class="stats-row" *ngIf="data.length > 0">
+          <div class="stat-item">
+            <div class="stat-value">{{ data.length }}</div>
+            <div class="stat-label">Total Records</div>
+          </div>
+          <div class="stat-item" *ngIf="selectedRows.length > 0">
+            <div class="stat-value">{{ selectedRows.length }}</div>
+            <div class="stat-label">Selected</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-section">
+        <!-- Search -->
+        <div class="search-wrapper" *ngIf="showGlobalFilter">
+          <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input
+              type="text"
+              class="search-input"
+              placeholder="Search across all fields..."
+              [value]="globalFilterValue"
+              (input)="onGlobalFilter($event)"
+            />
+            <button *ngIf="globalFilterValue" class="search-clear" (click)="clearFilter()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Header actions -->
+        <div class="header-actions">
+          <!-- Bulk actions -->
+          <div class="bulk-actions" *ngIf="selectedRows.length > 0">
+            <span class="selected-count">{{ selectedRows.length }} selected</span>
+          </div>
+
+          <!-- Action buttons -->
+          <button
+            *ngIf="showRefresh"
+            class="btn-custom-primary outlined small"
+            (click)="onRefresh()"
+            title="Refresh"
+          >
+            <i class="fas fa-sync-alt"></i>
+          </button>
+
+          <button
+            *ngIf="showExport"
+            class="btn-custom-primary outlined small"
+            (click)="onExport()"
+            title="Export"
+          >
+            <i class="fas fa-download"></i>
+          </button>
+
+          <button *ngIf="showCreate" class="btn-custom-primary create-button" (click)="onCreate()">
+            <i class="fas fa-plus"></i>
+            {{ createLabel }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PrimeNG Table -->
+  <div class="table-content">
+    <p-table
+      [value]="enableAdvancedFilters ? filteredData : data"
+      [globalFilterFields]="enableAdvancedFilters ? [] : globalFilterFields"
+      [loading]="loading"
+      [paginator]="paginator"
+      [rows]="rows"
+      [rowsPerPageOptions]="rowsPerPageOptions"
+      [globalFilterFields]="globalFilterFields"
+      [showCurrentPageReport]="showCurrentPageReport"
+      [currentPageReportTemplate]="currentPageReportTemplate"
+      [selectionMode]="selectionMode"
+      [dataKey]="dataKey"
+      [(selection)]="selectedRows"
+      (onRowSelect)="onRowSelect($event)"
+      (onRowUnselect)="onRowUnselect($event)"
+      (onSort)="onSort($event)"
+      (onFilter)="onFilter($event)"
+      styleClass="custom-prime-table"
+      responsiveLayout="scroll"
+    >
+      <!-- Table Header -->
+      <ng-template pTemplate="header">
+        <tr class="table-header-row">
+          <th *ngIf="selectionMode === 'multiple'" class="select-column">
+            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+          <th
+            *ngFor="let col of columns"
+            [pSortableColumn]="col.sortable ? col.field : ''"
+            [style.width]="col.width"
+            [class.actions-column]="col.type === 'actions'"
+          >
+            <div class="header-cell">
+              <span class="header-text">{{ col.header }}</span>
+              <div class="header-icons">
+                <p-sortIcon
+                  *ngIf="col.sortable"
+                  [field]="col.field"
+                  class="header-sort"
+                ></p-sortIcon>
+                <i *ngIf="col.filterable" class="fas fa-filter header-filter"></i>
+              </div>
+            </div>
+
+            <!-- Column Filter -->
+            <div
+              *ngIf="col.filterable && enableAdvancedFilters && col.type !== 'actions'"
+              class="column-filter"
+            >
+              <input
+                *ngIf="!col.filterType || col.filterType === 'text'"
+                type="text"
+                class="filter-input"
+                [placeholder]="getFilterPlaceholder(col)"
+                [value]="columnFilters[col.field] || ''"
+                (input)="onColumnFilter(col.field, $event)"
+              />
+
+              <input
+                *ngIf="col.filterType === 'date'"
+                type="date"
+                class="filter-input date-filter"
+                [value]="columnFilters[col.field] || ''"
+                (change)="onDateFilter(col.field, $event.target.value || '')"
+              />
+
+              <button
+                *ngIf="columnFilters[col.field]"
+                class="filter-clear"
+                (click)="clearFilter(col.field)"
+                title="Clear filter"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </th>
+        </tr>
+      </ng-template>
+
+      <!-- Table Body -->
+      <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex">
+        <tr class="table-row" [class.selected]="selectedRows.includes(rowData)">
+          <td *ngIf="selectionMode === 'multiple'" class="select-cell">
+            <div class="checkbox-wrapper">
+              <p-tableCheckbox [value]="rowData" class="table-checkbox"></p-tableCheckbox>
+            </div>
+          </td>
+
+          <td *ngFor="let col of columns" [class]="'cell-' + (col.type || 'text')">
+            <!-- Custom cell template -->
+            <ng-container *ngIf="cellTemplate; else defaultCell">
+              <ng-container
+                *ngTemplateOutlet="
+                  cellTemplate;
+                  context: {
+                    $implicit: rowData,
+                    column: col,
+                    value: getFieldValue(rowData, col.field)
+                  }
+                "
+              ></ng-container>
+            </ng-container>
+
+            <!-- Default cell templates -->
+            <ng-template #defaultCell>
+              <!-- Text cell with highlighting -->
+              <span
+                *ngIf="col.type === 'text' || !col.type"
+                class="cell-text"
+                [innerHTML]="
+                  enableSearchHighlighting
+                    ? getHighlightedValue(rowData, col.field)
+                    : getFieldValue(rowData, col.field)
+                "
+              ></span>
+
+              <!-- Date cell -->
+              <div *ngIf="col.type === 'date'" class="cell-date">
+                <i class="fas fa-calendar date-icon"></i>
+                <span>{{ formatDate(getFieldValue(rowData, col.field)) }}</span>
+              </div>
+
+              <!-- Status cell -->
+              <span
+                *ngIf="col.type === 'status'"
+                [class]="getStatusClass(getFieldValue(rowData, col.field))"
+              >
+                <div class="badge-indicator"></div>
+                {{ getFieldValue(rowData, col.field) }}
+              </span>
+
+              <!-- Image cell -->
+              <div *ngIf="col.type === 'image'" class="image-cell">
+                <img
+                  *ngIf="getFieldValue(rowData, col.field); else noImage"
+                  [src]="getFieldValue(rowData, col.field)"
+                  [alt]="rowData.name || 'Image'"
+                  class="table-image"
+                />
+                <ng-template #noImage>
+                  <span class="no-image">No image</span>
+                </ng-template>
+              </div>
+
+              <!-- User cell -->
+              <div *ngIf="col.type === 'user'" class="user-cell">
+                <img
+                  *ngIf="rowData.avatar"
+                  [src]="rowData.avatar"
+                  [alt]="rowData.name"
+                  class="user-avatar"
+                />
+                <div class="user-info">
+                  <div class="user-name">{{ rowData.name }}</div>
+                  <div class="user-meta" *ngIf="rowData.email">{{ rowData.email }}</div>
+                </div>
+              </div>
+
+              <!-- Actions cell -->
+              <div *ngIf="col.type === 'actions'" class="actions-cell">
+                <div class="enhanced-actions">
+                  <!-- Custom actions template -->
+                  <ng-container *ngIf="actionsTemplate; else defaultActions">
+                    <ng-container
+                      *ngTemplateOutlet="
+                        actionsTemplate;
+                        context: { $implicit: rowData, index: rowIndex }
+                      "
+                    ></ng-container>
+                  </ng-container>
+
+                  <!-- Default actions dropdown -->
+                  <ng-template #defaultActions>
+                    <app-dropdown
+                      [ellipsis]="true"
+                      [options]="getActionsForRow(rowData)"
+                    ></app-dropdown>
+                  </ng-template>
+                </div>
+              </div>
+            </ng-template>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- Loading template -->
+      <ng-template pTemplate="loadingbody">
+        <tr>
+          <td [attr.colspan]="columns.length + (selectionMode === 'multiple' ? 1 : 0)">
+            <div class="loading-container">
+              <div class="loading-content">
+                <div class="loading-spinner">
+                  <div class="spinner-ring"></div>
+                  <div class="spinner-ring"></div>
+                  <div class="spinner-ring"></div>
+                </div>
+                <div class="loading-text">Loading data...</div>
+                <div class="loading-progress">
+                  <div class="progress-bar"></div>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- Empty state -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td [attr.colspan]="columns.length + (selectionMode === 'multiple' ? 1 : 0)">
+            <div class="enhanced-empty">
+              <div class="empty-content">
+                <div class="empty-illustration">
+                  <div class="empty-icon-container">
+                    <i class="fas fa-inbox empty-icon"></i>
+                    <div class="icon-accent">
+                      <i class="fas fa-plus"></i>
+                    </div>
+                  </div>
+                </div>
+                <div class="empty-title">{{ emptyMessage }}</div>
+                <div class="empty-description">
+                  No records match your current search criteria. Try adjusting your filters or
+                  create a new record.
+                </div>
+                <div class="empty-action" *ngIf="showCreate">
+                  <button class="create-btn" (click)="onCreate()">
+                    <i class="fas fa-plus"></i>
+                    {{ createLabel }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

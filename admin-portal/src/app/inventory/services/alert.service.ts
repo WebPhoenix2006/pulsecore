@@ -25,7 +25,7 @@ export class AlertService {
 
   private getTenantId(): string {
     // TODO: Get tenant ID from auth service or local storage
-    return 'tenant-uuid-placeholder';
+    return '550e8400-e29b-41d4-a716-446655440000';
   }
 
   getAlerts(): Observable<Alert[]> {

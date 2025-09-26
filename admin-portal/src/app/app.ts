@@ -1,12 +1,13 @@
 import { Component, OnInit, signal, Renderer2, Inject } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-import { SharedModule } from './shared/shared-module';
+// SharedModule removed as this is a standalone component
 import { ToastService } from './shared/services/toast.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SharedModule, CommonModule],
+  standalone: true,
+  imports: [RouterOutlet, CommonModule],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

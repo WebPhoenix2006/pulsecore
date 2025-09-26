@@ -3,7 +3,7 @@ export interface SKU {
   tenant_id: string;
   name: string;
   sku_code: string | null;
-  category: string;
+  category: number;
   attributes?: Record<string, any>;
   barcode: string | null;
   price: number;
