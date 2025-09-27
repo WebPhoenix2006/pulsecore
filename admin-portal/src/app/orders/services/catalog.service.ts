@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Environments } from '../../../environments/environment';
 
@@ -39,58 +39,33 @@ export interface PaginatedResponse<T> {
 export class CatalogService {
   constructor(private http: HttpClient) {}
 
-  private getHeaders(): HttpHeaders {
-    return new HttpHeaders({
-      'X-Tenant-ID': this.getTenantId(),
-      'Content-Type': 'application/json',
-    });
-  }
-
-  private getTenantId(): string {
-    return localStorage.getItem('tenant-id') || 'tenant-uuid-placeholder';
-  }
-
   // Categories
   getCategories(): Observable<PaginatedResponse<Category>> {
-    return this.http.get<PaginatedResponse<Category>>(
-      Environments.catalog.categories,
-      { headers: this.getHeaders() }
-    );
+    return this.http.get<PaginatedResponse<Category>>(Environments.catalog.categories);
   }
 
   getCategory(id: string): Observable<Category> {
-    return this.http.get<Category>(
-      `${Environments.catalog.categories}${id}/`,
-      { headers: this.getHeaders() }
-    );
+    return this.http.get<Category>(`${Environments.catalog.categories}${id}/`);
   }
 
   // Products
   getProducts(): Observable<PaginatedResponse<Product>> {
-    return this.http.get<PaginatedResponse<Product>>(
-      Environments.catalog.products,
-      { headers: this.getHeaders() }
-    );
+    return this.http.get<PaginatedResponse<Product>>(Environments.catalog.products);
   }
 
   getProduct(id: string): Observable<Product> {
-    return this.http.get<Product>(
-      `${Environments.catalog.products}${id}/`,
-      { headers: this.getHeaders() }
-    );
+    return this.http.get<Product>(`${Environments.catalog.products}${id}/`);
   }
 
   getProductsByCategory(categoryId: string): Observable<PaginatedResponse<Product>> {
     return this.http.get<PaginatedResponse<Product>>(
-      `${Environments.catalog.products}?category=${categoryId}`,
-      { headers: this.getHeaders() }
+      `${Environments.catalog.products}?category=${categoryId}`
     );
   }
 
   searchProducts(query: string): Observable<PaginatedResponse<Product>> {
     return this.http.get<PaginatedResponse<Product>>(
-      `${Environments.catalog.products}?search=${query}`,
-      { headers: this.getHeaders() }
+      `${Environments.catalog.products}?search=${query}`
     );
   }
 }

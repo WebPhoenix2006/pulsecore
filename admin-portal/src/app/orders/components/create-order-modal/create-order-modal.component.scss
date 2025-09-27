@@ -237,52 +237,122 @@
   }
 }
 
-.form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+// Use the same form field styles as shared components
+.form-field-container {
+  margin-bottom: 1rem;
+  width: 100%;
 
-  label {
-    font-weight: 600;
-    color: var(--text-color);
-    font-size: 0.9rem;
-  }
+  &.has-error {
+    .form-input,
+    .form-textarea,
+    .form-select {
+      border-color: var(--error-color) !important;
 
-  .form-control {
-    padding: 0.875rem 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-    color: var(--text-color);
-    background: var(--white);
-    transition: all 0.3s ease;
-
-    &:focus {
-      outline: none;
-      border-color: var(--secondary-color);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-    }
-
-    &.error {
-      border-color: var(--error-color);
-    }
-
-    &.readonly {
-      background: var(--surface-color);
-      cursor: not-allowed;
-    }
-
-    &::placeholder {
-      color: var(--text-color);
-      opacity: 0.6;
+      &:focus {
+        border-color: var(--error-color);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--error-color) 10%, transparent);
+      }
     }
   }
 
-  .error-message {
-    color: var(--error-color);
-    font-size: 0.8rem;
-    margin-top: 0.25rem;
+  &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
   }
+}
+
+// Labels
+.field-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+
+  &.required {
+    .required-indicator {
+      color: var(--error-color);
+      margin-left: 0.25rem;
+    }
+  }
+}
+
+// Form inputs
+.form-input,
+.form-textarea,
+.form-select {
+  width: 100%;
+  padding: 0.75rem 0.75rem;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: var(--card-bg) !important;
+
+  &:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--border-focus) 10%, transparent);
+  }
+
+  &:disabled {
+    background-color: var(--surface-color);
+    color: var(--muted-text-light);
+    cursor: not-allowed;
+  }
+
+  &.error {
+    border-color: var(--error-color);
+  }
+
+  &.readonly {
+    background-color: var(--surface-color);
+    cursor: not-allowed;
+  }
+
+  &::placeholder {
+    color: var(--placeholder-color);
+  }
+}
+
+// Textarea specific
+.form-textarea {
+  resize: vertical;
+  min-height: 6rem;
+  font-family: inherit;
+}
+
+// Select dropdown styling
+.form-select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;charset=UTF-8,<svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M7 10L12 15L17 10H7Z' fill='%236b7280'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1rem;
+  padding-right: 2.5rem;
+  appearance: none;
+
+  &:disabled {
+    cursor: not-allowed;
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M7 10L12 15L17 10H7Z' fill='%239ca3af'/></svg>");
+  }
+
+  option {
+    padding: 0.5rem;
+
+    &:disabled {
+      color: var(--muted-text-light);
+    }
+  }
+}
+
+// Error messages
+.error-message {
+  font-size: 0.75rem;
+  color: var(--error-color);
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+  line-height: 1.4;
 }
 
 // Checkbox Styles
