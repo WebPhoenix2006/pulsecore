@@ -13,6 +13,7 @@ import { FooterComponent } from './components/footer/footer.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 
 import { GuestRoutingModule } from './guest-routing.module';
+import { SharedModule } from '../shared/shared-module';
 
 @NgModule({
   declarations: [
@@ -23,14 +24,15 @@ import { GuestRoutingModule } from './guest-routing.module';
     AboutUsComponent,
     ContactUsComponent,
     FooterComponent,
-    NavbarComponent
+    NavbarComponent,
   ],
   imports: [
     CommonModule,
     RouterModule,
     FormsModule,
     ReactiveFormsModule,
-    GuestRoutingModule
-  ]
+    GuestRoutingModule,
+    SharedModule,
+  ],
 })
-export class GuestModule { }
+export class GuestModule {}

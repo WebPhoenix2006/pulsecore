@@ -114,7 +114,8 @@
           }
 
           .stat-label {
-            color: var(--muted-text);
+            color: var(--text-color);
+          opacity: 0.8;
             font-size: 0.95rem;
             font-weight: 500;
           }
@@ -146,7 +147,8 @@
         }
 
         p {
-          color: var(--muted-text-dark);
+          color: var(--text-color);
+        opacity: 0.8;
           font-size: 1.1rem;
           line-height: 1.6;
           margin-bottom: 1.5rem;
@@ -217,7 +219,8 @@
               }
 
               p {
-                color: var(--muted-text);
+                color: var(--text-color);
+          opacity: 0.8;
                 font-size: 0.95rem;
               }
             }
@@ -283,7 +286,8 @@
         }
 
         p {
-          color: var(--muted-text);
+          color: var(--text-color);
+          opacity: 0.8;
           line-height: 1.6;
           font-size: 0.95rem;
         }
@@ -402,7 +406,8 @@
           }
 
           .member-bio {
-            color: var(--muted-text);
+            color: var(--text-color);
+          opacity: 0.8;
             font-size: 0.9rem;
             line-height: 1.5;
           }
@@ -434,7 +439,8 @@
       }
 
       p {
-        color: var(--muted-text-dark);
+        color: var(--text-color);
+        opacity: 0.8;
         font-size: 1.1rem;
         line-height: 1.6;
         margin-bottom: 2rem;

@@ -2,7 +2,11 @@
   min-height: 100vh;
   background: var(--bg-color);
   color: var(--text-color);
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Montserrat', sans-serif !important;
+
+  * {
+    font-family: 'Montserrat', sans-serif !important;
+  }
 
   .main-content {
     padding-top: 70px; // Account for fixed navbar height

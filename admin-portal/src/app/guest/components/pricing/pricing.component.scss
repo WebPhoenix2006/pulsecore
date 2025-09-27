@@ -29,7 +29,8 @@
       span {
         padding: 0.75rem 1rem;
         font-weight: 600;
-        color: var(--muted-text);
+        color: var(--text-color);
+        opacity: 0.8;
         cursor: pointer;
         transition: all 0.3s ease;
         border-radius: 6px;
@@ -154,7 +155,8 @@
       }
 
       .plan-description {
-        color: var(--muted-text);
+        color: var(--text-color);
+        opacity: 0.8;
         font-size: 0.95rem;
         margin-bottom: 2rem;
         line-height: 1.5;
@@ -169,7 +171,8 @@
         .currency {
           font-size: 1.25rem;
           font-weight: 600;
-          color: var(--muted-text);
+          color: var(--text-color);
+        opacity: 0.8;
         }
 
         .amount {
@@ -181,7 +184,8 @@
 
         .period {
           font-size: 1rem;
-          color: var(--muted-text);
+          color: var(--text-color);
+        opacity: 0.8;
         }
       }
 
@@ -290,7 +294,8 @@
         }
 
         p {
-          color: var(--muted-text);
+          color: var(--text-color);
+        opacity: 0.8;
           line-height: 1.6;
           font-size: 0.95rem;
         }
@@ -317,7 +322,8 @@
       }
 
       p {
-        color: var(--muted-text);
+        color: var(--text-color);
+        opacity: 0.8;
         font-size: 1.1rem;
         line-height: 1.6;
         margin-bottom: 2rem;

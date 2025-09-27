@@ -7,7 +7,8 @@
         </h1>
         <p class="hero-subtitle">
           PulseCore is the ultimate inventory management and business automation platform.
-          Streamline your catalog, manage inventory, process orders, and coordinate deliveries - all in one powerful solution.
+          Streamline your catalog, manage inventory, process orders, and coordinate deliveries - all
+          in one powerful solution.
         </p>
         <div class="hero-features">
           <div class="feature-tag">
@@ -24,14 +25,20 @@
           </div>
         </div>
         <div class="hero-buttons">
-          <button class="btn-primary large" routerLink="/auth/signup">
-            <span>Start Free Trial</span>
-            <i class="fas fa-arrow-right"></i>
-          </button>
-          <button class="btn-secondary large" (click)="scrollToFeatures()">
-            <i class="fas fa-play"></i>
-            <span>See How It Works</span>
-          </button>
+          <cus-btn
+            buttonText="Start free trial"
+            type="button"
+            size="large"
+            routerLink="/auth/signup"
+          ></cus-btn>
+          <cus-btn
+            buttonText="See how it works"
+            size="large"
+            [isOutlined]="true"
+            (click)="scrollToFeatures()"
+          >
+            <i class="fa fa-arrow-right"></i>
+          </cus-btn>
         </div>
         <div class="hero-stats">
           <div class="stat">
@@ -110,14 +117,16 @@
               <div class="chart-area">
                 <div class="chart-placeholder">
                   <svg viewBox="0 0 300 150">
-                    <path d="M 20 130 Q 50 100 80 90 T 140 80 T 200 70 T 280 60"
-                          stroke="url(#gradient)"
-                          stroke-width="3"
-                          fill="none"/>
+                    <path
+                      d="M 20 130 Q 50 100 80 90 T 140 80 T 200 70 T 280 60"
+                      stroke="url(#gradient)"
+                      stroke-width="3"
+                      fill="none"
+                    />
                     <defs>
                       <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" style="stop-color:#6366f1"/>
-                        <stop offset="100%" style="stop-color:#8b5cf6"/>
+                        <stop offset="0%" style="stop-color: #6366f1" />
+                        <stop offset="100%" style="stop-color: #8b5cf6" />
                       </linearGradient>
                     </defs>
                   </svg>

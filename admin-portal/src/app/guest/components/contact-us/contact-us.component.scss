@@ -117,7 +117,8 @@
 
           .method-sub {
             font-size: 0.9rem;
-            color: var(--muted-text);
+            color: var(--text-color);
+            opacity: 0.7;
           }
         }
       }
@@ -155,7 +156,8 @@
           }
 
           .time {
-            color: var(--muted-text-dark);
+            color: var(--text-color);
+        opacity: 0.8;
             font-size: 0.95rem;
           }
         }
@@ -188,7 +190,8 @@
       }
 
       p {
-        color: var(--muted-text-dark);
+        color: var(--text-color);
+        opacity: 0.8;
         margin-bottom: 1rem;
         font-size: 0.95rem;
       }
@@ -259,7 +262,8 @@
           }
 
           i {
-            color: var(--muted-text);
+            color: var(--text-color);
+            opacity: 0.8;
             transition: all 0.3s ease;
           }
         }
@@ -275,7 +279,8 @@
 
           p {
             padding: 0 2rem 1.5rem;
-            color: var(--muted-text-dark);
+            color: var(--text-color);
+        opacity: 0.8;
             line-height: 1.6;
             margin: 0;
           }
@@ -417,7 +422,8 @@
 
 .section-subtitle {
   font-size: 1.1rem;
-  color: var(--muted-text-dark);
+  color: var(--text-color);
+  opacity: 0.8;
   line-height: 1.6;
   max-width: 700px;
   margin: 0 auto;

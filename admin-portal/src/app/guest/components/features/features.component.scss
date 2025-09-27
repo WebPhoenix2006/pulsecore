@@ -81,7 +81,8 @@
         }
 
         p {
-          color: var(--muted-text);
+          color: var(--text-color);
+          opacity: 0.8;
           font-size: 0.95rem;
           line-height: 1.5;
         }
@@ -156,7 +157,8 @@
       }
 
       .card-description {
-        color: var(--muted-text);
+        color: var(--text-color);
+        opacity: 0.8;
         line-height: 1.6;
         margin-bottom: 1.5rem;
       }
@@ -170,7 +172,8 @@
           align-items: center;
           gap: 0.5rem;
           margin-bottom: 0.75rem;
-          color: var(--muted-text-dark);
+          color: var(--text-color);
+          opacity: 0.9;
 
           i {
             color: var(--success-color);
@@ -361,7 +364,8 @@
             .metric-label {
               display: block;
               font-size: 0.8rem;
-              color: var(--muted-text);
+              color: var(--text-color);
+            opacity: 0.8;
               margin-top: 0.25rem;
             }
           }
@@ -396,7 +400,8 @@
 
 .section-subtitle {
   font-size: 1.1rem;
-  color: var(--muted-text);
+  color: var(--text-color);
+  opacity: 0.8;
   line-height: 1.6;
   max-width: 700px;
   margin: 0 auto;
