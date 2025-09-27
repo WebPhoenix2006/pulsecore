@@ -1,0 +1,136 @@
+.custom-scrollbar-container {
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px; // Space for custom scrollbar
+
+  // Webkit browsers (Chrome, Safari, Edge)
+  &::-webkit-scrollbar {
+    width: var(--scrollbar-width, 8px);
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--track-color, var(--surface-color));
+    border-radius: var(--border-radius, 8px);
+    margin: 4px 0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--thumb-color, var(--secondary-color));
+    border-radius: var(--border-radius, 8px);
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      background: var(--accent-color, #5b21b6);
+      background-clip: content-box;
+      transform: scaleX(1.2);
+    }
+
+    &:active {
+      background: var(--accent-color, #5b21b6);
+      background-clip: content-box;
+      transform: scaleX(1.4);
+    }
+  }
+
+  // Firefox scrollbar styling
+  scrollbar-width: thin;
+  scrollbar-color: var(--thumb-color, var(--secondary-color)) var(--track-color, var(--surface-color));
+
+  // Enhanced scrollbar for modern browsers
+  &:hover {
+    &::-webkit-scrollbar-thumb {
+      background: linear-gradient(
+        135deg,
+        var(--secondary-color) 0%,
+        var(--accent-color) 100%
+      );
+      background-clip: content-box;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    }
+  }
+
+  // Hide scrollbar option
+  &.hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .scroll-content {
+    position: relative;
+    width: 100%;
+    min-height: min-content;
+  }
+
+  // Smooth scrolling behavior
+  scroll-behavior: smooth;
+
+  // Custom scroll indicators (optional)
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 2px;
+    height: 0;
+    background: linear-gradient(
+      to bottom,
+      var(--secondary-color),
+      transparent
+    );
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &:hover::after {
+    opacity: 0.3;
+    height: 20px;
+  }
+}
+
+// Responsive scrollbar adjustments
+@media (max-width: 768px) {
+  .custom-scrollbar-container {
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    padding-right: 2px;
+  }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+  .custom-scrollbar-container {
+    &::-webkit-scrollbar-thumb {
+      border: 1px solid var(--text-color);
+    }
+
+    &::-webkit-scrollbar-track {
+      border: 1px solid var(--border-color);
+    }
+  }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .custom-scrollbar-container {
+    scroll-behavior: auto;
+
+    &::-webkit-scrollbar-thumb {
+      transition: none;
+    }
+
+    &::after {
+      transition: none;
+    }
+  }
+}

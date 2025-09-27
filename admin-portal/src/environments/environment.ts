@@ -26,5 +26,7 @@ export const Environments = {
   },
   inventory: {
     inventory: `${api_url}/inventory/`,
+    alerts: `${api_url}/inventory/alerts/`,
+    skus: `${api_url}/inventory/skus/`,
   },
 };

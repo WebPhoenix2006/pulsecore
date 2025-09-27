@@ -7,7 +7,10 @@
       "Bash(npm run build:*)",
       "Bash(npm run lint)",
       "Bash(npm run:*)",
-      "Bash(npx ng build:*)"
+      "Bash(npx ng build:*)",
+      "Read(//c/Users/webaf/Pictures/Screenshots/**)",
+      "Bash(npm start)",
+      "Bash(ng serve:*)"
     ],
     "deny": [],
     "ask": []

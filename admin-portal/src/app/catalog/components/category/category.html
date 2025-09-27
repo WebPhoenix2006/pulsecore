@@ -1,13 +1,103 @@
 <div class="categories-page">
-  <app-reusable-data-table
-    #dataTable
-    [config]="tableConfig"
+  <!-- Categories Table -->
+  <app-prime-data-table
     [data]="categories()"
+    [columns]="tableColumns"
     [loading]="loading()"
-    (onCreate)="onCreateCategory($event)"
-    (onEdit)="onEditCategory($event)"
-    (onDelete)="onDeleteCategory($event)"
-    (onView)="onViewCategory($event)"
-    (onCustomAction)="onCustomAction($event)">
-  </app-reusable-data-table>
+    [actions]="tableActions"
+    tableTitle="Categories"
+    tableDescription="Manage product categories for your catalog"
+    createLabel="Create Category"
+    emptyMessage="No categories found"
+    [showCreate]="true"
+    [showExport]="true"
+    [showRefresh]="true"
+    [selectionMode]="'multiple'"
+    [enableAdvancedFilters]="true"
+    [enableSearchHighlighting]="true"
+    (createClick)="onCreateCategory()"
+    (refreshClick)="onRefreshData()"
+    (exportClick)="onExportData()"
+    (selectionChange)="onSelectionChange($event)"
+  >
+  </app-prime-data-table>
+
+  <!-- Create/Edit Category Modal -->
+  <p-dialog
+    header="{{ isEditMode ? 'Edit Category' : 'Create Category' }}"
+    [(visible)]="modalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{ width: '450px' }"
+  >
+    <form [formGroup]="categoryForm" (ngSubmit)="onSubmitCategory()">
+      <app-form-field
+        label="Name"
+        type="text"
+        [required]="true"
+        [errorMessage]="'Name is required'"
+        [formControl]="nameControl"
+      ></app-form-field>
+
+      <app-form-field
+        label="Description"
+        type="textarea"
+        [formControl]="descriptionControl"
+      ></app-form-field>
+
+      <div class="actions">
+        <cus-btn
+          pButton
+          type="button"
+          class="p-button-text"
+          (click)="modalVisible = false"
+          buttonText="Cancel"
+        ></cus-btn>
+        <cus-btn
+          pButton
+          type="submit"
+          buttonText="{{ isEditMode ? 'Update' : 'Create' }}"
+          [disabled]="categoryForm.invalid"
+          [isOutlined]="true"
+        ></cus-btn>
+      </div>
+    </form>
+  </p-dialog>
+
+  <!-- View Category Details Modal -->
+  <p-dialog
+    header="Category Details"
+    [(visible)]="viewModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{ width: '500px' }"
+  >
+    <div class="details-content" *ngIf="selectedCategory">
+      <div class="detail-row">
+        <strong>Name:</strong>
+        <span>{{ selectedCategory.name }}</span>
+      </div>
+      <div class="detail-row">
+        <strong>Description:</strong>
+        <span>{{ selectedCategory.description || 'No description' }}</span>
+      </div>
+      <div class="detail-row">
+        <strong>Created:</strong>
+        <span>{{ selectedCategory.created_at | date:'medium' }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedCategory.updated_at">
+        <strong>Last Updated:</strong>
+        <span>{{ selectedCategory.updated_at | date:'medium' }}</span>
+      </div>
+    </div>
+    <div class="actions">
+      <cus-btn
+        pButton
+        type="button"
+        (click)="viewModalVisible = false"
+        buttonText="Close"
+        [isOutlined]="true"
+      ></cus-btn>
+    </div>
+  </p-dialog>
 </div>

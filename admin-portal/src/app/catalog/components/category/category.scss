@@ -7,3 +7,35 @@
     padding: 0.5rem;
   }
 }
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.details-content {
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    strong {
+      color: var(--text-color);
+      font-weight: 600;
+      min-width: 120px;
+    }
+
+    span {
+      color: var(--text-secondary);
+      flex: 1;
+      text-align: right;
+    }
+  }
+}

@@ -1,0 +1,110 @@
+.skus-page {
+  padding: 1rem;
+  min-height: 100vh;
+  background: var(--bg-color);
+
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.details-content {
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    strong {
+      color: var(--text-color);
+      font-weight: 600;
+      min-width: 120px;
+    }
+
+    span {
+      color: var(--text-secondary);
+      flex: 1;
+      text-align: right;
+    }
+  }
+}
+
+.current-stock-info {
+  background: var(--card-bg);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border-color);
+
+  p {
+    margin: 0.25rem 0;
+  }
+
+  .stock-level {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1.1em;
+  }
+}
+
+.batch-header {
+  margin-bottom: 1rem;
+
+  h4 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-color);
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-secondary);
+  }
+}
+
+.no-batches {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+
+  p {
+    margin: 0.5rem 0;
+  }
+}
+
+.batches-table {
+  .batch-status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    font-weight: 600;
+
+    &.active {
+      background: var(--success-light);
+      color: var(--success-color);
+    }
+
+    &.expired {
+      background: var(--danger-light);
+      color: var(--danger-color);
+    }
+
+    &.low {
+      background: var(--warning-light);
+      color: var(--warning-color);
+    }
+  }
+}

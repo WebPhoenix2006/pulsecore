@@ -47,10 +47,11 @@
   width: 100%;
   padding: 0.75rem 0.75rem;
   border: 1px solid var(--border-color);
+  color: var(--text-color);
   border-radius: 0.375rem;
   font-size: 0.875rem;
   transition: border-color 0.2s, box-shadow 0.2s;
-  background-color: var(--white) !important;
+  background-color: var(--card-bg) !important;
 
   &:focus {
     outline: none;
@@ -59,7 +60,7 @@
   }
 
   &:disabled {
-    background-color: var(--bg-color);
+    background-color: var(--surface-color);
     color: var(--muted-text-light);
     cursor: not-allowed;
   }
@@ -172,7 +173,7 @@
   border: 1px solid var(--border-color);
   border-radius: 0.375rem;
   padding: 0.75rem;
-  background-color: var(--white);
+  background-color: var(--card-bg);
   max-height: 12rem;
   overflow-y: auto;
 
@@ -182,7 +183,7 @@
   }
 
   &::-webkit-scrollbar-track {
-    background: var(--bg-color);
+    background: var(--surface-color);
     border-radius: 3px;
   }
 

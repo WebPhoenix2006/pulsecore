@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SvgIcons } from './svg-icons';
+import { Skus } from './skus';
 
-describe('SvgIcons', () => {
-  let component: SvgIcons;
-  let fixture: ComponentFixture<SvgIcons>;
+describe('Skus', () => {
+  let component: Skus;
+  let fixture: ComponentFixture<Skus>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [SvgIcons]
+      declarations: [Skus]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(SvgIcons);
+    fixture = TestBed.createComponent(Skus);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

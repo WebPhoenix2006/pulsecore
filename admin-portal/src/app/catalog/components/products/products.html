@@ -1,15 +1,159 @@
 <!-- catalog/pages/products/products.component.html -->
 <div class="products-page">
-  <app-reusable-data-table
-    #dataTable
-    [config]="tableConfig"
+  <app-prime-data-table
     [data]="products()"
+    [columns]="tableColumns"
     [loading]="loading()"
-    (onCreate)="onCreateProduct($event)"
-    (onEdit)="onEditProduct($event)"
-    (onDelete)="onDeleteProduct($event)"
-    (onView)="onViewProduct($event)"
-    (onCustomAction)="onCustomAction($event)"
+    [actions]="tableActions"
+    tableTitle="Products"
+    tableDescription="Manage all products (SKUs)"
+    createLabel="Add Product"
+    emptyMessage="No products found"
+    [showCreate]="true"
+    [showExport]="true"
+    [showRefresh]="true"
+    [selectionMode]="'multiple'"
+    [enableAdvancedFilters]="true"
+    [enableSearchHighlighting]="true"
+    (createClick)="onCreateProduct()"
+    (refreshClick)="onRefreshData()"
+    (exportClick)="onExportData()"
+    (selectionChange)="onSelectionChange($event)">
+  </app-prime-data-table>
+
+  <!-- Create/Edit Product Modal -->
+  <p-dialog
+    header="{{ isEditMode ? 'Edit Product' : 'Create Product' }}"
+    [(visible)]="modalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{ width: '600px' }"
   >
-  </app-reusable-data-table>
+    <form [formGroup]="productForm" (ngSubmit)="onSubmitProduct()">
+      <app-form-field
+        label="Product Name"
+        type="text"
+        [required]="true"
+        [errorMessage]="'Product name is required'"
+        [formControl]="nameControl"
+      ></app-form-field>
+
+      <app-form-field
+        label="Category"
+        type="select"
+        [formControl]="categoryControl"
+        [options]="categoryOptions"
+      ></app-form-field>
+
+      <app-form-field
+        label="Price"
+        type="number"
+        [required]="true"
+        [errorMessage]="'Price is required'"
+        [formControl]="priceControl"
+        placeholder="0.00"
+      ></app-form-field>
+
+      <app-form-field
+        label="Barcode"
+        type="text"
+        [formControl]="barcodeControl"
+        placeholder="Enter barcode"
+      ></app-form-field>
+
+      <app-form-field
+        label="Batch Number"
+        type="text"
+        [formControl]="batchNumberControl"
+        placeholder="Enter batch number"
+      ></app-form-field>
+
+      <app-form-field
+        label="Expiry Date"
+        type="date"
+        [formControl]="expiryDateControl"
+      ></app-form-field>
+
+      <app-form-field
+        label="Supplier ID"
+        type="text"
+        [formControl]="supplierIdControl"
+        placeholder="Enter supplier ID"
+      ></app-form-field>
+
+      <div class="actions">
+        <cus-btn
+          pButton
+          type="button"
+          class="p-button-text"
+          (click)="modalVisible = false"
+          buttonText="Cancel"
+        ></cus-btn>
+        <cus-btn
+          pButton
+          type="submit"
+          buttonText="{{ isEditMode ? 'Update' : 'Create' }}"
+          [disabled]="productForm.invalid"
+          [isOutlined]="true"
+        ></cus-btn>
+      </div>
+    </form>
+  </p-dialog>
+
+  <!-- View Product Details Modal -->
+  <p-dialog
+    header="Product Details"
+    [(visible)]="viewModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{ width: '600px' }"
+  >
+    <div class="details-content" *ngIf="selectedProduct">
+      <div class="detail-row">
+        <strong>Name:</strong>
+        <span>{{ selectedProduct.name }}</span>
+      </div>
+      <div class="detail-row">
+        <strong>Category:</strong>
+        <span>{{ selectedProduct.category_name || 'No category' }}</span>
+      </div>
+      <div class="detail-row">
+        <strong>Price:</strong>
+        <span>${{ selectedProduct.price }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedProduct.barcode">
+        <strong>Barcode:</strong>
+        <span>{{ selectedProduct.barcode }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedProduct.batch_number">
+        <strong>Batch Number:</strong>
+        <span>{{ selectedProduct.batch_number }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedProduct.expiry_date">
+        <strong>Expiry Date:</strong>
+        <span>{{ selectedProduct.expiry_date | date:'mediumDate' }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedProduct.supplier_id">
+        <strong>Supplier ID:</strong>
+        <span>{{ selectedProduct.supplier_id }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedProduct.created_at">
+        <strong>Created:</strong>
+        <span>{{ selectedProduct.created_at | date:'medium' }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedProduct.updated_at">
+        <strong>Last Updated:</strong>
+        <span>{{ selectedProduct.updated_at | date:'medium' }}</span>
+      </div>
+    </div>
+    <div class="actions">
+      <cus-btn
+        pButton
+        type="button"
+        (click)="viewModalVisible = false"
+        buttonText="Close"
+        [isOutlined]="true"
+      ></cus-btn>
+    </div>
+  </p-dialog>
 </div>

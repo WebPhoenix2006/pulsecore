@@ -1,0 +1,168 @@
+<section id="about" class="about">
+  <div class="about-container">
+
+    <!-- Hero Section -->
+    <div class="about-hero">
+      <div class="hero-content">
+        <div class="section-badge">About PulseCore</div>
+        <h2 class="section-title">Empowering Businesses Through Technology</h2>
+        <p class="section-subtitle">
+          Founded in 2020, PulseCore was born from the vision of simplifying business operations
+          through intelligent automation. We understand the challenges modern businesses face
+          and have built a platform that grows with you.
+        </p>
+      </div>
+      <div class="hero-visual">
+        <div class="mission-card">
+          <div class="card-header">
+            <i class="fas fa-bullseye"></i>
+            <h3>Our Mission</h3>
+          </div>
+          <p>To revolutionize how businesses manage their operations by providing intuitive,
+             powerful, and affordable technology solutions.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="about-stats">
+      <div class="stats-grid">
+        <div class="stat-card" *ngFor="let stat of stats">
+          <div class="stat-icon">
+            <i [class]="stat.icon"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value">{{ stat.value }}</span>
+            <span class="stat-label">{{ stat.label }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Story Section -->
+    <div class="about-story">
+      <div class="story-content">
+        <div class="story-text">
+          <h3>Our Story</h3>
+          <p>
+            PulseCore started when our founders, experienced in enterprise software and retail operations,
+            witnessed firsthand the struggles small and medium businesses faced with outdated,
+            complex inventory systems.
+          </p>
+          <p>
+            We set out to create a solution that combines enterprise-level capabilities with
+            the simplicity and affordability that growing businesses need. Today, we serve
+            over 10,000 businesses worldwide, from local retailers to multi-location enterprises.
+          </p>
+          <div class="story-highlights">
+            <div class="highlight">
+              <i class="fas fa-calendar"></i>
+              <span>Founded in 2020</span>
+            </div>
+            <div class="highlight">
+              <i class="fas fa-globe"></i>
+              <span>Serving 50+ countries</span>
+            </div>
+            <div class="highlight">
+              <i class="fas fa-award"></i>
+              <span>Industry recognition</span>
+            </div>
+          </div>
+        </div>
+        <div class="story-visual">
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <h4>2020</h4>
+                <p>PulseCore founded</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <h4>2021</h4>
+                <p>1,000 customers milestone</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <div class="timeline-content">
+                <h4>2022</h4>
+                <p>International expansion</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker active"></div>
+              <div class="timeline-content">
+                <h4>2024</h4>
+                <p>10K+ customers worldwide</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Values Section -->
+    <div class="about-values">
+      <h3>Our Values</h3>
+      <div class="values-grid">
+        <div class="value-card" *ngFor="let value of values">
+          <div class="value-icon">
+            <i [class]="value.icon"></i>
+          </div>
+          <h4>{{ value.title }}</h4>
+          <p>{{ value.description }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Section -->
+    <div class="about-team">
+      <h3>Meet Our Team</h3>
+      <p class="team-intro">
+        Our diverse team brings together expertise from technology, retail, and business operations
+        to create solutions that truly understand your needs.
+      </p>
+      <div class="team-grid">
+        <div class="team-member" *ngFor="let member of team">
+          <div class="member-image">
+            <img [src]="member.image" [alt]="member.name" loading="lazy">
+            <div class="member-overlay">
+              <div class="social-links">
+                <a *ngFor="let social of member.social | keyvalue" [href]="social.value" target="_blank">
+                  <i [class]="'fab fa-' + social.key"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="member-info">
+            <h4>{{ member.name }}</h4>
+            <span class="member-role">{{ member.role }}</span>
+            <p class="member-bio">{{ member.bio }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="about-cta">
+      <div class="cta-content">
+        <h3>Ready to Transform Your Business?</h3>
+        <p>Join thousands of businesses that trust PulseCore to streamline their operations.</p>
+        <div class="cta-buttons">
+          <button class="btn-primary large" routerLink="/auth/signup">
+            <span>Start Free Trial</span>
+            <i class="fas fa-arrow-right"></i>
+          </button>
+          <button class="btn-secondary large" (click)="scrollToContact()">
+            <span>Contact Us</span>
+            <i class="fas fa-envelope"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

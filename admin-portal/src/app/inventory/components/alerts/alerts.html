@@ -1,0 +1,140 @@
+<!-- inventory/components/alerts/alerts.component.html -->
+<div class="alerts-page">
+  <app-prime-data-table
+    [data]="alerts()"
+    [columns]="tableColumns"
+    [loading]="loading()"
+    [actions]="tableActions"
+    tableTitle="Inventory Alerts"
+    tableDescription="Manage inventory alerts and notifications"
+    createLabel="Create Alert"
+    emptyMessage="No alerts found"
+    [showCreate]="true"
+    [showExport]="true"
+    [showRefresh]="true"
+    [selectionMode]="'multiple'"
+    [enableAdvancedFilters]="true"
+    [enableSearchHighlighting]="true"
+    (createClick)="onCreateAlert()"
+    (refreshClick)="onRefreshData()"
+    (exportClick)="onExportData()"
+    (selectionChange)="onSelectionChange($event)">
+  </app-prime-data-table>
+
+  <!-- Create Alert Modal -->
+  <p-dialog
+    header="Create Alert"
+    [(visible)]="modalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{ width: '500px' }"
+  >
+    <form [formGroup]="alertForm" (ngSubmit)="onSubmitAlert()">
+      <app-form-field
+        label="SKU"
+        type="select"
+        [required]="true"
+        [errorMessage]="'SKU is required'"
+        [formControl]="skuControl"
+        [options]="skuOptions"
+      ></app-form-field>
+
+      <app-form-field
+        label="Alert Type"
+        type="select"
+        [required]="true"
+        [errorMessage]="'Alert type is required'"
+        [formControl]="typeControl"
+        [options]="alertTypeOptions"
+      ></app-form-field>
+
+      <app-form-field
+        label="Threshold"
+        type="number"
+        [formControl]="thresholdControl"
+        placeholder="Stock threshold level"
+        description="Only for low stock alerts"
+      ></app-form-field>
+
+      <div class="actions">
+        <cus-btn
+          pButton
+          type="button"
+          class="p-button-text"
+          (click)="modalVisible = false"
+          buttonText="Cancel"
+        ></cus-btn>
+        <cus-btn
+          pButton
+          type="submit"
+          buttonText="Create"
+          [disabled]="alertForm.invalid"
+          [isOutlined]="true"
+        ></cus-btn>
+      </div>
+    </form>
+  </p-dialog>
+
+  <!-- View Alert Details Modal -->
+  <p-dialog
+    header="Alert Details"
+    [(visible)]="viewModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{ width: '600px' }"
+  >
+    <div class="details-content" *ngIf="selectedAlert">
+      <div class="detail-row">
+        <strong>Alert Type:</strong>
+        <span class="alert-type">{{ selectedAlert.type }}</span>
+      </div>
+      <div class="detail-row">
+        <strong>Product (SKU):</strong>
+        <span>{{ selectedAlert.sku_name }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedAlert.current_stock !== undefined">
+        <strong>Current Stock:</strong>
+        <span>{{ selectedAlert.current_stock }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedAlert.threshold">
+        <strong>Threshold:</strong>
+        <span>{{ selectedAlert.threshold }}</span>
+      </div>
+      <div class="detail-row">
+        <strong>Status:</strong>
+        <span [class]="'alert-status ' + (selectedAlert.acknowledged ? 'acknowledged' : 'pending')">
+          {{ selectedAlert.acknowledged ? 'Acknowledged' : 'Pending' }}
+        </span>
+      </div>
+      <div class="detail-row" *ngIf="selectedAlert.acknowledged_by">
+        <strong>Acknowledged By:</strong>
+        <span>{{ selectedAlert.acknowledged_by }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedAlert.acknowledged_at">
+        <strong>Acknowledged At:</strong>
+        <span>{{ selectedAlert.acknowledged_at | date:'medium' }}</span>
+      </div>
+      <div class="detail-row">
+        <strong>Created:</strong>
+        <span>{{ selectedAlert.created_at | date:'medium' }}</span>
+      </div>
+    </div>
+    <div class="actions">
+      <cus-btn
+        pButton
+        type="button"
+        (click)="viewModalVisible = false"
+        buttonText="Close"
+        [isOutlined]="true"
+      ></cus-btn>
+      <cus-btn
+        *ngIf="selectedAlert && !selectedAlert.acknowledged"
+        pButton
+        type="button"
+        (click)="acknowledgeAlert(selectedAlert.alert_id)"
+        buttonText="Acknowledge"
+        [isOutlined]="true"
+      ></cus-btn>
+    </div>
+  </p-dialog>
+</div>

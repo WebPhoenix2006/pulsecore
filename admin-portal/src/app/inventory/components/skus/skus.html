@@ -1,0 +1,308 @@
+<!-- inventory/components/skus/skus.component.html -->
+<div class="skus-page">
+  <app-prime-data-table
+    [data]="skus()"
+    [columns]="tableColumns"
+    [loading]="loading()"
+    [actions]="tableActions"
+    tableTitle="SKUs"
+    tableDescription="Manage Stock Keeping Units (SKUs)"
+    createLabel="Create SKU"
+    emptyMessage="No SKUs found"
+    [showCreate]="true"
+    [showExport]="true"
+    [showRefresh]="true"
+    [selectionMode]="'multiple'"
+    [enableAdvancedFilters]="true"
+    [enableSearchHighlighting]="true"
+    (createClick)="onCreateSku()"
+    (refreshClick)="onRefreshData()"
+    (exportClick)="onExportData()"
+    (selectionChange)="onSelectionChange($event)">
+  </app-prime-data-table>
+
+  <!-- Create/Edit SKU Modal -->
+  <p-dialog
+    header="{{ isEditMode ? 'Edit SKU' : 'Create SKU' }}"
+    [(visible)]="modalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{ width: '600px' }"
+  >
+    <form [formGroup]="skuForm" (ngSubmit)="onSubmitSku()">
+      <app-form-field
+        label="SKU Name"
+        type="text"
+        [required]="true"
+        [errorMessage]="'SKU name is required'"
+        [formControl]="nameControl"
+      ></app-form-field>
+
+      <app-form-field
+        label="SKU Code"
+        type="text"
+        [formControl]="skuCodeControl"
+        placeholder="Auto-generated if empty"
+      ></app-form-field>
+
+      <app-form-field
+        label="Category"
+        type="select"
+        [required]="true"
+        [errorMessage]="'Category is required'"
+        [formControl]="categoryControl"
+        [options]="categoryOptions"
+      ></app-form-field>
+
+      <app-form-field
+        label="Price"
+        type="number"
+        [required]="true"
+        [errorMessage]="'Price is required'"
+        [formControl]="priceControl"
+        placeholder="0.00"
+      ></app-form-field>
+
+      <app-form-field
+        label="Stock Level"
+        type="number"
+        [required]="true"
+        [errorMessage]="'Stock level is required'"
+        [formControl]="stockLevelControl"
+        placeholder="0"
+      ></app-form-field>
+
+      <app-form-field
+        label="Reorder Threshold"
+        type="number"
+        [formControl]="reorderThresholdControl"
+        placeholder="Minimum stock level"
+      ></app-form-field>
+
+      <app-form-field
+        label="Barcode"
+        type="text"
+        [formControl]="barcodeControl"
+        placeholder="Enter barcode"
+      ></app-form-field>
+
+      <app-form-field
+        label="Supplier ID"
+        type="text"
+        [formControl]="supplierIdControl"
+        placeholder="Enter supplier ID"
+      ></app-form-field>
+
+      <app-form-field
+        label="Track Batches"
+        type="checkbox"
+        [formControl]="trackBatchesControl"
+      ></app-form-field>
+
+      <div class="actions">
+        <cus-btn
+          pButton
+          type="button"
+          class="p-button-text"
+          (click)="modalVisible = false"
+          buttonText="Cancel"
+        ></cus-btn>
+        <cus-btn
+          pButton
+          type="submit"
+          buttonText="{{ isEditMode ? 'Update' : 'Create' }}"
+          [disabled]="skuForm.invalid"
+          [isOutlined]="true"
+        ></cus-btn>
+      </div>
+    </form>
+  </p-dialog>
+
+  <!-- View SKU Details Modal -->
+  <p-dialog
+    header="SKU Details"
+    [(visible)]="viewModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{ width: '650px' }"
+  >
+    <div class="details-content" *ngIf="selectedSku">
+      <div class="detail-row">
+        <strong>Name:</strong>
+        <span>{{ selectedSku.name }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedSku.sku_code">
+        <strong>SKU Code:</strong>
+        <span>{{ selectedSku.sku_code }}</span>
+      </div>
+      <div class="detail-row">
+        <strong>Category:</strong>
+        <span>{{ selectedSku.category_name || 'No category' }}</span>
+      </div>
+      <div class="detail-row">
+        <strong>Price:</strong>
+        <span>${{ selectedSku.price }}</span>
+      </div>
+      <div class="detail-row">
+        <strong>Stock Level:</strong>
+        <span>{{ selectedSku.stock_level }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedSku.reorder_threshold">
+        <strong>Reorder Threshold:</strong>
+        <span>{{ selectedSku.reorder_threshold }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedSku.barcode">
+        <strong>Barcode:</strong>
+        <span>{{ selectedSku.barcode }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedSku.supplier_id">
+        <strong>Supplier ID:</strong>
+        <span>{{ selectedSku.supplier_id }}</span>
+      </div>
+      <div class="detail-row">
+        <strong>Track Batches:</strong>
+        <span>{{ selectedSku.track_batches ? 'Yes' : 'No' }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedSku.created_at">
+        <strong>Created:</strong>
+        <span>{{ selectedSku.created_at | date:'medium' }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedSku.updated_at">
+        <strong>Last Updated:</strong>
+        <span>{{ selectedSku.updated_at | date:'medium' }}</span>
+      </div>
+    </div>
+    <div class="actions">
+      <cus-btn
+        pButton
+        type="button"
+        (click)="viewModalVisible = false"
+        buttonText="Close"
+        [isOutlined]="true"
+      ></cus-btn>
+    </div>
+  </p-dialog>
+
+  <!-- Adjust Stock Modal -->
+  <p-dialog
+    header="Adjust Stock"
+    [(visible)]="adjustStockModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{ width: '450px' }"
+  >
+    <form [formGroup]="adjustStockForm" (ngSubmit)="onSubmitStockAdjustment()" *ngIf="selectedSku">
+      <div class="current-stock-info">
+        <p><strong>{{ selectedSku.name }}</strong></p>
+        <p>Current Stock: <span class="stock-level">{{ selectedSku.stock_level }}</span></p>
+      </div>
+
+      <app-form-field
+        label="Adjustment Type"
+        type="select"
+        [required]="true"
+        [errorMessage]="'Adjustment type is required'"
+        [formControl]="adjustmentTypeControl"
+        [options]="adjustmentTypeOptions"
+      ></app-form-field>
+
+      <app-form-field
+        label="Quantity"
+        type="number"
+        [required]="true"
+        [errorMessage]="'Quantity is required'"
+        [formControl]="quantityControl"
+        placeholder="Enter quantity"
+      ></app-form-field>
+
+      <app-form-field
+        label="Reason"
+        type="textarea"
+        [required]="true"
+        [errorMessage]="'Reason is required'"
+        [formControl]="reasonControl"
+        placeholder="Enter reason for adjustment"
+      ></app-form-field>
+
+      <div class="actions">
+        <cus-btn
+          pButton
+          type="button"
+          class="p-button-text"
+          (click)="adjustStockModalVisible = false"
+          buttonText="Cancel"
+        ></cus-btn>
+        <cus-btn
+          pButton
+          type="submit"
+          buttonText="Adjust Stock"
+          [disabled]="adjustStockForm.invalid"
+          [isOutlined]="true"
+        ></cus-btn>
+      </div>
+    </form>
+  </p-dialog>
+
+  <!-- View Batches Modal -->
+  <p-dialog
+    header="SKU Batches"
+    [(visible)]="viewBatchesModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{ width: '800px' }"
+  >
+    <div *ngIf="selectedSku">
+      <div class="batch-header">
+        <h4>{{ selectedSku.name }} - Batches</h4>
+        <p>Track batches enabled: {{ selectedSku.track_batches ? 'Yes' : 'No' }}</p>
+      </div>
+
+      <div *ngIf="!selectedSku.track_batches" class="no-batches">
+        <p>Batch tracking is not enabled for this SKU.</p>
+        <p>Enable batch tracking in SKU settings to view batch information.</p>
+      </div>
+
+      <div *ngIf="selectedSku.track_batches" class="batches-table">
+        <p-table [value]="batches" [loading]="batchesLoading">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Batch Number</th>
+              <th>Quantity</th>
+              <th>Manufacturing Date</th>
+              <th>Expiry Date</th>
+              <th>Status</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-batch>
+            <tr>
+              <td>{{ batch.batch_number || 'N/A' }}</td>
+              <td>{{ batch.quantity || 0 }}</td>
+              <td>{{ batch.manufacturing_date ? (batch.manufacturing_date | date:'shortDate') : 'N/A' }}</td>
+              <td>{{ batch.expiry_date ? (batch.expiry_date | date:'shortDate') : 'N/A' }}</td>
+              <td>
+                <span [class]="'batch-status ' + (batch.status || 'active')">
+                  {{ batch.status || 'Active' }}
+                </span>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="5" class="text-center">No batches found for this SKU</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+
+    <div class="actions">
+      <cus-btn
+        pButton
+        type="button"
+        (click)="viewBatchesModalVisible = false"
+        buttonText="Close"
+        [isOutlined]="true"
+      ></cus-btn>
+    </div>
+  </p-dialog>
+</div>

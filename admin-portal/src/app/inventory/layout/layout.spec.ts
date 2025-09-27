@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ReusableDataTable } from './reusable-data-table';
+import { Layout } from './layout';
 
-describe('ReusableDataTable', () => {
-  let component: ReusableDataTable;
-  let fixture: ComponentFixture<ReusableDataTable>;
+describe('Layout', () => {
+  let component: Layout;
+  let fixture: ComponentFixture<Layout>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ReusableDataTable]
+      declarations: [Layout]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ReusableDataTable);
+    fixture = TestBed.createComponent(Layout);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

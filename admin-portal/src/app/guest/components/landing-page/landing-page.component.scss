@@ -1,0 +1,113 @@
+.landing-page {
+  min-height: 100vh;
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Montserrat', sans-serif !important;
+
+  * {
+    font-family: 'Montserrat', sans-serif !important;
+  }
+
+  .main-content {
+    padding-top: 70px; // Account for fixed navbar height
+
+    // Smooth scrolling for sections
+    section {
+      scroll-margin-top: 80px; // Offset for fixed navbar
+    }
+  }
+}
+
+// Global navbar scroll effect
+.navbar.scrolled {
+  background: rgba(255, 255, 255, 0.98) !important;
+  box-shadow: var(--shadow-md) !important;
+  backdrop-filter: blur(20px) !important;
+
+  @media (max-width: 768px) {
+    .navbar-menu {
+      background: var(--white) !important;
+    }
+  }
+}
+
+[data-theme='dark'] {
+  .navbar.scrolled {
+    background: rgba(30, 41, 59, 0.98) !important;
+
+    @media (max-width: 768px) {
+      .navbar-menu {
+        background: var(--card-bg) !important;
+      }
+    }
+  }
+}
+
+// Smooth animations for page elements
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Apply animations to sections when they come into view
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s ease;
+
+  &.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive design utilities
+@media (max-width: 1200px) {
+  .landing-page {
+    .main-content {
+      section {
+        scroll-margin-top: 70px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-page {
+    .main-content {
+      padding-top: 70px;
+
+      section {
+        scroll-margin-top: 60px;
+      }
+    }
+  }
+}
