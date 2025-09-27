@@ -1,0 +1,119 @@
+<footer class="footer">
+  <div class="footer-container">
+
+    <div class="footer-content">
+      <!-- Brand Section -->
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="logo-icon">⚡</span>
+          <span class="logo-text">PulseCore</span>
+        </div>
+        <p class="footer-description">
+          Streamlining business operations through intelligent automation and powerful inventory management solutions.
+        </p>
+        <div class="footer-social">
+          <a
+            *ngFor="let social of socialLinks"
+            [href]="social.url"
+            [title]="social.name"
+            target="_blank"
+            rel="noopener noreferrer">
+            <i [class]="social.icon"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Links Sections -->
+      <div class="footer-links">
+        <div class="footer-section">
+          <h3>Product</h3>
+          <ul>
+            <li *ngFor="let link of footerLinks.product">
+              <a [href]="link.link" (click)="scrollToSection(link.link)">{{ link.name }}</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h3>Company</h3>
+          <ul>
+            <li *ngFor="let link of footerLinks.company">
+              <a [href]="link.link" (click)="scrollToSection(link.link)">{{ link.name }}</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h3>Support</h3>
+          <ul>
+            <li *ngFor="let link of footerLinks.support">
+              <a [href]="link.link" (click)="scrollToSection(link.link)">{{ link.name }}</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="footer-section">
+          <h3>Legal</h3>
+          <ul>
+            <li *ngFor="let link of footerLinks.legal">
+              <a [href]="link.link">{{ link.name }}</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Newsletter Section -->
+      <div class="footer-newsletter">
+        <h3>Stay Updated</h3>
+        <p>Get the latest updates, tips, and insights delivered to your inbox.</p>
+        <form class="newsletter-form">
+          <div class="newsletter-input">
+            <input
+              type="email"
+              placeholder="Enter your email address"
+              required>
+            <button type="submit">
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </form>
+        <div class="newsletter-trust">
+          <i class="fas fa-shield-alt"></i>
+          <span>We respect your privacy. Unsubscribe anytime.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="footer-bottom">
+      <div class="footer-bottom-content">
+        <div class="footer-copyright">
+          <p>&copy; {{ currentYear }} PulseCore. All rights reserved.</p>
+        </div>
+
+        <div class="footer-certifications">
+          <div class="certification">
+            <i class="fas fa-shield-check"></i>
+            <span>SOC 2 Certified</span>
+          </div>
+          <div class="certification">
+            <i class="fas fa-lock"></i>
+            <span>ISO 27001</span>
+          </div>
+          <div class="certification">
+            <i class="fas fa-certificate"></i>
+            <span>GDPR Compliant</span>
+          </div>
+        </div>
+
+        <div class="footer-status">
+          <div class="status-indicator">
+            <span class="status-dot"></span>
+            <span>All systems operational</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</footer>

@@ -10,7 +10,9 @@
       "Bash(taskkill:*)",
       "Bash(npx sass:*)",
       "Bash(npx ng build:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(curl:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

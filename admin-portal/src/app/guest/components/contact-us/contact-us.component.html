@@ -1,0 +1,176 @@
+<section id="contact" class="contact">
+  <div class="contact-container">
+
+    <div class="contact-header">
+      <div class="section-badge">Contact Us</div>
+      <h2 class="section-title">Get in Touch</h2>
+      <p class="section-subtitle">
+        Have questions about PulseCore? Our team is here to help you find the perfect solution for your business.
+        Reach out and we'll get back to you within 24 hours.
+      </p>
+    </div>
+
+    <div class="contact-content">
+
+      <!-- Contact Form -->
+      <div class="contact-form-section">
+        <div class="form-container">
+          <h3>Send us a Message</h3>
+
+          <div *ngIf="submitSuccess" class="success-message">
+            <i class="fas fa-check-circle"></i>
+            <span>Thank you! Your message has been sent successfully. We'll get back to you soon.</span>
+          </div>
+
+          <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form">
+            <div class="form-row">
+              <div class="form-field">
+                <label for="name">Full Name *</label>
+                <input
+                  type="text"
+                  id="name"
+                  formControlName="name"
+                  placeholder="Enter your full name"
+                  [class.error]="getFieldError('name')">
+                <span class="error-message" *ngIf="getFieldError('name')">{{ getFieldError('name') }}</span>
+              </div>
+
+              <div class="form-field">
+                <label for="email">Email Address *</label>
+                <input
+                  type="email"
+                  id="email"
+                  formControlName="email"
+                  placeholder="Enter your email address"
+                  [class.error]="getFieldError('email')">
+                <span class="error-message" *ngIf="getFieldError('email')">{{ getFieldError('email') }}</span>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label for="company">Company</label>
+                <input
+                  type="text"
+                  id="company"
+                  formControlName="company"
+                  placeholder="Your company name">
+              </div>
+
+              <div class="form-field">
+                <label for="phone">Phone Number</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  formControlName="phone"
+                  placeholder="Your phone number">
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="subject">Subject *</label>
+              <select id="subject" formControlName="subject" [class.error]="getFieldError('subject')">
+                <option value="">Select a subject</option>
+                <option value="general">General Inquiry</option>
+                <option value="sales">Sales Question</option>
+                <option value="support">Technical Support</option>
+                <option value="partnership">Partnership</option>
+                <option value="demo">Request Demo</option>
+              </select>
+              <span class="error-message" *ngIf="getFieldError('subject')">{{ getFieldError('subject') }}</span>
+            </div>
+
+            <div class="form-field">
+              <label for="message">Message *</label>
+              <textarea
+                id="message"
+                formControlName="message"
+                rows="6"
+                placeholder="Tell us about your business needs or questions..."
+                [class.error]="getFieldError('message')"></textarea>
+              <span class="error-message" *ngIf="getFieldError('message')">{{ getFieldError('message') }}</span>
+            </div>
+
+            <button
+              type="submit"
+              class="submit-btn"
+              [disabled]="isSubmitting"
+              [class.loading]="isSubmitting">
+              <span *ngIf="!isSubmitting">
+                <i class="fas fa-paper-plane"></i>
+                Send Message
+              </span>
+              <span *ngIf="isSubmitting">
+                <i class="fas fa-spinner fa-spin"></i>
+                Sending...
+              </span>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Contact Information -->
+      <div class="contact-info-section">
+        <h3>Other Ways to Reach Us</h3>
+
+        <div class="contact-methods">
+          <div class="contact-method" *ngFor="let info of contactInfo">
+            <div class="method-icon">
+              <i [class]="info.icon"></i>
+            </div>
+            <div class="method-content">
+              <h4>{{ info.title }}</h4>
+              <p class="method-main">{{ info.content }}</p>
+              <p class="method-sub">{{ info.subtitle }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="business-hours">
+          <h4>Business Hours</h4>
+          <div class="hours-list">
+            <div class="hours-item">
+              <span class="day">Monday - Friday</span>
+              <span class="time">9:00 AM - 6:00 PM EST</span>
+            </div>
+            <div class="hours-item">
+              <span class="day">Saturday</span>
+              <span class="time">10:00 AM - 4:00 PM EST</span>
+            </div>
+            <div class="hours-item">
+              <span class="day">Sunday</span>
+              <span class="time">Closed</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="emergency-contact">
+          <div class="emergency-header">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h4>Emergency Support</h4>
+          </div>
+          <p>For critical issues outside business hours, Enterprise customers can reach our emergency support line.</p>
+          <a href="tel:+1555987654" class="emergency-phone">+1 (555) 987-6543</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="contact-faq">
+      <h3>Frequently Asked Questions</h3>
+      <div class="faq-list">
+        <div class="faq-item" *ngFor="let faq of faqs; let i = index">
+          <div class="faq-question" (click)="toggleFaq(i)" [class.active]="faq.isOpen">
+            <h4>{{ faq.question }}</h4>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer" [class.open]="faq.isOpen">
+            <p>{{ faq.answer }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>

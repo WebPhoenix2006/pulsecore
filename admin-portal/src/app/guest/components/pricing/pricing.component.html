@@ -1,0 +1,97 @@
+<section id="pricing" class="pricing">
+  <div class="pricing-container">
+    <div class="pricing-header">
+      <div class="section-badge">Pricing</div>
+      <h2 class="section-title">Simple, Transparent Pricing</h2>
+      <p class="section-subtitle">
+        Choose the perfect plan for your business. All plans include core features with no hidden fees.
+        Upgrade or downgrade anytime.
+      </p>
+
+      <div class="billing-toggle">
+        <span [class.active]="billingCycle === 'monthly'" (click)="setBillingCycle('monthly')">Monthly</span>
+        <div class="toggle-switch" [class.yearly]="billingCycle === 'yearly'" (click)="setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')">
+          <div class="toggle-slider"></div>
+        </div>
+        <span [class.active]="billingCycle === 'yearly'" (click)="setBillingCycle('yearly')">
+          Yearly
+          <span class="save-badge">Save up to 20%</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="pricing-grid">
+      <div
+        *ngFor="let plan of plans; trackBy: trackByPlan"
+        class="pricing-card"
+        [class.popular]="plan.popular">
+
+        <div class="popular-badge" *ngIf="plan.popular">
+          <i class="fas fa-star"></i>
+          <span>Most Popular</span>
+        </div>
+
+        <div class="plan-header">
+          <h3 class="plan-name">{{ plan.name }}</h3>
+          <p class="plan-description">{{ plan.description }}</p>
+
+          <div class="plan-price">
+            <span class="currency">$</span>
+            <span class="amount">{{ getPrice(plan) }}</span>
+            <span class="period">/ {{ billingCycle === 'monthly' ? 'month' : 'year' }}</span>
+          </div>
+
+          <div class="savings" *ngIf="billingCycle === 'yearly'">
+            Save {{ getSavings(plan) }}% annually
+          </div>
+        </div>
+
+        <ul class="plan-features">
+          <li *ngFor="let feature of plan.features; trackBy: trackByFeature">
+            <i class="fas fa-check"></i>
+            <span>{{ feature }}</span>
+          </li>
+        </ul>
+
+        <button class="plan-button" [class.primary]="plan.popular" routerLink="/auth/signup">
+          <span *ngIf="!plan.popular">Get Started</span>
+          <span *ngIf="plan.popular">Start Free Trial</span>
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="pricing-faq">
+      <h3>Frequently Asked Questions</h3>
+      <div class="faq-grid">
+        <div class="faq-item">
+          <h4>Can I change plans anytime?</h4>
+          <p>Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately and billing is prorated.</p>
+        </div>
+        <div class="faq-item">
+          <h4>Is there a free trial?</h4>
+          <p>Yes, all plans come with a 14-day free trial. No credit card required to start.</p>
+        </div>
+        <div class="faq-item">
+          <h4>What payment methods do you accept?</h4>
+          <p>We accept all major credit cards, PayPal, and bank transfers for annual plans.</p>
+        </div>
+        <div class="faq-item">
+          <h4>Do you offer custom enterprise solutions?</h4>
+          <p>Yes, we offer custom solutions for large enterprises. Contact our sales team for a personalized quote.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="pricing-contact">
+      <div class="contact-content">
+        <h3>Need a Custom Solution?</h3>
+        <p>Contact our sales team for enterprise pricing and custom features tailored to your business needs.</p>
+        <button class="btn-secondary" (click)="scrollToContact()">
+          <span>Contact Sales</span>
+          <i class="fas fa-phone"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>

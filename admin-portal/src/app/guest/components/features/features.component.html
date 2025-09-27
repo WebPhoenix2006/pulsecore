@@ -1,0 +1,102 @@
+<section id="features" class="features">
+  <div class="features-container">
+    <div class="features-header">
+      <div class="section-badge">Features</div>
+      <h2 class="section-title">Everything You Need to Run Your Business</h2>
+      <p class="section-subtitle">
+        PulseCore provides a complete suite of tools designed to streamline every aspect of your business operations.
+        From inventory management to order fulfillment, we've got you covered.
+      </p>
+    </div>
+
+    <div class="features-showcase">
+      <div class="features-tabs">
+        <div
+          *ngFor="let feature of features; trackBy: trackByFn"
+          class="feature-tab"
+          [class.active]="selectedFeature === feature"
+          (click)="selectFeature(feature)">
+          <div class="tab-icon">
+            <i [class]="feature.icon"></i>
+          </div>
+          <div class="tab-content">
+            <h3>{{ feature.title }}</h3>
+            <p>{{ feature.description }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-detail">
+        <div class="feature-visual">
+          <div class="feature-demo">
+            <div class="demo-header">
+              <div class="demo-title">
+                <i [class]="selectedFeature.icon"></i>
+                <span>{{ selectedFeature.title }}</span>
+              </div>
+              <div class="demo-status">
+                <span class="status-dot active"></span>
+                <span>Live Demo</span>
+              </div>
+            </div>
+            <div class="demo-content">
+              <div class="capability-list">
+                <div
+                  *ngFor="let capability of selectedFeature.capabilities; trackBy: trackByCapability"
+                  class="capability-item">
+                  <i class="fas fa-check-circle"></i>
+                  <span>{{ capability }}</span>
+                </div>
+              </div>
+              <div class="demo-metrics">
+                <div class="metric">
+                  <span class="metric-value">99.9%</span>
+                  <span class="metric-label">Accuracy</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-value">2.3s</span>
+                  <span class="metric-label">Response Time</span>
+                </div>
+                <div class="metric">
+                  <span class="metric-value">24/7</span>
+                  <span class="metric-label">Availability</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card" *ngFor="let feature of features; trackBy: trackByFn">
+        <div class="card-icon">
+          <i [class]="feature.icon"></i>
+        </div>
+        <h3 class="card-title">{{ feature.title }}</h3>
+        <p class="card-description">{{ feature.description }}</p>
+        <ul class="card-features">
+          <li *ngFor="let capability of feature.capabilities.slice(0, 3); trackBy: trackByCapability">
+            <i class="fas fa-check"></i>
+            <span>{{ capability }}</span>
+          </li>
+        </ul>
+        <button class="card-button">
+          <span>Learn More</span>
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="features-cta">
+      <div class="cta-content">
+        <h3>Ready to Transform Your Business?</h3>
+        <p>Join thousands of businesses already using PulseCore to streamline their operations.</p>
+        <button class="btn-primary large" routerLink="/auth/signup">
+          <span>Start Your Free Trial</span>
+          <i class="fas fa-rocket"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
