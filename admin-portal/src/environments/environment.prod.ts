@@ -1,4 +1,4 @@
-export const api_url: string = 'http://127.0.0.1:8000/api';
+export const api_url: string = 'https://pulsecore-qk5b.onrender.com/api';
 
 export const Environments = {
   auth: {
