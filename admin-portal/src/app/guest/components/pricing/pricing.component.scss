@@ -91,8 +91,19 @@
     gap: 2rem;
     margin-bottom: 6rem;
 
+    @media (max-width: 1024px) {
+      gap: 1.5rem;
+    }
+
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+
+    @media (max-width: 480px) {
+      gap: 1rem;
+      margin-bottom: 3rem;
     }
   }
 
@@ -279,6 +290,15 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 2rem;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      @media (max-width: 480px) {
+        gap: 1rem;
+      }
 
       .faq-item {
         background: var(--card-bg);

@@ -20,10 +20,18 @@
     gap: 4rem;
     align-items: center;
 
+    @media (max-width: 1024px) {
+      gap: 3rem;
+    }
+
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
       gap: 2rem;
       text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      gap: 1.5rem;
     }
   }
 
@@ -68,6 +76,13 @@
 
     @media (max-width: 768px) {
       justify-content: center;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .feature-tag {
@@ -81,8 +96,20 @@
       font-size: 0.9rem;
       font-weight: 500;
 
+      @media (max-width: 480px) {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+        width: 100%;
+        max-width: 250px;
+        justify-content: center;
+      }
+
       i {
         font-size: 1rem;
+
+        @media (max-width: 480px) {
+          font-size: 0.9rem;
+        }
       }
     }
   }
@@ -150,15 +177,28 @@
 
     @media (max-width: 768px) {
       justify-content: center;
+      gap: 1.5rem;
     }
 
     @media (max-width: 480px) {
-      flex-direction: column;
+      flex-direction: row;
+      flex-wrap: wrap;
       gap: 1rem;
+      justify-content: space-around;
+    }
+
+    @media (max-width: 360px) {
+      flex-direction: column;
+      gap: 0.75rem;
     }
 
     .stat {
       text-align: center;
+
+      @media (max-width: 480px) {
+        flex: 1;
+        min-width: 80px;
+      }
 
       &-number {
         display: block;
@@ -166,6 +206,14 @@
         font-weight: 700;
         color: var(--secondary-color);
         line-height: 1;
+
+        @media (max-width: 768px) {
+          font-size: 1.75rem;
+        }
+
+        @media (max-width: 480px) {
+          font-size: 1.5rem;
+        }
       }
 
       &-label {
@@ -174,6 +222,10 @@
         color: var(--text-color);
         opacity: 0.7;
         margin-top: 0.25rem;
+
+        @media (max-width: 480px) {
+          font-size: 0.8rem;
+        }
       }
     }
   }
@@ -240,8 +292,18 @@
   transform: perspective(1000px) rotateY(-5deg) rotateX(5deg);
   transition: transform 0.3s ease;
 
+  @media (max-width: 768px) {
+    transform: none;
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
   &:hover {
     transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
+
+    @media (max-width: 768px) {
+      transform: none;
+    }
   }
 
   .window-bar {
@@ -286,10 +348,24 @@
     grid-template-columns: 200px 1fr;
     height: 300px;
 
+    @media (max-width: 768px) {
+      grid-template-columns: 150px 1fr;
+      height: 250px;
+    }
+
+    @media (max-width: 480px) {
+      grid-template-columns: 120px 1fr;
+      height: 200px;
+    }
+
     .dashboard-sidebar {
       background: #f8fafc;
       padding: 1rem 0;
       border-right: 1px solid var(--border-color);
+
+      @media (max-width: 480px) {
+        padding: 0.5rem 0;
+      }
 
       .sidebar-item {
         display: flex;
@@ -301,6 +377,18 @@
         font-size: 0.85rem;
         transition: all 0.2s ease;
 
+        @media (max-width: 768px) {
+          padding: 0.6rem 0.8rem;
+          font-size: 0.8rem;
+          gap: 0.5rem;
+        }
+
+        @media (max-width: 480px) {
+          padding: 0.5rem 0.6rem;
+          font-size: 0.75rem;
+          gap: 0.4rem;
+        }
+
         &.active {
           background: var(--secondary-color);
           color: var(--white);
@@ -309,6 +397,17 @@
         i {
           width: 16px;
           text-align: center;
+
+          @media (max-width: 480px) {
+            width: 14px;
+            font-size: 0.8rem;
+          }
+        }
+
+        span {
+          @media (max-width: 480px) {
+            display: none;
+          }
         }
       }
     }
@@ -316,11 +415,29 @@
     .dashboard-main {
       padding: 1.5rem;
 
+      @media (max-width: 768px) {
+        padding: 1rem;
+      }
+
+      @media (max-width: 480px) {
+        padding: 0.75rem;
+      }
+
       .stats-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 1rem;
         margin-bottom: 1.5rem;
+
+        @media (max-width: 768px) {
+          gap: 0.75rem;
+          margin-bottom: 1rem;
+        }
+
+        @media (max-width: 480px) {
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0.5rem;
+        }
 
         .stat-card {
           background: var(--white);
@@ -330,6 +447,18 @@
           display: flex;
           align-items: center;
           gap: 0.75rem;
+
+          @media (max-width: 768px) {
+            padding: 0.75rem;
+            gap: 0.5rem;
+          }
+
+          @media (max-width: 480px) {
+            padding: 0.5rem;
+            gap: 0.4rem;
+            flex-direction: column;
+            text-align: center;
+          }
 
           .stat-icon {
             width: 40px;

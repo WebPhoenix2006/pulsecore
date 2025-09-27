@@ -1,0 +1,400 @@
+<div class="payments-page">
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="page-title">
+          <i class="ri-bank-card-line"></i>
+          Payments Management
+        </h1>
+        <p class="page-subtitle">Track and manage all payment transactions</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary" (click)="exportPayments()">
+          <i class="ri-download-line"></i>
+          Export
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  @if (paymentStats()) {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon total">
+          <i class="ri-bank-card-line"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ paymentStats()!.totalPayments }}</h3>
+          <p>Total Payments</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon success">
+          <i class="ri-check-line"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ paymentStats()!.successfulPayments }}</h3>
+          <p>Successful</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon pending">
+          <i class="ri-time-line"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ paymentStats()!.pendingPayments }}</h3>
+          <p>Pending</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon failed">
+          <i class="ri-close-line"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ paymentStats()!.failedPayments }}</h3>
+          <p>Failed</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon revenue">
+          <i class="ri-money-dollar-circle-line"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ formatCurrency(paymentStats()!.successfulAmount) }}</h3>
+          <p>Total Revenue</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon rate">
+          <i class="ri-percent-line"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ getSuccessRate() }}%</h3>
+          <p>Success Rate</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <div class="search-field">
+        <input
+          type="text"
+          placeholder="Search by payment reference or order ID..."
+          [value]="searchTerm()"
+          (input)="searchTerm.set($any($event.target).value); onSearchChange()"
+          class="search-input">
+        <i class="ri-search-line search-icon"></i>
+      </div>
+      <div class="filter-field">
+        <select
+          [value]="selectedStatus()"
+          (change)="selectedStatus.set($any($event.target).value); onStatusChange()"
+          class="filter-select">
+          <option value="all">All Statuses</option>
+          @for (status of paymentStatuses; track status) {
+            <option [value]="status">{{ status | titlecase }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-field">
+        <select
+          [value]="selectedProvider()"
+          (change)="selectedProvider.set($any($event.target).value); onProviderChange()"
+          class="filter-select">
+          <option value="all">All Providers</option>
+          @for (provider of paymentProviders; track provider) {
+            <option [value]="provider">{{ provider | titlecase }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payments Table -->
+  <div class="table-container">
+    @if (isLoading()) {
+      <div class="loading-state">
+        <i class="ri-loader-line loading-spinner"></i>
+        <p>Loading payments...</p>
+      </div>
+    } @else if (filteredPayments().length === 0) {
+      <div class="empty-state">
+        <i class="ri-bank-card-line"></i>
+        <h3>No payments found</h3>
+        <p>There are no payments matching your current filters.</p>
+      </div>
+    } @else {
+      <div class="data-table">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Reference</th>
+              <th>Order ID</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Provider</th>
+              <th>Created</th>
+              <th>Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (payment of filteredPayments(); track payment.id) {
+              <tr>
+                <td>
+                  <span class="payment-reference">{{ payment.reference }}</span>
+                </td>
+                <td>
+                  <span class="order-id">#{{ payment.orderId.slice(-8) }}</span>
+                </td>
+                <td>
+                  <span class="amount">{{ formatCurrency(payment.amount) }}</span>
+                  <span class="currency">{{ payment.currency }}</span>
+                </td>
+                <td>
+                  <span class="badge" [class]="getStatusClass(payment.status)">
+                    {{ payment.status | titlecase }}
+                  </span>
+                </td>
+                <td>
+                  <div class="provider-info">
+                    <i [class]="getProviderIcon(payment.provider)"></i>
+                    <span>{{ payment.provider | titlecase }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="date">{{ formatDate(payment.createdAt) }}</span>
+                </td>
+                <td>
+                  <span class="date">{{ formatDate(payment.updatedAt) }}</span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button
+                      class="btn-icon"
+                      (click)="viewPaymentDetails(payment)"
+                      title="View Details">
+                      <i class="ri-eye-line"></i>
+                    </button>
+
+                    @if (payment.status === 'pending') {
+                      <button
+                        class="btn-icon btn-info"
+                        (click)="verifyPayment(payment)"
+                        title="Verify Payment">
+                        <i class="ri-refresh-line"></i>
+                      </button>
+                    }
+
+                    @if (payment.status === 'failed') {
+                      <button
+                        class="btn-icon btn-warning"
+                        (click)="retryPayment(payment)"
+                        title="Retry Payment">
+                        <i class="ri-restart-line"></i>
+                      </button>
+                    }
+
+                    @if (payment.authorizationUrl && payment.status === 'pending') {
+                      <button
+                        class="btn-icon btn-secondary"
+                        (click)="openPaymentLink(payment.authorizationUrl)"
+                        title="Open Payment Link">
+                        <i class="ri-external-link-line"></i>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button
+            class="btn btn-secondary"
+            [disabled]="currentPage() === 1"
+            (click)="previousPage()">
+            <i class="ri-arrow-left-line"></i>
+            Previous
+          </button>
+
+          <div class="page-numbers">
+            @for (page of getPageNumbers(); track page) {
+              @if (page <= 5 || page > totalPages() - 5 || absValue(page - currentPage()) <= 2) {
+                <button
+                  class="page-btn"
+                  [class.active]="page === currentPage()"
+                  (click)="goToPage(page)">
+                  {{ page }}
+                </button>
+              } @else if (page === 6 && currentPage() > 8) {
+                <span class="page-ellipsis">...</span>
+              } @else if (page === totalPages() - 5 && currentPage() < totalPages() - 7) {
+                <span class="page-ellipsis">...</span>
+              }
+            }
+          </div>
+
+          <button
+            class="btn btn-secondary"
+            [disabled]="currentPage() === totalPages()"
+            (click)="nextPage()">
+            Next
+            <i class="ri-arrow-right-line"></i>
+          </button>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+<!-- Payment Details Modal -->
+@if (showPaymentModal() && selectedPayment()) {
+  <div class="modal-overlay" (click)="closePaymentModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <i class="ri-bank-card-line"></i>
+          Payment Details
+        </h2>
+        <button class="btn-close" (click)="closePaymentModal()">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <div class="payment-details">
+          <!-- Payment Information -->
+          <div class="detail-section">
+            <h3>Payment Information</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <label>Reference</label>
+                <span class="reference">{{ selectedPayment()!.reference }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Status</label>
+                <span class="badge" [class]="getStatusClass(selectedPayment()!.status)">
+                  {{ selectedPayment()!.status | titlecase }}
+                </span>
+              </div>
+              <div class="detail-item">
+                <label>Amount</label>
+                <span class="amount">{{ formatCurrency(selectedPayment()!.amount) }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Currency</label>
+                <span>{{ selectedPayment()!.currency }}</span>
+              </div>
+              <div class="detail-item">
+                <label>Provider</label>
+                <div class="provider-info">
+                  <i [class]="getProviderIcon(selectedPayment()!.provider)"></i>
+                  <span>{{ selectedPayment()!.provider | titlecase }}</span>
+                </div>
+              </div>
+              <div class="detail-item">
+                <label>Order ID</label>
+                <span class="order-id">#{{ selectedPayment()!.orderId.slice(-8) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timeline -->
+          <div class="detail-section">
+            <h3>Payment Timeline</h3>
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="timeline-icon created">
+                  <i class="ri-add-line"></i>
+                </div>
+                <div class="timeline-content">
+                  <h4>Payment Created</h4>
+                  <p>{{ formatDate(selectedPayment()!.createdAt) }}</p>
+                </div>
+              </div>
+
+              @if (selectedPayment()!.paidAt) {
+                <div class="timeline-item">
+                  <div class="timeline-icon success">
+                    <i class="ri-check-line"></i>
+                  </div>
+                  <div class="timeline-content">
+                    <h4>Payment Successful</h4>
+                    <p>{{ formatDate(selectedPayment()!.paidAt!) }}</p>
+                  </div>
+                </div>
+              }
+
+              @if (selectedPayment()!.failedAt) {
+                <div class="timeline-item">
+                  <div class="timeline-icon failed">
+                    <i class="ri-close-line"></i>
+                  </div>
+                  <div class="timeline-content">
+                    <h4>Payment Failed</h4>
+                    <p>{{ formatDate(selectedPayment()!.failedAt!) }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Gateway Response -->
+          @if (selectedPayment()!.gatewayResponse) {
+            <div class="detail-section">
+              <h3>Gateway Response</h3>
+              <div class="gateway-response">
+                <pre>{{ selectedPayment()!.gatewayResponse | json }}</pre>
+              </div>
+            </div>
+          }
+
+          <!-- Payment Links -->
+          @if (selectedPayment()!.authorizationUrl) {
+            <div class="detail-section">
+              <h3>Payment Links</h3>
+              <div class="payment-links">
+                <a
+                  [href]="selectedPayment()!.authorizationUrl"
+                  target="_blank"
+                  class="payment-link">
+                  <i class="ri-external-link-line"></i>
+                  Open Payment Page
+                </a>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <div class="footer-actions">
+          @if (selectedPayment()!.status === 'pending') {
+            <button
+              class="btn btn-primary"
+              (click)="verifyPayment(selectedPayment()!); closePaymentModal()">
+              <i class="ri-refresh-line"></i>
+              Verify Payment
+            </button>
+          }
+          <button class="btn btn-secondary" (click)="closePaymentModal()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

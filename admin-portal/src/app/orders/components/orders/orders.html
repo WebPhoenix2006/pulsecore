@@ -1,0 +1,276 @@
+<div class="orders-page">
+  <!-- Header Section -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="page-title">
+          <i class="ri-shopping-cart-line"></i>
+          Orders Management
+        </h1>
+        <p class="page-subtitle">Manage your orders, track payments, and handle returns</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="openCreateOrderModal()">
+          <i class="ri-add-line"></i>
+          Create Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  @if (orderStats()) {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon total">
+          <i class="ri-shopping-cart-line"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ orderStats()!.totalOrders }}</h3>
+          <p>Total Orders</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon pending">
+          <i class="ri-time-line"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ orderStats()!.pendingOrders }}</h3>
+          <p>Pending</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon processing">
+          <i class="ri-loader-line"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ orderStats()!.processingOrders }}</h3>
+          <p>Processing</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon delivered">
+          <i class="ri-check-line"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ orderStats()!.deliveredOrders }}</h3>
+          <p>Delivered</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon revenue">
+          <i class="ri-money-dollar-circle-line"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ formatCurrency(orderStats()!.totalRevenue) }}</h3>
+          <p>Total Revenue</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <div class="search-field">
+        <input
+          type="text"
+          placeholder="Search orders by ID, customer name, or email..."
+          [value]="searchTerm()"
+          (input)="searchTerm.set($any($event.target).value); onSearchChange()"
+          class="search-input">
+        <i class="ri-search-line search-icon"></i>
+      </div>
+      <div class="filter-field">
+        <select
+          [value]="selectedStatus()"
+          (change)="selectedStatus.set($any($event.target).value); onStatusChange()"
+          class="filter-select">
+          <option value="all">All Statuses</option>
+          @for (status of orderStatuses; track status) {
+            <option [value]="status">{{ status | titlecase }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="table-container">
+    @if (isLoading()) {
+      <div class="loading-state">
+        <i class="ri-loader-line loading-spinner"></i>
+        <p>Loading orders...</p>
+      </div>
+    } @else if (filteredOrders().length === 0) {
+      <div class="empty-state">
+        <i class="ri-shopping-cart-line"></i>
+        <h3>No orders found</h3>
+        <p>There are no orders matching your current filters.</p>
+      </div>
+    } @else {
+      <div class="data-table">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Status</th>
+              <th>Items</th>
+              <th>Total Amount</th>
+              <th>Payment Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (order of filteredOrders(); track order.id) {
+              <tr>
+                <td>
+                  <span class="order-id">#{{ order.id.slice(-8) }}</span>
+                </td>
+                <td>
+                  <div class="customer-info">
+                    <div class="customer-name">{{ order.customerName || 'Unknown' }}</div>
+                    @if (order.customerEmail) {
+                      <div class="customer-email">{{ order.customerEmail }}</div>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <span class="badge" [class]="getStatusClass(order.status)">
+                    {{ order.status | titlecase }}
+                  </span>
+                </td>
+                <td>
+                  <span class="item-count">{{ order.items.length }} item(s)</span>
+                </td>
+                <td>
+                  <span class="amount">{{ formatCurrency(order.totalAmount) }}</span>
+                </td>
+                <td>
+                  <span class="badge" [class]="getPaymentStatusClass(order.paymentStatus)">
+                    {{ order.paymentStatus | titlecase }}
+                  </span>
+                </td>
+                <td>
+                  <span class="date">{{ formatDate(order.createdAt) }}</span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button
+                      class="btn-icon"
+                      (click)="viewOrderDetails(order)"
+                      title="View Details">
+                      <i class="ri-eye-line"></i>
+                    </button>
+
+                    @if (order.status !== 'cancelled' && order.status !== 'delivered') {
+                      <div class="dropdown">
+                        <button class="btn-icon dropdown-toggle" title="Update Status">
+                          <i class="ri-more-line"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                          @for (status of orderStatuses; track status) {
+                            @if (status !== order.status) {
+                              <button
+                                class="dropdown-item"
+                                (click)="updateOrderStatus(order, status)">
+                                {{ status | titlecase }}
+                              </button>
+                            }
+                          }
+                        </div>
+                      </div>
+                    }
+
+                    @if (order.status === 'delivered' && !order.returnRequested) {
+                      <button
+                        class="btn-icon btn-warning"
+                        (click)="openReturnModal(order)"
+                        title="Request Return">
+                        <i class="ri-arrow-go-back-line"></i>
+                      </button>
+                    }
+
+                    @if (order.status === 'pending') {
+                      <button
+                        class="btn-icon btn-danger"
+                        (click)="deleteOrder(order)"
+                        title="Delete Order">
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button
+            class="btn btn-secondary"
+            [disabled]="currentPage() === 1"
+            (click)="previousPage()">
+            <i class="ri-arrow-left-line"></i>
+            Previous
+          </button>
+
+          <div class="page-numbers">
+            @for (page of getPageNumbers(); track page) {
+              @if (page <= 5 || page > totalPages() - 5 || absValue(page - currentPage()) <= 2) {
+                <button
+                  class="page-btn"
+                  [class.active]="page === currentPage()"
+                  (click)="goToPage(page)">
+                  {{ page }}
+                </button>
+              } @else if (page === 6 && currentPage() > 8) {
+                <span class="page-ellipsis">...</span>
+              } @else if (page === totalPages() - 5 && currentPage() < totalPages() - 7) {
+                <span class="page-ellipsis">...</span>
+              }
+            }
+          </div>
+
+          <button
+            class="btn btn-secondary"
+            [disabled]="currentPage() === totalPages()"
+            (click)="nextPage()">
+            Next
+            <i class="ri-arrow-right-line"></i>
+          </button>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+<!-- Create Order Modal -->
+@if (showCreateOrderModal()) {
+  <app-create-order-modal
+    (orderCreated)="onOrderCreated()"
+    (close)="closeCreateOrderModal()">
+  </app-create-order-modal>
+}
+
+<!-- Order Details Modal -->
+@if (showOrderDetailsModal() && selectedOrder()) {
+  <app-order-details
+    [order]="selectedOrder()!"
+    (close)="closeOrderDetailsModal()">
+  </app-order-details>
+}
+
+<!-- Return Modal -->
+@if (showReturnModal() && selectedOrder()) {
+  <app-return-modal
+    [order]="selectedOrder()!"
+    (returnRequested)="onReturnRequested()"
+    (close)="closeReturnModal()">
+  </app-return-modal>
+}

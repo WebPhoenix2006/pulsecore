@@ -11,9 +11,21 @@
   .main-content {
     padding-top: 70px; // Account for fixed navbar height
 
+    @media (max-width: 480px) {
+      padding-top: 60px;
+    }
+
     // Smooth scrolling for sections
     section {
       scroll-margin-top: 80px; // Offset for fixed navbar
+
+      @media (max-width: 768px) {
+        scroll-margin-top: 70px;
+      }
+
+      @media (max-width: 480px) {
+        scroll-margin-top: 60px;
+      }
     }
   }
 }
@@ -89,25 +101,67 @@
   }
 }
 
-// Responsive design utilities
-@media (max-width: 1200px) {
-  .landing-page {
-    .main-content {
-      section {
-        scroll-margin-top: 70px;
-      }
-    }
+// Global responsive spacing for all sections
+.landing-page section {
+  padding: 6rem 0;
+
+  @media (max-width: 1024px) {
+    padding: 5rem 0;
+  }
+
+  @media (max-width: 768px) {
+    padding: 4rem 0;
+  }
+
+  @media (max-width: 480px) {
+    padding: 3rem 0;
   }
 }
 
-@media (max-width: 768px) {
-  .landing-page {
-    .main-content {
-      padding-top: 70px;
+// Container responsive padding
+.landing-page .hero-container,
+.landing-page .features-container,
+.landing-page .pricing-container,
+.landing-page .about-container,
+.landing-page .contact-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
 
-      section {
-        scroll-margin-top: 60px;
-      }
+  @media (max-width: 768px) {
+    padding: 0 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0 1rem;
+  }
+}
+
+// Typography responsive adjustments
+.landing-page {
+  h1, .hero-title {
+    @media (max-width: 480px) {
+      line-height: 1.2;
+    }
+  }
+
+  h2, .section-title {
+    @media (max-width: 480px) {
+      font-size: 1.75rem;
+      line-height: 1.3;
+    }
+  }
+
+  h3 {
+    @media (max-width: 480px) {
+      font-size: 1.25rem;
+    }
+  }
+
+  p, .section-subtitle {
+    @media (max-width: 480px) {
+      font-size: 1rem;
+      line-height: 1.5;
     }
   }
 }

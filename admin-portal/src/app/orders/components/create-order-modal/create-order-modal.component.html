@@ -1,0 +1,390 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <i class="ri-add-line"></i>
+        Create New Order
+      </h2>
+      <button class="btn-close" (click)="onClose()">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="steps-container">
+      <div class="steps">
+        @for (step of [1, 2, 3]; track step) {
+          <div class="step" [class.active]="step === currentStep()" [class.completed]="step < currentStep()">
+            <div class="step-number">
+              @if (step < currentStep()) {
+                <i class="ri-check-line"></i>
+              } @else {
+                {{ step }}
+              }
+            </div>
+            <div class="step-label">
+              @switch (step) {
+                @case (1) { Customer }
+                @case (2) { Items }
+                @case (3) { Delivery }
+              }
+            </div>
+          </div>
+          @if (step < 3) {
+            <div class="step-connector" [class.completed]="step < currentStep()"></div>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+      <form [formGroup]="orderForm" (ngSubmit)="onSubmit()">
+        <!-- Step 1: Customer Information -->
+        @if (currentStep() === 1) {
+          <div class="step-content">
+            <div class="step-header">
+              <h3>{{ getStepTitle() }}</h3>
+              <p>Select or add customer information for this order</p>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-field-container-container">
+                <label for="customerId" class="field-label required">Customer <span class="required-indicator">*</span></label>
+                <select
+                  id="customerId"
+                  formControlName="customerId"
+                  (change)="onCustomerChange()"
+                  class="form-select">
+                  <option value="">Select a customer</option>
+                  @for (customer of customers(); track customer.id) {
+                    <option [value]="customer.id">{{ customer.name }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-field-container-container">
+                <label for="customerName" class="field-label">Customer Name</label>
+                <input
+                  type="text"
+                  id="customerName"
+                  formControlName="customerName"
+                  placeholder="Customer name"
+                  class="form-input">
+              </div>
+
+              <div class="form-field-container-container">
+                <label for="customerEmail" class="field-label">Email</label>
+                <input
+                  type="email"
+                  id="customerEmail"
+                  formControlName="customerEmail"
+                  placeholder="customer@example.com"
+                  class="form-input">
+              </div>
+
+              <div class="form-field-container-container">
+                <label for="customerPhone" class="field-label">Phone Number</label>
+                <input
+                  type="tel"
+                  id="customerPhone"
+                  formControlName="customerPhone"
+                  placeholder="+234801234567"
+                  class="form-input">
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Step 2: Order Items -->
+        @if (currentStep() === 2) {
+          <div class="step-content">
+            <div class="step-header">
+              <h3>{{ getStepTitle() }}</h3>
+              <p>Add items to this order</p>
+            </div>
+
+            <div class="items-section">
+              <!-- Add Item Button -->
+              <div class="add-item-header">
+                <button type="button" class="btn btn-secondary" (click)="addOrderItem()">
+                  <i class="ri-add-line"></i>
+                  Add Item
+                </button>
+              </div>
+
+              <!-- Order Items List -->
+              @if (itemsArray.length === 0) {
+                <div class="empty-items">
+                  <i class="ri-shopping-cart-line"></i>
+                  <p>No items added yet. Click "Add Item" to start building the order.</p>
+                </div>
+              } @else {
+                <div class="items-list">
+                  @for (item of itemsArray.controls; track $index; let i = $index) {
+                    <div class="item-row" [formGroupName]="i">
+                      <div class="item-grid">
+                        <div class="form-field-container">
+                          <label>Product *</label>
+                          <select
+                            formControlName="skuId"
+                            (change)="onSKUChange(i)"
+                            class="form-select">
+                            <option value="">Select product</option>
+                            @for (sku of filteredSKUs(); track sku.id) {
+                              <option [value]="sku.id">
+                                {{ sku.name }} - {{ formatCurrency(sku.price) }}
+                                ({{ sku.availableQuantity }} available)
+                              </option>
+                            }
+                          </select>
+                        </div>
+
+                        <div class="form-field-container">
+                          <label>Quantity *</label>
+                          <input
+                            type="number"
+                            formControlName="quantity"
+                            (input)="onQuantityChange(i)"
+                            min="1"
+                            [max]="getSKUAvailableQuantity(item.get('skuId')?.value)"
+                            class="form-input"
+                            [class.error]="!isQuantityValid(i)">
+                          @if (!isQuantityValid(i) && item.get('quantity')?.value > 0) {
+                            <span class="error-message">
+                              Only {{ getSKUAvailableQuantity(item.get('skuId')?.value) }} available
+                            </span>
+                          }
+                        </div>
+
+                        <div class="form-field-container">
+                          <label>Unit Price</label>
+                          <input
+                            type="text"
+                            [value]="formatCurrency(item.get('unitPrice')?.value || 0)"
+                            readonly
+                            class="form-input readonly">
+                        </div>
+
+                        <div class="form-field-container">
+                          <label>Total</label>
+                          <input
+                            type="text"
+                            [value]="formatCurrency(item.get('totalPrice')?.value || 0)"
+                            readonly
+                            class="form-input readonly">
+                        </div>
+
+                        <div class="remove-item">
+                          <button
+                            type="button"
+                            class="btn-icon btn-danger"
+                            (click)="removeOrderItem(i)"
+                            title="Remove item">
+                            <i class="ri-delete-bin-line"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- Order Summary -->
+                <div class="order-summary">
+                  <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span class="amount">{{ formatCurrency(getOrderSubtotal()) }}</span>
+                  </div>
+                  <div class="summary-row">
+                    <span>Discount:</span>
+                    <input
+                      type="number"
+                      formControlName="discount"
+                      min="0"
+                      [max]="getOrderSubtotal()"
+                      class="discount-input">
+                  </div>
+                  <div class="summary-row total">
+                    <span>Total:</span>
+                    <span class="amount">{{ formatCurrency(getOrderTotal()) }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Step 3: Delivery & Summary -->
+        @if (currentStep() === 3) {
+          <div class="step-content">
+            <div class="step-header">
+              <h3>{{ getStepTitle() }}</h3>
+              <p>Configure delivery options and review order</p>
+            </div>
+
+            <!-- Delivery Options -->
+            <div class="delivery-section">
+              <div class="form-field-container">
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    formControlName="includeDelivery"
+                    class="checkbox">
+                  <span class="checkmark"></span>
+                  Include delivery address
+                </label>
+              </div>
+
+              @if (orderForm.get('includeDelivery')?.value) {
+                <div class="delivery-form" formGroupName="deliveryAddress">
+                  <div class="form-grid">
+                    <div class="form-field-container full-width">
+                      <label for="street">Street Address *</label>
+                      <input
+                        type="text"
+                        id="street"
+                        formControlName="street"
+                        placeholder="123 Main Street"
+                        class="form-input">
+                    </div>
+
+                    <div class="form-field-container">
+                      <label for="city">City *</label>
+                      <input
+                        type="text"
+                        id="city"
+                        formControlName="city"
+                        placeholder="Lagos"
+                        class="form-input">
+                    </div>
+
+                    <div class="form-field-container">
+                      <label for="state">State *</label>
+                      <input
+                        type="text"
+                        id="state"
+                        formControlName="state"
+                        placeholder="Lagos State"
+                        class="form-input">
+                    </div>
+
+                    <div class="form-field-container">
+                      <label for="postalCode">Postal Code</label>
+                      <input
+                        type="text"
+                        id="postalCode"
+                        formControlName="postalCode"
+                        placeholder="100001"
+                        class="form-input">
+                    </div>
+
+                    <div class="form-field-container">
+                      <label for="country">Country</label>
+                      <input
+                        type="text"
+                        id="country"
+                        formControlName="country"
+                        class="form-input">
+                    </div>
+
+                    <div class="form-field-container full-width">
+                      <label for="landmark">Landmark</label>
+                      <input
+                        type="text"
+                        id="landmark"
+                        formControlName="landmark"
+                        placeholder="Near the big tree"
+                        class="form-input">
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Order Notes -->
+            <div class="notes-section">
+              <div class="form-field-container">
+                <label for="notes">Order Notes</label>
+                <textarea
+                  id="notes"
+                  formControlName="notes"
+                  placeholder="Special instructions or notes for this order..."
+                  rows="3"
+                  class="form-textarea"></textarea>
+              </div>
+            </div>
+
+            <!-- Final Order Summary -->
+            <div class="final-summary">
+              <h4>Order Summary</h4>
+              <div class="summary-details">
+                <div class="summary-row">
+                  <span>Customer:</span>
+                  <span>{{ orderForm.get('customerName')?.value || 'Unknown' }}</span>
+                </div>
+                <div class="summary-row">
+                  <span>Items:</span>
+                  <span>{{ itemsArray.length }} item(s)</span>
+                </div>
+                <div class="summary-row">
+                  <span>Subtotal:</span>
+                  <span>{{ formatCurrency(getOrderSubtotal()) }}</span>
+                </div>
+                @if (orderForm.get('discount')?.value > 0) {
+                  <div class="summary-row">
+                    <span>Discount:</span>
+                    <span class="discount">-{{ formatCurrency(orderForm.get('discount')?.value) }}</span>
+                  </div>
+                }
+                <div class="summary-row total">
+                  <span>Total:</span>
+                  <span class="amount">{{ formatCurrency(getOrderTotal()) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </form>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <div class="footer-actions">
+        @if (currentStep() > 1) {
+          <button type="button" class="btn btn-secondary" (click)="previousStep()">
+            <i class="ri-arrow-left-line"></i>
+            Previous
+          </button>
+        }
+
+        <div class="spacer"></div>
+
+        @if (currentStep() < totalSteps) {
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="!validateCurrentStep()"
+            (click)="nextStep()">
+            Next
+            <i class="ri-arrow-right-line"></i>
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="isLoading() || !orderForm.valid || itemsArray.length === 0"
+            (click)="onSubmit()">
+            @if (isLoading()) {
+              <i class="ri-loader-line loading-spinner"></i>
+              Creating...
+            } @else {
+              <i class="ri-check-line"></i>
+              Create Order
+            }
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</div>

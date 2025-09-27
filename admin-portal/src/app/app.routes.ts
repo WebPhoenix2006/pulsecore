@@ -5,7 +5,7 @@ export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   {
     path: 'home',
-    loadChildren: () => import('./guest/guest.module').then((m) => m.GuestModule)
+    loadChildren: () => import('./guest/guest.module').then((m) => m.GuestModule),
   },
   { path: 'auth', loadChildren: () => import('./auth/auth-module').then((m) => m.AuthModule) },
   {
@@ -16,6 +16,11 @@ export const routes: Routes = [
   {
     path: 'inventory',
     loadChildren: () => import('./inventory/inventory-module').then((m) => m.InventoryModule),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'orders',
+    loadChildren: () => import('./orders/orders-module').then((m) => m.OrdersModule),
     canActivate: [authGuard],
   },
 ];
