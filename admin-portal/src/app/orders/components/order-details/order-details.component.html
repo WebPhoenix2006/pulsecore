@@ -1,0 +1,389 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="header-left">
+        <h2 class="modal-title">
+          <i class="ri-receipt-line"></i>
+          Order Details
+        </h2>
+        <div class="order-meta">
+          <span class="order-id">#{{ order().id.slice(-8) }}</span>
+          <span class="badge" [class]="getStatusClass(order().status)">
+            {{ order().status | titlecase }}
+          </span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-icon" (click)="printOrder()" title="Print Order">
+          <i class="ri-printer-line"></i>
+        </button>
+        <button class="btn-icon" (click)="downloadInvoice()" title="Download Invoice">
+          <i class="ri-download-line"></i>
+        </button>
+        <button class="btn-close" (click)="onClose()">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <button
+        class="tab-btn"
+        [class.active]="activeTab() === 'details'"
+        (click)="setActiveTab('details')">
+        <i class="ri-information-line"></i>
+        Details
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="activeTab() === 'payments'"
+        (click)="setActiveTab('payments')">
+        <i class="ri-bank-card-line"></i>
+        Payments
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="activeTab() === 'returns'"
+        (click)="setActiveTab('returns')">
+        <i class="ri-arrow-go-back-line"></i>
+        Returns
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+      <!-- Order Details Tab -->
+      @if (activeTab() === 'details') {
+        <div class="tab-content">
+          <!-- Customer Information -->
+          <div class="info-section">
+            <h3 class="section-title">
+              <i class="ri-user-line"></i>
+              Customer Information
+            </h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Name</label>
+                <span>{{ order().customerName || 'Unknown' }}</span>
+              </div>
+              @if (order().customerEmail) {
+                <div class="info-item">
+                  <label>Email</label>
+                  <span>{{ order().customerEmail }}</span>
+                </div>
+              }
+              @if (order().customerPhone) {
+                <div class="info-item">
+                  <label>Phone</label>
+                  <span>{{ order().customerPhone }}</span>
+                </div>
+              }
+              <div class="info-item">
+                <label>Customer ID</label>
+                <span class="customer-id">{{ order().customerId }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order Information -->
+          <div class="info-section">
+            <h3 class="section-title">
+              <i class="ri-shopping-cart-line"></i>
+              Order Information
+            </h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Order Date</label>
+                <span>{{ formatDate(order().createdAt) }}</span>
+              </div>
+              <div class="info-item">
+                <label>Last Updated</label>
+                <span>{{ formatDate(order().updatedAt) }}</span>
+              </div>
+              @if (order().deliveredAt) {
+                <div class="info-item">
+                  <label>Delivered At</label>
+                  <span>{{ formatDate(order().deliveredAt!) }}</span>
+                </div>
+              }
+              @if (order().cancelledAt) {
+                <div class="info-item">
+                  <label>Cancelled At</label>
+                  <span>{{ formatDate(order().cancelledAt!) }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Order Items -->
+          <div class="info-section">
+            <h3 class="section-title">
+              <i class="ri-list-check"></i>
+              Order Items
+            </h3>
+            <div class="items-table">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of order().items; track item.id) {
+                    <tr>
+                      <td>
+                        <div class="item-info">
+                          <span class="item-name">{{ item.skuName || item.skuId }}</span>
+                          <span class="item-id">SKU: {{ item.skuId }}</span>
+                        </div>
+                      </td>
+                      <td>{{ item.quantity }}</td>
+                      <td>{{ formatCurrency(item.unitPrice) }}</td>
+                      <td class="amount">{{ formatCurrency(item.totalPrice) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Delivery Address -->
+          @if (order().deliveryAddress) {
+            <div class="info-section">
+              <h3 class="section-title">
+                <i class="ri-map-pin-line"></i>
+                Delivery Address
+              </h3>
+              <div class="address-card">
+                <div class="address-line">{{ order().deliveryAddress!.street }}</div>
+                <div class="address-line">
+                  {{ order().deliveryAddress!.city }}, {{ order().deliveryAddress!.state }}
+                </div>
+                @if (order().deliveryAddress!.postalCode) {
+                  <div class="address-line">{{ order().deliveryAddress!.postalCode }}</div>
+                }
+                <div class="address-line">{{ order().deliveryAddress!.country }}</div>
+                @if (order().deliveryAddress!.landmark) {
+                  <div class="address-line landmark">
+                    <i class="ri-map-pin-2-line"></i>
+                    {{ order().deliveryAddress!.landmark }}
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Order Notes -->
+          @if (order().notes) {
+            <div class="info-section">
+              <h3 class="section-title">
+                <i class="ri-sticky-note-line"></i>
+                Order Notes
+              </h3>
+              <div class="notes-card">
+                <p>{{ order().notes }}</p>
+              </div>
+            </div>
+          }
+
+          <!-- Order Summary -->
+          <div class="info-section">
+            <h3 class="section-title">
+              <i class="ri-calculator-line"></i>
+              Order Summary
+            </h3>
+            <div class="summary-card">
+              <div class="summary-row">
+                <span>Subtotal</span>
+                <span>{{ formatCurrency(order().subtotal) }}</span>
+              </div>
+              @if (order().tax > 0) {
+                <div class="summary-row">
+                  <span>Tax</span>
+                  <span>{{ formatCurrency(order().tax) }}</span>
+                </div>
+              }
+              @if (order().discount && order().discount! > 0) {
+                <div class="summary-row">
+                  <span>Discount</span>
+                  <span class="discount">-{{ formatCurrency(order().discount!) }}</span>
+                </div>
+              }
+              @if (order().deliveryFee && order().deliveryFee! > 0) {
+                <div class="summary-row">
+                  <span>Delivery Fee</span>
+                  <span>{{ formatCurrency(order().deliveryFee!) }}</span>
+                </div>
+              }
+              <div class="summary-row total">
+                <span>Total Amount</span>
+                <span class="amount">{{ formatCurrency(order().totalAmount) }}</span>
+              </div>
+
+              @if (getTotalPaid() > 0) {
+                <div class="summary-row">
+                  <span>Amount Paid</span>
+                  <span class="paid">{{ formatCurrency(getTotalPaid()) }}</span>
+                </div>
+              }
+
+              @if (getOutstandingAmount() > 0) {
+                <div class="summary-row outstanding">
+                  <span>Outstanding</span>
+                  <span class="amount">{{ formatCurrency(getOutstandingAmount()) }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Payments Tab -->
+      @if (activeTab() === 'payments') {
+        <div class="tab-content">
+          <div class="payments-section">
+            <div class="section-header">
+              <h3 class="section-title">
+                <i class="ri-bank-card-line"></i>
+                Payment History
+              </h3>
+              @if (canInitiatePayment()) {
+                <button
+                  class="btn btn-primary"
+                  [disabled]="isLoading()"
+                  (click)="initiatePayment()">
+                  @if (isLoading()) {
+                    <i class="ri-loader-line loading-spinner"></i>
+                    Processing...
+                  } @else {
+                    <i class="ri-add-line"></i>
+                    Initiate Payment
+                  }
+                </button>
+              }
+            </div>
+
+            @if (payments().length === 0) {
+              <div class="empty-state">
+                <i class="ri-bank-card-line"></i>
+                <h4>No payments found</h4>
+                <p>No payment attempts have been made for this order yet.</p>
+              </div>
+            } @else {
+              <div class="payments-list">
+                @for (payment of payments(); track payment.id) {
+                  <div class="payment-card">
+                    <div class="payment-header">
+                      <div class="payment-info">
+                        <span class="payment-id">{{ payment.reference }}</span>
+                        <span class="badge" [class]="getStatusClass(payment.status)">
+                          {{ payment.status | titlecase }}
+                        </span>
+                      </div>
+                      <div class="payment-amount">
+                        {{ formatCurrency(payment.amount) }}
+                      </div>
+                    </div>
+                    <div class="payment-details">
+                      <div class="detail-item">
+                        <span class="label">Provider:</span>
+                        <span>{{ payment.provider | titlecase }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="label">Created:</span>
+                        <span>{{ formatDate(payment.createdAt) }}</span>
+                      </div>
+                      @if (payment.paidAt) {
+                        <div class="detail-item">
+                          <span class="label">Paid At:</span>
+                          <span>{{ formatDate(payment.paidAt) }}</span>
+                        </div>
+                      }
+                      @if (payment.failedAt) {
+                        <div class="detail-item">
+                          <span class="label">Failed At:</span>
+                          <span>{{ formatDate(payment.failedAt) }}</span>
+                        </div>
+                      }
+                    </div>
+                    @if (payment.status === 'pending') {
+                      <div class="payment-actions">
+                        <button
+                          class="btn btn-secondary btn-sm"
+                          (click)="verifyPayment(payment.reference)">
+                          <i class="ri-refresh-line"></i>
+                          Verify Payment
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Returns Tab -->
+      @if (activeTab() === 'returns') {
+        <div class="tab-content">
+          <div class="returns-section">
+            <h3 class="section-title">
+              <i class="ri-arrow-go-back-line"></i>
+              Return History
+            </h3>
+
+            @if (returns().length === 0) {
+              <div class="empty-state">
+                <i class="ri-arrow-go-back-line"></i>
+                <h4>No returns found</h4>
+                <p>No return requests have been made for this order.</p>
+              </div>
+            } @else {
+              <div class="returns-list">
+                @for (returnItem of returns(); track returnItem.id) {
+                  <div class="return-card">
+                    <div class="return-header">
+                      <div class="return-info">
+                        <span class="return-id">Return #{{ returnItem.id.slice(-8) }}</span>
+                        <span class="badge" [class]="getStatusClass(returnItem.status)">
+                          {{ returnItem.status | titlecase }}
+                        </span>
+                      </div>
+                      <div class="return-date">
+                        {{ formatDate(returnItem.createdAt) }}
+                      </div>
+                    </div>
+                    <div class="return-details">
+                      <div class="detail-item">
+                        <span class="label">Reason:</span>
+                        <span>{{ returnItem.reason }}</span>
+                      </div>
+                      @if (returnItem.refundAmount) {
+                        <div class="detail-item">
+                          <span class="label">Refund Amount:</span>
+                          <span class="amount">{{ formatCurrency(returnItem.refundAmount) }}</span>
+                        </div>
+                      }
+                      @if (returnItem.notes) {
+                        <div class="detail-item full-width">
+                          <span class="label">Notes:</span>
+                          <span>{{ returnItem.notes }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

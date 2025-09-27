@@ -1,0 +1,236 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <i class="ri-arrow-go-back-line"></i>
+        Request Return
+      </h2>
+      <button class="btn-close" (click)="onClose()">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+      <form [formGroup]="returnForm" (ngSubmit)="onSubmit()">
+        <!-- Order Information -->
+        <div class="order-info">
+          <h3>Order Information</h3>
+          <div class="order-summary">
+            <div class="summary-item">
+              <span class="label">Order ID:</span>
+              <span class="value">#{{ order().id.slice(-8) }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Customer:</span>
+              <span class="value">{{ order().customerName || 'Unknown' }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Order Total:</span>
+              <span class="value">{{ formatCurrency(order().totalAmount) }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Order Date:</span>
+              <span class="value">{{ order().createdAt | date:'short' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Return Reason -->
+        <div class="form-section">
+          <h3>Return Reason</h3>
+          <div class="form-field">
+            <label for="reason">Reason for Return *</label>
+            <select id="reason" formControlName="reason" class="form-control">
+              <option value="">Select a reason</option>
+              <option value="defective">Defective Product</option>
+              <option value="wrong_item">Wrong Item Received</option>
+              <option value="damaged_shipping">Damaged During Shipping</option>
+              <option value="not_as_described">Not as Described</option>
+              <option value="customer_change_mind">Customer Changed Mind</option>
+              <option value="size_fit">Size/Fit Issues</option>
+              <option value="quality_issues">Quality Issues</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Return Type Selection -->
+        <div class="form-section">
+          <h3>Return Type</h3>
+          <div class="return-type-selection">
+            <label class="radio-label">
+              <input
+                type="radio"
+                name="returnType"
+                value="full"
+                formControlName="returnType"
+                (change)="onReturnTypeChange()"
+                class="radio-input">
+              <span class="radio-custom"></span>
+              <div class="radio-content">
+                <span class="radio-title">Full Return</span>
+                <span class="radio-description">Return all items in this order</span>
+              </div>
+            </label>
+
+            <label class="radio-label">
+              <input
+                type="radio"
+                name="returnType"
+                value="partial"
+                formControlName="returnType"
+                (change)="onReturnTypeChange()"
+                class="radio-input">
+              <span class="radio-custom"></span>
+              <div class="radio-content">
+                <span class="radio-title">Partial Return</span>
+                <span class="radio-description">Return specific items or quantities</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Items Selection (for partial returns) -->
+        @if (returnType() === 'partial') {
+          <div class="form-section">
+            <h3>Select Items to Return</h3>
+            <div class="items-list">
+              @for (item of itemsArray.controls; track $index; let i = $index) {
+                <div class="item-card" [formGroupName]="i">
+                  <div class="item-header">
+                    <label class="checkbox-label">
+                      <input
+                        type="checkbox"
+                        formControlName="selected"
+                        (change)="onItemSelectionChange(i)"
+                        class="checkbox">
+                      <span class="checkmark"></span>
+                      <div class="item-info">
+                        <span class="item-name">{{ item.get('skuName')?.value }}</span>
+                        <span class="item-sku">SKU: {{ item.get('skuId')?.value }}</span>
+                      </div>
+                    </label>
+                    <div class="item-meta">
+                      <span class="original-qty">Ordered: {{ item.get('originalQuantity')?.value }}</span>
+                    </div>
+                  </div>
+
+                  @if (item.get('selected')?.value) {
+                    <div class="item-details">
+                      <div class="quantity-field">
+                        <label>Return Quantity</label>
+                        <input
+                          type="number"
+                          formControlName="returnQuantity"
+                          (input)="onQuantityChange(i)"
+                          [min]="1"
+                          [max]="item.get('originalQuantity')?.value"
+                          class="form-control"
+                          [class.error]="!isQuantityValid(i)">
+                        @if (!isQuantityValid(i)) {
+                          <span class="error-message">
+                            Quantity must be between 1 and {{ item.get('originalQuantity')?.value }}
+                          </span>
+                        }
+                      </div>
+
+                      <div class="reason-field">
+                        <label>Specific Reason (Optional)</label>
+                        <input
+                          type="text"
+                          formControlName="reason"
+                          placeholder="Additional details for this item..."
+                          class="form-control">
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Full Return Items Display -->
+        @if (returnType() === 'full') {
+          <div class="form-section">
+            <h3>Items to be Returned</h3>
+            <div class="items-summary">
+              @for (orderItem of order().items; track orderItem.id) {
+                <div class="summary-item-card">
+                  <div class="item-info">
+                    <span class="item-name">{{ orderItem.skuName || orderItem.skuId }}</span>
+                    <span class="item-sku">SKU: {{ orderItem.skuId }}</span>
+                  </div>
+                  <div class="item-quantity">
+                    <span>Qty: {{ orderItem.quantity }}</span>
+                    <span class="item-total">{{ formatCurrency(orderItem.totalPrice) }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Return Summary -->
+        @if (getSelectedItems().length > 0 || returnType() === 'full') {
+          <div class="return-summary">
+            <h3>Return Summary</h3>
+            <div class="summary-card">
+              <div class="summary-row">
+                <span>Items to Return:</span>
+                <span>
+                  @if (returnType() === 'full') {
+                    {{ order().items.length }} item(s)
+                  } @else {
+                    {{ getSelectedItems().length }} item(s)
+                  }
+                </span>
+              </div>
+              <div class="summary-row total">
+                <span>Estimated Refund:</span>
+                <span class="amount">
+                  @if (returnType() === 'full') {
+                    {{ formatCurrency(order().totalAmount) }}
+                  } @else {
+                    {{ formatCurrency(getTotalReturnValue()) }}
+                  }
+                </span>
+              </div>
+            </div>
+            <div class="return-note">
+              <p>
+                <i class="ri-information-line"></i>
+                The actual refund amount may vary based on processing fees and return conditions.
+                Refunds typically take 3-5 business days to process.
+              </p>
+            </div>
+          </div>
+        }
+      </form>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <div class="footer-actions">
+        <button type="button" class="btn btn-secondary" (click)="onClose()">
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="isLoading() || !returnForm.valid || (returnType() === 'partial' && getSelectedItems().length === 0)"
+          (click)="onSubmit()">
+          @if (isLoading()) {
+            <i class="ri-loader-line loading-spinner"></i>
+            Processing...
+          } @else {
+            <i class="ri-send-plane-line"></i>
+            Submit Return Request
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

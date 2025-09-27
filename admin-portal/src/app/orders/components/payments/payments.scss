@@ -1,0 +1,397 @@
+// Import base styles from parent directory since they share similar layout
+@use '../orders/orders';
+
+// Additional payment-specific styles
+.payments-page {
+  .payment-reference {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: var(--secondary-color);
+    background: rgba(99, 102, 241, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+
+  .provider-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    i {
+      color: var(--secondary-color);
+      font-size: 1.1rem;
+    }
+  }
+
+  .currency {
+    font-size: 0.8rem;
+    color: var(--text-color);
+    opacity: 0.7;
+    margin-left: 0.25rem;
+  }
+
+  // Additional action button styles
+  .btn-info {
+    border-color: #3b82f6;
+    color: #1d4ed8;
+
+    &:hover {
+      background: rgba(59, 130, 246, 0.1);
+    }
+  }
+
+  // Stats grid additions for payment-specific stats
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+
+    .stat-icon {
+      &.success {
+        background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+      }
+
+      &.failed {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      }
+
+      &.rate {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      }
+    }
+  }
+}
+
+// Payment Details Modal
+.payment-details {
+  .detail-section {
+    margin-bottom: 2rem;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-color);
+      margin: 0 0 1.5rem 0;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      label {
+        font-weight: 600;
+        color: var(--text-color);
+        opacity: 0.8;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      span {
+        color: var(--text-color);
+        font-weight: 500;
+
+        &.reference {
+          font-family: 'Courier New', monospace;
+          font-size: 0.9rem;
+          background: rgba(99, 102, 241, 0.1);
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          display: inline-block;
+        }
+
+        &.amount {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: var(--success-color);
+        }
+
+        &.order-id {
+          font-family: 'Courier New', monospace;
+          font-size: 0.9rem;
+          background: rgba(99, 102, 241, 0.1);
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          display: inline-block;
+        }
+      }
+
+      .provider-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        i {
+          color: var(--secondary-color);
+          font-size: 1.1rem;
+        }
+      }
+    }
+  }
+
+  // Timeline Styles
+  .timeline {
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      bottom: 20px;
+      width: 2px;
+      background: var(--border-color);
+    }
+
+    .timeline-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      position: relative;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .timeline-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 1.1rem;
+        position: relative;
+        z-index: 2;
+
+        &.created {
+          background: var(--secondary-color);
+        }
+
+        &.success {
+          background: var(--success-color);
+        }
+
+        &.failed {
+          background: var(--error-color);
+        }
+      }
+
+      .timeline-content {
+        flex: 1;
+        background: var(--card-bg);
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+
+        h4 {
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--text-color);
+          margin: 0 0 0.25rem 0;
+        }
+
+        p {
+          color: var(--text-color);
+          opacity: 0.8;
+          margin: 0;
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+
+  // Gateway Response
+  .gateway-response {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+
+    pre {
+      margin: 0;
+      color: var(--text-color);
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  }
+
+  // Payment Links
+  .payment-links {
+    .payment-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--gradient-color);
+      color: var(--white);
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+
+      &:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+      }
+
+      i {
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+// Modal Styles (inherited from other components)
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-color);
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    max-width: 100%;
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
+}
+
+.modal-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface-color);
+
+  @media (max-width: 768px) {
+    padding: 1rem 1.5rem;
+  }
+
+  .modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    i {
+      color: var(--secondary-color);
+    }
+
+    @media (max-width: 768px) {
+      font-size: 1.25rem;
+    }
+  }
+
+  .btn-close {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: var(--surface-color);
+      color: var(--error-color);
+    }
+  }
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+}
+
+.modal-footer {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--border-color);
+  background: var(--surface-color);
+
+  @media (max-width: 768px) {
+    padding: 1rem 1.5rem;
+  }
+
+  .footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column-reverse;
+    }
+  }
+}
+
+// Dark theme adjustments
+[data-theme='dark'] {
+  .payments-page {
+    background: var(--surface-color);
+  }
+
+  .modal-content {
+    background: var(--card-bg);
+  }
+}

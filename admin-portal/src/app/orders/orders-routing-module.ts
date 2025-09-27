@@ -1,17 +1,16 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { Category } from './components/category/category';
-import { Products } from './components/products/products';
 import { Layout } from '../shared/components/layout/layout';
+import { Orders } from './components/orders/orders';
+import { Payments } from './components/payments/payments';
 
 const routes: Routes = [
   {
     path: '',
     component: Layout,
     children: [
-      { path: 'categories', component: Category },
-
-      { path: 'products', component: Products },
+      { path: '', component: Orders },
+      { path: 'payments', component: Payments },
     ],
   },
 ];
@@ -20,4 +19,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
-export class CatalogRoutingModule {}
+export class OrdersRoutingModule {}

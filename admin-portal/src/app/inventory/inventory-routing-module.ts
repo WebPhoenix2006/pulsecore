@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { Category } from '../catalog/components/category/category';
 import { Products } from '../catalog/components/products/products';
-import { Layout } from './layout/layout';
+import { Layout } from '../shared/components/layout/layout';
 import { Skus } from './components/skus/skus';
 import { Alerts } from './components/alerts/alerts';
 

@@ -5,11 +5,11 @@ import { CatalogRoutingModule } from './catalog-routing-module';
 import { Category } from './components/category/category';
 import { Products } from './components/products/products';
 import { SharedModule } from '../shared/shared-module';
-import { Layout } from './components/layout/layout';
 import { ReactiveFormsModule } from '@angular/forms';
+import { Layout } from '../shared/components/layout/layout';
 
 @NgModule({
-  declarations: [Category, Products, Layout],
-  imports: [CommonModule, CatalogRoutingModule, SharedModule, ReactiveFormsModule],
+  declarations: [Category, Products],
+  imports: [CommonModule, CatalogRoutingModule, SharedModule, ReactiveFormsModule, Layout],
 })
 export class CatalogModule {}

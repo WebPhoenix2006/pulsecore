@@ -111,44 +111,57 @@ export class Sidebar implements OnInit, OnDestroy {
       {
         id: 'orders',
         label: 'Orders',
-        icon: 'ri-bill-line',
+        icon: 'ri-shopping-cart-line',
         route: '/orders',
-        badge: '5',
+        children: [
+          {
+            id: 'orders',
+            label: 'Orders',
+            icon: 'ri-receipt-line',
+            route: '/orders/'
+          },
+          {
+            id: 'payments',
+            label: 'Payments',
+            icon: 'ri-bank-card-line',
+            route: '/orders/payments/'
+          },
+        ],
       },
       {
         id: 'inventory',
         label: 'Inventory',
-        icon: 'ri-apps-2-line',
+        icon: 'ri-stack-line',
         children: [
           {
             id: 'skus',
             label: 'SKUs',
-            icon: 'ri-price-tag-3-line',
+            icon: 'ri-barcode-line',
             route: '/inventory/skus',
           },
           {
             id: 'alerts',
             label: 'Alerts',
-            icon: 'ri-archive-2-line',
-            route: '/inventory/alerts',
+            icon: 'ri-alarm-warning-line',
+            route: '/inventory/alerts'
           },
         ],
       },
       {
         id: 'catalog',
         label: 'Catalog',
-        icon: 'ri-apps-2-line',
+        icon: 'ri-book-open-line',
         children: [
           {
             id: 'categories',
             label: 'Categories',
-            icon: 'ri-price-tag-3-line',
+            icon: 'ri-folder-line',
             route: '/catalog/categories',
           },
           {
             id: 'products',
             label: 'Products',
-            icon: 'ri-archive-2-line',
+            icon: 'ri-product-hunt-line',
             route: '/catalog/products',
           },
         ],
@@ -290,11 +303,12 @@ export class Sidebar implements OnInit, OnDestroy {
         this.isLoading.set(false);
 
         // Check if it's a token-related error and handle gracefully
-        if (err.message && (
-          err.message.includes('refresh token') ||
-          err.message.includes('invalid') ||
-          err.message.includes('expired')
-        )) {
+        if (
+          err.message &&
+          (err.message.includes('refresh token') ||
+            err.message.includes('invalid') ||
+            err.message.includes('expired'))
+        ) {
           this.toaster.showSuccess('Logged out successfully');
           this.router.navigateByUrl('/auth/login');
         } else {

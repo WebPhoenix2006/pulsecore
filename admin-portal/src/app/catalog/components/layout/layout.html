@@ -1,6 +1,0 @@
-<div class="layout-parent">
-  <app-sidebar [isLeftsidebarCollased]="sidebarState()" (toggleState)="acceptState($event)" />
-  <div class="body" [ngClass]="!sidebarState() ? 'body-trimmed' : 'body-md-screen'">
-    <router-outlet />
-  </div>
-</div>
