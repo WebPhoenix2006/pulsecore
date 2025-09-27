@@ -105,17 +105,32 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
     this.customers.set(mockCustomers);
   }
 
-  loadSKUs() {
-    // TODO: Replace with actual SKU service call
-    const mockSKUs: SKU[] = [
-      { id: 'sku1', name: 'Premium Coffee Beans', price: 2500, availableQuantity: 50 },
-      { id: 'sku2', name: 'Organic Tea Leaves', price: 1800, availableQuantity: 30 },
-      { id: 'sku3', name: 'Artisan Bread', price: 800, availableQuantity: 20 },
-      { id: 'sku4', name: 'Fresh Milk', price: 400, availableQuantity: 100 },
-      { id: 'sku5', name: 'Chocolate Cake', price: 3500, availableQuantity: 15 }
-    ];
-    this.skus.set(mockSKUs);
-    this.filteredSKUs.set(mockSKUs);
+  loadProducts() {
+    this.catalogService.getProducts()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.products.set(response.results);
+          this.filteredProducts.set(response.results);
+        },
+        error: (error) => {
+          this.toastService.showError('Failed to load products');
+          console.error('Error loading products:', error);
+        }
+      });
+  }
+
+  loadCategories() {
+    this.catalogService.getCategories()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.categories.set(response.results);
+        },
+        error: (error) => {
+          console.error('Error loading categories:', error);
+        }
+      });
   }
 
   onCustomerChange() {
@@ -133,8 +148,8 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
 
   addOrderItem() {
     const itemGroup = this.fb.group({
-      skuId: ['', Validators.required],
-      skuName: [''],
+      productId: ['', Validators.required],
+      productName: [''],
       quantity: [1, [Validators.required, Validators.min(1)]],
       unitPrice: [0],
       totalPrice: [0]
@@ -147,15 +162,15 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
     this.itemsArray.removeAt(index);
   }
 
-  onSKUChange(index: number) {
+  onProductChange(index: number) {
     const itemGroup = this.itemsArray.at(index) as FormGroup;
-    const skuId = itemGroup.get('skuId')?.value;
-    const sku = this.skus().find(s => s.id === skuId);
+    const productId = itemGroup.get('productId')?.value;
+    const product =this.products().find(s => s.id === productId);
 
     if (sku) {
       itemGroup.patchValue({
-        skuName: sku.name,
-        unitPrice: sku.price,
+        productName: product.name,
+        unitPrice: product.price,
         quantity: 1
       });
       this.calculateItemTotal(index);
@@ -227,7 +242,7 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
 
       const formValue = this.orderForm.value;
       const items: CreateOrderItem[] = formValue.items.map((item: any) => ({
-        skuId: item.skuId,
+        productId: item.productId,
         quantity: item.quantity
       }));
 
@@ -283,27 +298,27 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
     }
   }
 
-  filterSKUs(searchTerm: string) {
+  filterProducts(searchTerm: string) {
     if (!searchTerm) {
-      this.filteredSKUs.set(this.skus());
+      this.filteredProducts.set(this.products());
     } else {
-      const filtered = this.skus().filter(sku =>
-        sku.name.toLowerCase().includes(searchTerm.toLowerCase())
+      const filtered = this.products().filter(sku =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      this.filteredSKUs.set(filtered);
+      this.filteredProducts.set(filtered);
     }
   }
 
-  getSKUAvailableQuantity(skuId: string): number {
-    const sku = this.skus().find(s => s.id === skuId);
-    return sku?.availableQuantity || 0;
+  getProductAvailableQuantity(productId: string): number {
+    const product =this.products().find(s => s.id === productId);
+    return product?.stock_quantity || 0;
   }
 
   isQuantityValid(index: number): boolean {
     const itemGroup = this.itemsArray.at(index) as FormGroup;
-    const skuId = itemGroup.get('skuId')?.value;
+    const productId = itemGroup.get('productId')?.value;
     const quantity = itemGroup.get('quantity')?.value || 0;
-    const availableQuantity = this.getSKUAvailableQuantity(skuId);
+    const availableQuantity = this.getProductAvailableQuantity(productId);
 
     return quantity > 0 && quantity <= availableQuantity;
   }

@@ -128,14 +128,14 @@
                         <div class="form-field-container">
                           <label>Product *</label>
                           <select
-                            formControlName="skuId"
-                            (change)="onSKUChange(i)"
+                            formControlName="productId"
+                            (change)="onProductChange(i)"
                             class="form-select">
                             <option value="">Select product</option>
-                            @for (sku of filteredSKUs(); track sku.id) {
-                              <option [value]="sku.id">
-                                {{ sku.name }} - {{ formatCurrency(sku.price) }}
-                                ({{ sku.availableQuantity }} available)
+                            @for (product of filteredProducts(); track product.id) {
+                              <option [value]="product.id">
+                                {{ product.name }} - {{ formatCurrency(product.price) }}
+                                ({{ product.stock_quantity }} available)
                               </option>
                             }
                           </select>
@@ -148,12 +148,12 @@
                             formControlName="quantity"
                             (input)="onQuantityChange(i)"
                             min="1"
-                            [max]="getSKUAvailableQuantity(item.get('skuId')?.value)"
+                            [max]="getProductAvailableQuantity(item.get('productId')?.value)"
                             class="form-input"
                             [class.error]="!isQuantityValid(i)">
                           @if (!isQuantityValid(i) && item.get('quantity')?.value > 0) {
                             <span class="error-message">
-                              Only {{ getSKUAvailableQuantity(item.get('skuId')?.value) }} available
+                              Only {{ getProductAvailableQuantity(item.get('productId')?.value) }} available
                             </span>
                           }
                         </div>
