@@ -10,7 +10,9 @@
       "Bash(npx ng build:*)",
       "Read(//c/Users/webaf/Pictures/Screenshots/**)",
       "Bash(npm start)",
-      "Bash(ng serve:*)"
+      "Bash(ng serve:*)",
+      "Bash(taskkill:*)",
+      "Read(//c/WebPhoenix/pulsecore/services/backend/**)"
     ],
     "deny": [],
     "ask": []

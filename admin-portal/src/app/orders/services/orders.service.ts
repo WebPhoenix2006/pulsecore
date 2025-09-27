@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Environments } from '../../../environments/environment';
 import {
@@ -22,93 +22,64 @@ export class OrdersService {
 
   constructor(private http: HttpClient) {}
 
-  private getHeaders(): HttpHeaders {
-    return new HttpHeaders({
-      'X-Tenant-ID': this.getTenantId(),
-      'Content-Type': 'application/json',
-    });
-  }
-
-  private getTenantId(): string {
-    return localStorage.getItem('tenant-id') || 'tenant-uuid-placeholder';
-  }
-
   // Order Management
   getOrders(): Observable<{ results: Order[]; count: number; next: string | null; previous: string | null }> {
     return this.http.get<{ results: Order[]; count: number; next: string | null; previous: string | null }>(
-      this.baseUrl,
-      { headers: this.getHeaders() }
+      this.baseUrl
     );
   }
 
   getOrder(id: string): Observable<Order> {
-    return this.http.get<Order>(`${this.baseUrl}${id}/`, { headers: this.getHeaders() });
+    return this.http.get<Order>(`${this.baseUrl}${id}/`);
   }
 
   createOrder(orderData: CreateOrderRequest): Observable<Order> {
-    return this.http.post<Order>(this.baseUrl, orderData, {
-      headers: this.getHeaders(),
-    });
+    return this.http.post<Order>(this.baseUrl, orderData);
   }
 
   updateOrder(id: string, orderData: UpdateOrderRequest): Observable<Order> {
-    return this.http.patch<Order>(`${this.baseUrl}${id}/`, orderData, {
-      headers: this.getHeaders(),
-    });
+    return this.http.patch<Order>(`${this.baseUrl}${id}/`, orderData);
   }
 
   deleteOrder(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}${id}/`, { headers: this.getHeaders() });
+    return this.http.delete<void>(`${this.baseUrl}${id}/`);
   }
 
   getOrderStats(): Observable<OrderStats> {
     // Note: This endpoint might not exist in backend, using aggregated data from orders list
-    return this.http.get<OrderStats>(`${this.baseUrl}stats/`, {
-      headers: this.getHeaders(),
-    });
+    return this.http.get<OrderStats>(`${this.baseUrl}stats/`);
   }
 
   // Payment Management - Note: Payments are PaystackTransactions in backend
   getPayments(): Observable<{ results: Payment[]; count: number; next: string | null; previous: string | null }> {
     // This endpoint might not exist, payments are accessed through orders' transactions
     return this.http.get<{ results: Payment[]; count: number; next: string | null; previous: string | null }>(
-      `${this.baseUrl}transactions/`,
-      { headers: this.getHeaders() }
+      `${this.baseUrl}transactions/`
     );
   }
 
   getPayment(id: string): Observable<Payment> {
-    return this.http.get<Payment>(`${this.baseUrl}transactions/${id}/`, { headers: this.getHeaders() });
+    return this.http.get<Payment>(`${this.baseUrl}transactions/${id}/`);
   }
 
   initiatePayment(paymentData: InitiatePaymentRequest): Observable<Payment> {
-    return this.http.post<Payment>(Environments.orders.paystackInit, paymentData, {
-      headers: this.getHeaders(),
-    });
+    return this.http.post<Payment>(Environments.orders.paystackInit, paymentData);
   }
 
   verifyPayment(reference: string): Observable<Payment> {
-    return this.http.get<Payment>(`${Environments.orders.paystackVerify}${reference}/`, {
-      headers: this.getHeaders(),
-    });
+    return this.http.get<Payment>(`${Environments.orders.paystackVerify}${reference}/`);
   }
 
   getOrderPayments(orderId: string): Observable<Payment[]> {
-    return this.http.get<Payment[]>(`${this.baseUrl}${orderId}/transactions/`, {
-      headers: this.getHeaders(),
-    });
+    return this.http.get<Payment[]>(`${this.baseUrl}${orderId}/transactions/`);
   }
 
   // Returns Management - Returns are nested under orders
   requestReturn(orderId: string, returnData: ReturnRequest): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}${orderId}/return/`, returnData, {
-      headers: this.getHeaders(),
-    });
+    return this.http.post<any>(`${this.baseUrl}${orderId}/return/`, returnData);
   }
 
   getOrderReturns(orderId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}${orderId}/returns/`, {
-      headers: this.getHeaders(),
-    });
+    return this.http.get<any[]>(`${this.baseUrl}${orderId}/returns/`);
   }
 }

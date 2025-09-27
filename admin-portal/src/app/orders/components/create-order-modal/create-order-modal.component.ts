@@ -165,9 +165,9 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
   onProductChange(index: number) {
     const itemGroup = this.itemsArray.at(index) as FormGroup;
     const productId = itemGroup.get('productId')?.value;
-    const product =this.products().find(s => s.id === productId);
+    const product = this.products().find(s => s.id === productId);
 
-    if (sku) {
+    if (product) {
       itemGroup.patchValue({
         productName: product.name,
         unitPrice: product.price,
@@ -242,7 +242,7 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
 
       const formValue = this.orderForm.value;
       const items: CreateOrderItem[] = formValue.items.map((item: any) => ({
-        productId: item.productId,
+        skuId: item.productId,
         quantity: item.quantity
       }));
 
@@ -302,7 +302,7 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
     if (!searchTerm) {
       this.filteredProducts.set(this.products());
     } else {
-      const filtered = this.products().filter(sku =>
+      const filtered = this.products().filter(product =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
       this.filteredProducts.set(filtered);
@@ -310,7 +310,7 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
   }
 
   getProductAvailableQuantity(productId: string): number {
-    const product =this.products().find(s => s.id === productId);
+    const product = this.products().find(s => s.id === productId);
     return product?.stock_quantity || 0;
   }
 
