@@ -1,0 +1,56 @@
+<div class="custom-select" [class.disabled]="disabled" [class.open]="isOpen()">
+  <div class="select-trigger" (click)="toggleDropdown()" (blur)="onBlur()" tabindex="0">
+    <span class="select-value" [class.placeholder]="!selectedOption()">
+      {{ displayText() }}
+    </span>
+    <div class="select-actions">
+      @if (clearable && selectedOption()) {
+        <button
+          type="button"
+          class="clear-btn"
+          (click)="clearSelection($event)"
+          tabindex="-1">
+          <i class="ri-close-line"></i>
+        </button>
+      }
+      <i class="select-arrow ri-arrow-down-s-line" [class.rotated]="isOpen()"></i>
+    </div>
+  </div>
+
+  @if (isOpen()) {
+    <div class="select-dropdown" (mousedown)="onFocus()" (mouseleave)="onBlur()">
+      @if (searchable) {
+        <div class="search-box">
+          <i class="ri-search-line search-icon"></i>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search..."
+            [value]="searchTerm()"
+            (input)="onSearchInput($event)"
+            (focus)="onFocus()"
+            (blur)="onBlur()">
+        </div>
+      }
+
+      <div class="options-list">
+        @if (filteredOptions().length === 0) {
+          <div class="no-options">No options available</div>
+        } @else {
+          @for (option of filteredOptions(); track option.value) {
+            <div
+              class="select-option"
+              [class.selected]="option.value === value()"
+              [class.disabled]="option.disabled"
+              (click)="selectOption(option)">
+              <span class="option-label">{{ option.label }}</span>
+              @if (option.value === value()) {
+                <i class="ri-check-line option-check"></i>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>

@@ -21,7 +21,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "0.0.0.0",
-    "https://pulsecore-qk5b.onrender.com",
+    "pulsecore-qk5b.onrender.com",
 ]
 
 

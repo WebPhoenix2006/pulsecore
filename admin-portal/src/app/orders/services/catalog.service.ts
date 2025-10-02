@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Environments } from '../../../environments/environment';
+import { Product } from '../../interfaces/product.interface';
+
+// Re-export Product for convenience
+export type { Product } from '../../interfaces/product.interface';
 
 export interface Category {
   id: string;
@@ -12,18 +16,17 @@ export interface Category {
   updated_at: string;
 }
 
-export interface Product {
-  id: string;
+// Backend product structure
+export interface ProductResponse {
+  sku_id: string;
+  tenant_id: string;
   name: string;
   description?: string;
-  price: number;
-  category_id: string;
-  category?: Category;
-  sku: string;
-  stock_quantity: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  attributes?: any;
+  barcode?: string;
+  sku?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -39,6 +42,24 @@ export interface PaginatedResponse<T> {
 export class CatalogService {
   constructor(private http: HttpClient) {}
 
+  // Helper to transform backend product to frontend product
+  private transformProduct(product: ProductResponse): Product {
+    return {
+      id: product.sku_id, // Use sku_id as the primary id
+      sku_id: product.sku_id,
+      tenant_id: product.tenant_id,
+      name: product.name,
+      description: product.description,
+      price: product.attributes?.price || 0,
+      stock_quantity: product.attributes?.stock_quantity ?? 999, // Default to 999 if not provided
+      sku: product.sku,
+      barcode: product.barcode,
+      attributes: product.attributes,
+      created_at: product.created_at,
+      updated_at: product.updated_at
+    };
+  }
+
   // Categories
   getCategories(): Observable<PaginatedResponse<Category>> {
     return this.http.get<PaginatedResponse<Category>>(Environments.catalog.categories);
@@ -50,22 +71,41 @@ export class CatalogService {
 
   // Products
   getProducts(): Observable<PaginatedResponse<Product>> {
-    return this.http.get<PaginatedResponse<Product>>(Environments.catalog.products);
+    return this.http.get<PaginatedResponse<ProductResponse>>(Environments.catalog.products)
+      .pipe(
+        map(response => ({
+          ...response,
+          results: response.results.map(p => this.transformProduct(p))
+        }))
+      );
   }
 
   getProduct(id: string): Observable<Product> {
-    return this.http.get<Product>(`${Environments.catalog.products}${id}/`);
+    return this.http.get<ProductResponse>(`${Environments.catalog.products}${id}/`)
+      .pipe(
+        map(p => this.transformProduct(p))
+      );
   }
 
   getProductsByCategory(categoryId: string): Observable<PaginatedResponse<Product>> {
-    return this.http.get<PaginatedResponse<Product>>(
+    return this.http.get<PaginatedResponse<ProductResponse>>(
       `${Environments.catalog.products}?category=${categoryId}`
+    ).pipe(
+      map(response => ({
+        ...response,
+        results: response.results.map(p => this.transformProduct(p))
+      }))
     );
   }
 
   searchProducts(query: string): Observable<PaginatedResponse<Product>> {
-    return this.http.get<PaginatedResponse<Product>>(
+    return this.http.get<PaginatedResponse<ProductResponse>>(
       `${Environments.catalog.products}?search=${query}`
+    ).pipe(
+      map(response => ({
+        ...response,
+        results: response.results.map(p => this.transformProduct(p))
+      }))
     );
   }
 }

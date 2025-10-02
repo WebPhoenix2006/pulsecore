@@ -1,10 +1,12 @@
-import { Component, OnInit, OnDestroy, signal, output } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, output, computed } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { OrdersService } from '../../services/orders.service';
-import { CatalogService, Product, Category } from '../../services/catalog.service';
+import { CatalogService, Category } from '../../services/catalog.service';
+import { Product } from '../../../interfaces/product.interface';
 import { ToastService } from '../../../shared/services/toast.service';
 import { CreateOrderRequest, CreateOrderItem, DeliveryAddress } from '../../interfaces/order.interface';
+import { SelectOption } from '../../../shared/components/custom-select/custom-select.component';
 
 // Using Product interface from CatalogService instead of SKU
 
@@ -32,6 +34,23 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
   products = signal<Product[]>([]);
   filteredProducts = signal<Product[]>([]);
   categories = signal<Category[]>([]);
+
+  // Select options for custom-select
+  customerOptions = computed<SelectOption[]>(() => {
+    return this.customers().map(customer => ({
+      value: customer.id,
+      label: `${customer.name} - ${customer.email}`,
+      metadata: customer
+    }));
+  });
+
+  productOptions = computed<SelectOption[]>(() => {
+    return this.filteredProducts().map(product => ({
+      value: product.id || product.sku_id,
+      label: `${product.name} - ${this.formatCurrency(product.price)} (${product.stock_quantity ?? 999} available)`,
+      metadata: product
+    }));
+  });
 
   // Outputs
   orderCreated = output<void>();
@@ -133,15 +152,19 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
       });
   }
 
-  onCustomerChange() {
-    const customerId = this.orderForm.get('customerId')?.value;
-    const customer = this.customers().find(c => c.id === customerId);
-
-    if (customer) {
+  onCustomerChange(option: SelectOption | null) {
+    if (option && option.metadata) {
+      const customer = option.metadata as Customer;
       this.orderForm.patchValue({
         customerName: customer.name,
         customerEmail: customer.email,
         customerPhone: customer.phone || ''
+      });
+    } else {
+      this.orderForm.patchValue({
+        customerName: '',
+        customerEmail: '',
+        customerPhone: ''
       });
     }
   }
@@ -162,18 +185,26 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
     this.itemsArray.removeAt(index);
   }
 
-  onProductChange(index: number) {
+  onProductChange(index: number, option: SelectOption | null) {
     const itemGroup = this.itemsArray.at(index) as FormGroup;
-    const productId = itemGroup.get('productId')?.value;
-    const product = this.products().find(s => s.id === productId);
 
-    if (product) {
+    if (option && option.metadata) {
+      const product = option.metadata as Product;
       itemGroup.patchValue({
+        productId: product.id || product.sku_id,
         productName: product.name,
         unitPrice: product.price,
         quantity: 1
       });
       this.calculateItemTotal(index);
+    } else {
+      itemGroup.patchValue({
+        productId: '',
+        productName: '',
+        unitPrice: 0,
+        quantity: 1,
+        totalPrice: 0
+      });
     }
   }
 
@@ -310,8 +341,9 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
   }
 
   getProductAvailableQuantity(productId: string): number {
-    const product = this.products().find(s => s.id === productId);
-    return product?.stock_quantity || 0;
+    if (!productId) return 0;
+    const product = this.products().find(s => (s.id || s.sku_id) === productId);
+    return product?.stock_quantity ?? 999;
   }
 
   isQuantityValid(index: number): boolean {
