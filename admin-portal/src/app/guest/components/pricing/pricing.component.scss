@@ -2,6 +2,29 @@
   padding: 8rem 0;
   background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
 
+  .section-badge {
+    display: inline-block;
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--secondary-color);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    color: var(--card-bg);
+    margin: 20px 0;
+    font-weight: 700;
+  }
+
+  .faq-title {
+    color: var(--card-bg);
+    margin: 40px 0;
+    font-weight: 700;
+  }
+
   &-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -97,12 +120,12 @@
 
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
-      gap: 1.5rem;
+      gap: 2rem;
       margin-bottom: 4rem;
     }
 
     @media (max-width: 480px) {
-      gap: 1rem;
+      gap: 2rem;
       margin-bottom: 3rem;
     }
   }
@@ -183,7 +206,7 @@
           font-size: 1.25rem;
           font-weight: 600;
           color: var(--text-color);
-        opacity: 0.8;
+          opacity: 0.8;
         }
 
         .amount {
@@ -196,7 +219,7 @@
         .period {
           font-size: 1rem;
           color: var(--text-color);
-        opacity: 0.8;
+          opacity: 0.8;
         }
       }
 
@@ -315,7 +338,7 @@
 
         p {
           color: var(--text-color);
-        opacity: 0.8;
+          opacity: 0.8;
           line-height: 1.6;
           font-size: 0.95rem;
         }

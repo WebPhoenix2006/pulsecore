@@ -1,6 +1,6 @@
 .footer {
   background: var(--text-color);
-  color: #ffffff;
+  color: var(--card-bg);
   padding: 4rem 0 0;
 
   &-container {
@@ -39,12 +39,14 @@
       }
 
       .logo-text {
-        color: #ffffff;
+        background: var(--gradient-color);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
       }
     }
 
     .footer-description {
-      color: rgba(255, 255, 255, 0.8);
+      color: var(--card-bg);
       line-height: 1.6;
       margin-bottom: 2rem;
       font-size: 0.95rem;
@@ -58,7 +60,7 @@
         width: 40px;
         height: 40px;
         background: rgba(255, 255, 255, 0.1);
-        color: #ffffff;
+        color: var(--card-bg);
         border-radius: 8px;
         display: flex;
         align-items: center;
@@ -93,7 +95,7 @@
 
     .footer-section {
       h3 {
-        color: #ffffff;
+        color: var(--card-bg);
         font-size: 1.1rem;
         font-weight: 600;
         margin-bottom: 1rem;
@@ -101,19 +103,22 @@
 
       ul {
         list-style: none;
+        padding: 0;
 
         li {
           margin-bottom: 0.75rem;
 
           a {
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--card-bg);
             text-decoration: none;
             font-size: 0.9rem;
             transition: all 0.3s ease;
 
             &:hover {
-              color: #ffffff;
+              color: var(--card-bg);
               cursor: pointer;
+              border-bottom: 1px solid #000000;
+              transition: all 0.5s ease;
             }
           }
         }
@@ -123,14 +128,14 @@
 
   &-newsletter {
     h3 {
-      color: #ffffff;
+      color: var(--card-bg);
       font-size: 1.1rem;
       font-weight: 600;
       margin-bottom: 0.5rem;
     }
 
     p {
-      color: rgba(255, 255, 255, 0.7);
+      color: var(--card-bg);
       font-size: 0.9rem;
       line-height: 1.5;
       margin-bottom: 1.5rem;
@@ -148,9 +153,9 @@
         input {
           flex: 1;
           padding: 0.875rem 1rem;
-          border: none;
+          border: 1px solid #6366f1;
           background: transparent;
-          color: #ffffff;
+          color: var(--card-bg);
           font-size: 0.9rem;
 
           &::placeholder {
@@ -166,7 +171,7 @@
           padding: 0.875rem 1rem;
           background: var(--secondary-color);
           border: none;
-          color: #ffffff;
+          color: var(--card-bg);
           cursor: pointer;
           transition: all 0.3s ease;
 
@@ -191,6 +196,10 @@
       i {
         color: var(--success-color);
       }
+
+      span {
+        color: #1e293b;
+      }
     }
   }
 
@@ -211,15 +220,20 @@
 
       .footer-copyright {
         p {
-          color: rgba(255, 255, 255, 0.7);
+          color: var(--card-bg);
           font-size: 0.9rem;
           margin: 0;
         }
       }
 
       .footer-certifications {
+        font-weight: 500;
         display: flex;
         gap: 1.5rem;
+
+        span {
+          color: #1e293b;
+        }
 
         @media (max-width: 768px) {
           justify-content: center;
@@ -245,7 +259,7 @@
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          color: rgba(255, 255, 255, 0.7);
+          color: var(--card-bg);
           font-size: 0.85rem;
 
           .status-dot {
