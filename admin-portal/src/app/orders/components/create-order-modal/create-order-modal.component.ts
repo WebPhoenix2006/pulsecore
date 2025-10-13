@@ -46,7 +46,7 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
 
   productOptions = computed<SelectOption[]>(() => {
     return this.filteredProducts().map(product => ({
-      value: product.id || product.sku_id,
+      value: product.sku_id,  // Always use sku_id
       label: `${product.name} - ${this.formatCurrency(product.price)} (${product.stock_quantity ?? 999} available)`,
       metadata: product
     }));
@@ -190,8 +190,9 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
 
     if (option && option.metadata) {
       const product = option.metadata as Product;
+      // Always use sku_id as it's what the backend expects
       itemGroup.patchValue({
-        productId: product.id || product.sku_id,
+        productId: product.sku_id,
         productName: product.name,
         unitPrice: product.price,
         quantity: 1
@@ -272,32 +273,32 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
       this.isLoading.set(true);
 
       const formValue = this.orderForm.value;
-      const items: CreateOrderItem[] = formValue.items.map((item: any) => ({
-        skuId: item.productId,
-        quantity: item.quantity
-      }));
 
-      const orderData: CreateOrderRequest = {
-        customerId: formValue.customerId,
-        items,
-        notes: formValue.notes || undefined,
-        discount: formValue.discount || undefined
+      // Match backend API format exactly
+      const orderData: any = {
+        customer_name: formValue.customerName || 'Walk-in Customer',
+        items: formValue.items.map((item: any) => ({
+          sku_id: item.productId,  // Backend expects sku_id, not skuId
+          quantity: item.quantity
+        })),
+        status: 'pending',
+        payment_status: 'unpaid'
       };
-
-      if (formValue.includeDelivery) {
-        orderData.deliveryAddress = formValue.deliveryAddress;
-      }
 
       this.ordersService.createOrder(orderData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: () => {
+          next: (response: any) => {
+            const total = response.total_amount || response.totalAmount || 0;
+            this.toastService.showSuccess(`Order created successfully! Total: ${this.formatCurrency(parseFloat(total))}`);
             this.orderCreated.emit();
             this.isLoading.set(false);
           },
           error: (error) => {
-            this.toastService.showError('Failed to create order');
+            const errorMsg = error?.error?.detail || error?.error?.non_field_errors?.[0] || 'Failed to create order';
+            this.toastService.showError(errorMsg);
             this.isLoading.set(false);
+            console.error('Create order error:', error);
           }
         });
     } else {
@@ -342,7 +343,7 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
 
   getProductAvailableQuantity(productId: string): number {
     if (!productId) return 0;
-    const product = this.products().find(s => (s.id || s.sku_id) === productId);
+    const product = this.products().find(s => s.sku_id === productId);
     return product?.stock_quantity ?? 999;
   }
 

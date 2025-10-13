@@ -100,7 +100,7 @@ export class Payments implements OnInit, OnDestroy {
       const term = this.searchTerm().toLowerCase();
       filtered = filtered.filter(payment =>
         payment.reference.toLowerCase().includes(term) ||
-        payment.orderId.toLowerCase().includes(term)
+        payment.order_id.toLowerCase().includes(term)
       );
     }
 

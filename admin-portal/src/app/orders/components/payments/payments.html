@@ -150,7 +150,7 @@
                   <span class="payment-reference">{{ payment.reference }}</span>
                 </td>
                 <td>
-                  <span class="order-id">#{{ payment.orderId.slice(-8) }}</span>
+                  <span class="order-id">#{{ payment.order_id.slice(-8) }}</span>
                 </td>
                 <td>
                   <span class="amount">{{ formatCurrency(payment.amount) }}</span>
@@ -306,7 +306,7 @@
               </div>
               <div class="detail-item">
                 <label>Order ID</label>
-                <span class="order-id">#{{ selectedPayment()!.orderId.slice(-8) }}</span>
+                <span class="order-id">#{{ selectedPayment()!.order_id.slice(-8) }}</span>
               </div>
             </div>
           </div>

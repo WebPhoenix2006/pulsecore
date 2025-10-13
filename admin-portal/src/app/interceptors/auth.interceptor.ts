@@ -37,6 +37,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError(error => {
       // If we get 401 Unauthorized on a protected endpoint, try to refresh the token
       if (error instanceof HttpErrorResponse && error.status === 401 && !shouldSkipAuth(req.url)) {
+        // Check if this is a token blacklist error
+        const errorMessage = error.error?.detail || error.error?.message || '';
+        if (errorMessage.toLowerCase().includes('blacklist') ||
+            errorMessage.toLowerCase().includes('token') && errorMessage.toLowerCase().includes('invalid')) {
+          console.warn('Token is blacklisted or invalid - logging out');
+          authService.clearAuth();
+          router.navigate(['/auth/login']);
+          return EMPTY;
+        }
         return handle401Error(authReq, next, authService, router);
       }
       return throwError(() => error);
@@ -128,6 +137,7 @@ function handle401Error(request: any, next: any, authService: AuthService, route
 
   // CASE 1: No refresh token or refresh token expired -> User must re-login
   if (!refreshToken || authService.isTokenExpired(refreshToken)) {
+    console.warn('No refresh token or refresh token expired - redirecting to login');
     authService.clearAuth();
     router.navigate(['/auth/login']);
     return EMPTY;
@@ -143,14 +153,25 @@ function handle401Error(request: any, next: any, authService: AuthService, route
         // SUCCESS: Got new access token -> retry original request with new token and tenant ID
         isRefreshing = false;
         refreshTokenSubject.next(newToken);
+        console.log('Token refreshed successfully, retrying original request');
         return next(addTokenHeader(request, newToken, authService));
       }),
       catchError((error) => {
-        // FAILURE: Refresh failed -> clear auth and redirect to login
+        // FAILURE: Refresh failed -> check if it's due to blacklist or expiration
         isRefreshing = false;
+        const errorMessage = error?.error?.detail || error?.error?.message || '';
+
+        if (errorMessage.toLowerCase().includes('blacklist')) {
+          console.warn('Refresh token is blacklisted - logging out');
+        } else if (errorMessage.toLowerCase().includes('expired')) {
+          console.warn('Refresh token expired - logging out');
+        } else {
+          console.warn('Token refresh failed - logging out');
+        }
+
         authService.clearAuth();
         router.navigate(['/auth/login']);
-        return throwError(() => error);
+        return EMPTY;
       })
     );
   }

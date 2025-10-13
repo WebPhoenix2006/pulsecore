@@ -17,7 +17,15 @@
       "Bash(npm run:*)",
       "Bash(netstat:*)",
       "Bash(findstr:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(dir \"C:\\WebPhoenix\\pulsecore\\services\\main_services\\analytics\\tests\")",
+      "Bash(python -m pytest main_services/analytics/tests/ -v)",
+      "Bash(python -m pytest main_services/analytics/tests/ -v --tb=short)",
+      "Bash(python -m pytest:*)",
+      "Bash(python manage.py:*)",
+      "Bash(python:*)",
+      "Read(//c/Users/webaf/Pictures/Screenshots/**)",
+      "Bash(dir \"C:\\WebPhoenix\\pulsecore\\admin-portal\\src\\app\\orders\" /s /b)"
     ],
     "deny": [],
     "ask": []

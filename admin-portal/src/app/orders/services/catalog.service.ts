@@ -69,9 +69,9 @@ export class CatalogService {
     return this.http.get<Category>(`${Environments.catalog.categories}${id}/`);
   }
 
-  // Products
+  // Products - Use inventory SKUs instead of catalog products
   getProducts(): Observable<PaginatedResponse<Product>> {
-    return this.http.get<PaginatedResponse<ProductResponse>>(Environments.catalog.products)
+    return this.http.get<PaginatedResponse<ProductResponse>>(Environments.inventory.skus)
       .pipe(
         map(response => ({
           ...response,

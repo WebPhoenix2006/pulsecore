@@ -8,7 +8,7 @@
           Order Details
         </h2>
         <div class="order-meta">
-          <span class="order-id">#{{ order().id.slice(-8) }}</span>
+          <span class="order-id">#{{ order().order_id.slice(-8) }}</span>
           <span class="badge" [class]="getStatusClass(order().status)">
             {{ order().status | titlecase }}
           </span>
@@ -66,23 +66,7 @@
             <div class="info-grid">
               <div class="info-item">
                 <label>Name</label>
-                <span>{{ order().customerName || 'Unknown' }}</span>
-              </div>
-              @if (order().customerEmail) {
-                <div class="info-item">
-                  <label>Email</label>
-                  <span>{{ order().customerEmail }}</span>
-                </div>
-              }
-              @if (order().customerPhone) {
-                <div class="info-item">
-                  <label>Phone</label>
-                  <span>{{ order().customerPhone }}</span>
-                </div>
-              }
-              <div class="info-item">
-                <label>Customer ID</label>
-                <span class="customer-id">{{ order().customerId }}</span>
+                <span>{{ order().customer_name || 'Unknown' }}</span>
               </div>
             </div>
           </div>
@@ -96,24 +80,18 @@
             <div class="info-grid">
               <div class="info-item">
                 <label>Order Date</label>
-                <span>{{ formatDate(order().createdAt) }}</span>
+                <span>{{ formatDate(order().created_at) }}</span>
               </div>
               <div class="info-item">
                 <label>Last Updated</label>
-                <span>{{ formatDate(order().updatedAt) }}</span>
+                <span>{{ formatDate(order().updated_at) }}</span>
               </div>
-              @if (order().deliveredAt) {
-                <div class="info-item">
-                  <label>Delivered At</label>
-                  <span>{{ formatDate(order().deliveredAt!) }}</span>
-                </div>
-              }
-              @if (order().cancelledAt) {
-                <div class="info-item">
-                  <label>Cancelled At</label>
-                  <span>{{ formatDate(order().cancelledAt!) }}</span>
-                </div>
-              }
+              <div class="info-item">
+                <label>Payment Status</label>
+                <span class="badge" [class]="getStatusClass(order().payment_status)">
+                  {{ order().payment_status | titlecase }}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -127,69 +105,23 @@
               <table class="table">
                 <thead>
                   <tr>
-                    <th>Item</th>
+                    <th>Item ID</th>
+                    <th>SKU ID</th>
                     <th>Quantity</th>
-                    <th>Unit Price</th>
-                    <th>Total</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @for (item of order().items; track item.id) {
+                  @for (item of order().items; track item.item_id) {
                     <tr>
-                      <td>
-                        <div class="item-info">
-                          <span class="item-name">{{ item.skuName || item.skuId }}</span>
-                          <span class="item-id">SKU: {{ item.skuId }}</span>
-                        </div>
-                      </td>
+                      <td>{{ item.item_id }}</td>
+                      <td>{{ item.sku_id }}</td>
                       <td>{{ item.quantity }}</td>
-                      <td>{{ formatCurrency(item.unitPrice) }}</td>
-                      <td class="amount">{{ formatCurrency(item.totalPrice) }}</td>
                     </tr>
                   }
                 </tbody>
               </table>
             </div>
           </div>
-
-          <!-- Delivery Address -->
-          @if (order().deliveryAddress) {
-            <div class="info-section">
-              <h3 class="section-title">
-                <i class="ri-map-pin-line"></i>
-                Delivery Address
-              </h3>
-              <div class="address-card">
-                <div class="address-line">{{ order().deliveryAddress!.street }}</div>
-                <div class="address-line">
-                  {{ order().deliveryAddress!.city }}, {{ order().deliveryAddress!.state }}
-                </div>
-                @if (order().deliveryAddress!.postalCode) {
-                  <div class="address-line">{{ order().deliveryAddress!.postalCode }}</div>
-                }
-                <div class="address-line">{{ order().deliveryAddress!.country }}</div>
-                @if (order().deliveryAddress!.landmark) {
-                  <div class="address-line landmark">
-                    <i class="ri-map-pin-2-line"></i>
-                    {{ order().deliveryAddress!.landmark }}
-                  </div>
-                }
-              </div>
-            </div>
-          }
-
-          <!-- Order Notes -->
-          @if (order().notes) {
-            <div class="info-section">
-              <h3 class="section-title">
-                <i class="ri-sticky-note-line"></i>
-                Order Notes
-              </h3>
-              <div class="notes-card">
-                <p>{{ order().notes }}</p>
-              </div>
-            </div>
-          }
 
           <!-- Order Summary -->
           <div class="info-section">
@@ -198,31 +130,9 @@
               Order Summary
             </h3>
             <div class="summary-card">
-              <div class="summary-row">
-                <span>Subtotal</span>
-                <span>{{ formatCurrency(order().subtotal) }}</span>
-              </div>
-              @if (order().tax > 0) {
-                <div class="summary-row">
-                  <span>Tax</span>
-                  <span>{{ formatCurrency(order().tax) }}</span>
-                </div>
-              }
-              @if (order().discount && order().discount! > 0) {
-                <div class="summary-row">
-                  <span>Discount</span>
-                  <span class="discount">-{{ formatCurrency(order().discount!) }}</span>
-                </div>
-              }
-              @if (order().deliveryFee && order().deliveryFee! > 0) {
-                <div class="summary-row">
-                  <span>Delivery Fee</span>
-                  <span>{{ formatCurrency(order().deliveryFee!) }}</span>
-                </div>
-              }
               <div class="summary-row total">
                 <span>Total Amount</span>
-                <span class="amount">{{ formatCurrency(order().totalAmount) }}</span>
+                <span class="amount">{{ formatCurrency(order().total_amount) }}</span>
               </div>
 
               @if (getTotalPaid() > 0) {

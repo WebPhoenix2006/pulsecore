@@ -1,0 +1,364 @@
+openapi: 3.0.3
+info:
+  title: PulseCore Analytics API
+  version: 1.0.0
+  description: "Analytics endpoints for PulseCore MVP — dashboard KPIs, time-series, aggregations, and CSV export. All endpoints require X-Tenant-ID header (row-level tenancy)."
+servers:
+  - url: https://api.example.com
+    description: "Production / replace with environment-specific server"
+
+tags:
+  - name: Analytics
+    description: "Dashboard & analytics endpoints"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    TenantHeader:
+      name: X-Tenant-ID
+      in: header
+      description: "Tenant UUID (row-level tenancy). REQUIRED for all requests."
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    TimeSeriesPoint:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2025-09-01"
+        value:
+          type: number
+          example: 125.5
+
+    TopSKU:
+      type: object
+      properties:
+        sku_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        sold_quantity:
+          type: integer
+        revenue:
+          type: number
+      example:
+        sku_id: "a1b2c3d4-1111-2222-3333-4444abcd0000"
+        name: "Coca-Cola 1L"
+        sold_quantity: 120
+        revenue: 239.8
+
+    DashboardResponse:
+      type: object
+      properties:
+        stock_total:
+          type: integer
+          description: "Sum of current stock across SKUs for tenant"
+        low_stock_count:
+          type: integer
+        stockout_count:
+          type: integer
+        sales_count:
+          type: integer
+        revenue_total:
+          type: number
+          format: float
+        top_skus:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopSKU"
+        revenue_trend:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeSeriesPoint"
+        stock_trend:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimeSeriesPoint"
+
+    AggregationParams:
+      type: object
+      properties:
+        start_date:
+          type: string
+          format: date
+          description: "ISO date YYYY-MM-DD. Defaults to 30 days ago if not provided."
+        end_date:
+          type: string
+          format: date
+          description: "ISO date YYYY-MM-DD. Defaults to today if not provided."
+        group_by:
+          type: string
+          enum: [day, week, month]
+          description: "Aggregation resolution. Default: day"
+        sku_id:
+          type: string
+          format: uuid
+        category:
+          type: string
+
+paths:
+  /api/analytics/dashboard/:
+    get:
+      tags: [Analytics]
+      summary: "Top-level dashboard KPIs and small datasets for charts"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TenantHeader"
+        - in: query
+          name: start_date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: end_date
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: "Dashboard KPIs and small series to populate charts"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardResponse"
+        "401":
+          description: Unauthorized
+        "400":
+          description: Bad Request
+
+  /api/analytics/sales/:
+    get:
+      tags: [Analytics]
+      summary: "Sales aggregation (time series / per-SKU / per-category)"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TenantHeader"
+        - in: query
+          name: start_date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: end_date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: group_by
+          schema:
+            type: string
+            enum: [day, week, month]
+            default: day
+        - in: query
+          name: sku_id
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: category
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: "Aggregated sales"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        period:
+                          type: string
+                          example: "2025-09-01"
+                        sales_count:
+                          type: integer
+                        revenue:
+                          type: number
+        "400":
+          description: Bad Request
+
+  /api/analytics/stock/:
+    get:
+      tags: [Analytics]
+      summary: "Stock levels & stock history (adjustments)"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TenantHeader"
+        - in: query
+          name: sku_id
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: category
+          schema:
+            type: string
+        - in: query
+          name: start_date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: end_date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: group_by
+          schema:
+            type: string
+            enum: [day, week, month]
+      responses:
+        "200":
+          description: "Stock aggregate/time series"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_stock:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TimeSeriesPoint"
+
+  /api/analytics/stockouts/:
+    get:
+      tags: [Analytics]
+      summary: "Stockout incidents (list or count)"
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TenantHeader"
+        - in: query
+          name: start_date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: end_date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: sku_id
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: "Stockout incidents"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                  incidents:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        sku_id:
+                          type: string
+                          format: uuid
+                        sku_name:
+                          type: string
+                        date:
+                          type: string
+                          format: date
+                        note:
+                          type: string
+
+  /api/analytics/export/:
+    get:
+      tags: [Analytics]
+      summary: "Export analytics CSV for a metric (sales/stock/revenue). Use query params to scope."
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/TenantHeader"
+        - in: query
+          name: metric
+          schema:
+            type: string
+            enum: [sales, stock, revenue, stockouts]
+          required: true
+        - in: query
+          name: start_date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: end_date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: sku_id
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: category
+          schema:
+            type: string
+        - in: query
+          name: group_by
+          schema:
+            type: string
+            enum: [day, week, month]
+      responses:
+        "200":
+          description: "CSV file stream"
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized

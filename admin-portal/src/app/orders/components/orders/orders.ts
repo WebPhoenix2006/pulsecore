@@ -85,9 +85,8 @@ export class Orders implements OnInit, OnDestroy {
     if (this.searchTerm()) {
       const term = this.searchTerm().toLowerCase();
       filtered = filtered.filter(order =>
-        order.id.toLowerCase().includes(term) ||
-        order.customerName?.toLowerCase().includes(term) ||
-        order.customerEmail?.toLowerCase().includes(term)
+        order.order_id.toString().toLowerCase().includes(term) ||
+        order.customer_name?.toLowerCase().includes(term)
       );
     }
 
@@ -135,7 +134,7 @@ export class Orders implements OnInit, OnDestroy {
   updateOrderStatus(order: Order, newStatus: OrderStatus) {
     this.isLoading.set(true);
 
-    this.ordersService.updateOrder(order.id, { status: newStatus })
+    this.ordersService.updateOrder(order.order_id.toString(), { status: newStatus })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (updatedOrder) => {
@@ -154,7 +153,7 @@ export class Orders implements OnInit, OnDestroy {
     if (confirm('Are you sure you want to delete this order?')) {
       this.isLoading.set(true);
 
-      this.ordersService.deleteOrder(order.id)
+      this.ordersService.deleteOrder(order.order_id.toString())
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
@@ -222,12 +221,10 @@ export class Orders implements OnInit, OnDestroy {
 
   getPaymentStatusClass(status: string): string {
     switch (status) {
-      case 'pending':
+      case 'unpaid':
         return 'badge-warning';
       case 'paid':
         return 'badge-success';
-      case 'failed':
-        return 'badge-error';
       case 'refunded':
         return 'badge-secondary';
       default:
