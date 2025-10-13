@@ -1,36 +1,20 @@
 export interface Order {
-  id: string;
-  customerId: string;
-  customerName?: string;
-  customerEmail?: string;
-  customerPhone?: string;
+  order_id: string;
+  customer_name: string;
+  customer_email?: string;
   status: OrderStatus;
   items: OrderItem[];
-  totalAmount: number;
-  subtotal: number;
-  tax: number;
-  discount?: number;
-  deliveryFee?: number;
-  notes?: string;
-  deliveryAddress?: DeliveryAddress;
-  paymentStatus: PaymentStatus;
-  createdAt: string;
-  updatedAt: string;
-  deliveredAt?: string;
-  cancelledAt?: string;
-  returnRequested?: boolean;
-  returnStatus?: ReturnStatus;
-  returnReason?: string;
+  total_amount: number;
+  payment_status: string;
+  created_at: string;
+  updated_at: string;
+  tenant_id?: string;
 }
 
 export interface OrderItem {
-  id: string;
-  orderId: string;
-  skuId: string;
-  skuName?: string;
+  item_id: string;
+  sku_id: string;
   quantity: number;
-  unitPrice: number;
-  totalPrice: number;
 }
 
 export interface DeliveryAddress {
@@ -64,7 +48,7 @@ export interface UpdateOrderRequest {
 
 export interface Payment {
   id: string;
-  orderId: string;
+  order_id: string;
   amount: number;
   currency: string;
   status: PaymentStatus;
@@ -80,8 +64,8 @@ export interface Payment {
 }
 
 export interface InitiatePaymentRequest {
-  orderId: string;
-  email: string;
+  order_id: string;
+  customer_email: string;
   amount: number;
   currency?: string;
   callbackUrl?: string;
@@ -119,25 +103,26 @@ export enum OrderStatus {
   PENDING = 'pending',
   PROCESSING = 'processing',
   DELIVERED = 'delivered',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 export enum PaymentStatus {
+  UNPAID = 'unpaid',
   PENDING = 'pending',
   PAID = 'paid',
   FAILED = 'failed',
-  REFUNDED = 'refunded'
+  REFUNDED = 'refunded',
 }
 
 export enum PaymentProvider {
-  PAYSTACK = 'paystack'
+  PAYSTACK = 'paystack',
 }
 
 export enum ReturnStatus {
   REQUESTED = 'requested',
   APPROVED = 'approved',
   REJECTED = 'rejected',
-  PROCESSED = 'processed'
+  PROCESSED = 'processed',
 }
 
 export interface OrderStats {

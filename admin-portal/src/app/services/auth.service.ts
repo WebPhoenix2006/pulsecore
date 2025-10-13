@@ -20,14 +20,20 @@ export class AuthService {
   private tenantId = 'tenant-id';
   private isRefreshing = false;
   private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
+  private tokenExpirationTimer: any;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router) {
+    // Start monitoring token expiration when service is initialized
+    this.startTokenExpirationMonitoring();
+  }
 
   // Store authentication tokens and tenant ID after successful login
   setAuth(access: string, refresh: string, tenantId: string) {
     localStorage.setItem(this.accessKey, access);
     localStorage.setItem(this.refreshKey, refresh);
     localStorage.setItem(this.tenantId, tenantId);
+    // Restart token monitoring when new tokens are set
+    this.startTokenExpirationMonitoring();
   }
 
   getToken(): string | null {
@@ -67,8 +73,9 @@ export class AuthService {
   logout(): Observable<LogoutResponseInterface> {
     const refreshToken = this.getRefreshToken();
 
+    // Always clear auth on logout, regardless of token state
+    // This ensures user can logout even if tokens are expired/blacklisted
     if (!refreshToken) {
-      // If no refresh token, still clear local storage and redirect
       this.clearAuth();
       this.router.navigate(['/auth/login']);
       return throwError(() => new Error('No refresh token available'));
@@ -78,17 +85,21 @@ export class AuthService {
       refresh: refreshToken,
     };
 
+    // Try to blacklist the token on backend, but don't fail if it's already blacklisted
     return this.http.post<LogoutResponseInterface>(Environments.auth.logout, data, {
       responseType: 'text' as 'json',
     }).pipe(
       tap(() => {
-        // Clear auth on successful logout
+        console.log('Successfully blacklisted token on backend');
         this.clearAuth();
+        this.router.navigate(['/auth/login']);
       }),
       catchError((error) => {
-        // Even if logout fails on backend, clear local storage
-        console.warn('Logout request failed, but clearing local storage:', error);
+        // Clear auth even if logout fails (token might be already blacklisted/expired)
+        console.warn('Logout API failed (token may be expired/blacklisted), clearing local storage:', error);
         this.clearAuth();
+        this.router.navigate(['/auth/login']);
+        // Return success since we successfully logged out locally
         return throwError(() => error);
       })
     );
@@ -134,6 +145,11 @@ export class AuthService {
     localStorage.removeItem(this.accessKey);
     localStorage.removeItem(this.refreshKey);
     localStorage.removeItem(this.tenantId);
+    // Clear token expiration timer
+    if (this.tokenExpirationTimer) {
+      clearTimeout(this.tokenExpirationTimer);
+      this.tokenExpirationTimer = null;
+    }
   }
 
   isAuthenticated(): boolean {
@@ -170,5 +186,55 @@ export class AuthService {
   // Get current user
   getCurrentUser(): Observable<any> {
     return this.http.get<any>(Environments.auth.currentUser);
+  }
+
+  // Monitor token expiration and automatically logout or refresh
+  private startTokenExpirationMonitoring() {
+    // Clear any existing timer
+    if (this.tokenExpirationTimer) {
+      clearTimeout(this.tokenExpirationTimer);
+    }
+
+    const accessToken = this.getToken();
+    const refreshToken = this.getRefreshToken();
+
+    // No tokens to monitor
+    if (!accessToken && !refreshToken) {
+      return;
+    }
+
+    // Both tokens expired - logout immediately
+    if (accessToken && this.isTokenExpired(accessToken) &&
+        refreshToken && this.isTokenExpired(refreshToken)) {
+      console.warn('Both tokens expired - logging out automatically');
+      this.clearAuth();
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
+    // Check refresh token expiration
+    if (refreshToken) {
+      const refreshExpiration = this.getTokenExpiration(refreshToken);
+      if (refreshExpiration) {
+        const refreshTimeUntilExpiry = refreshExpiration.getTime() - Date.now();
+
+        // If refresh token expires in less than 1 minute, logout immediately
+        if (refreshTimeUntilExpiry < 60000) {
+          console.warn('Refresh token expiring soon - logging out automatically');
+          this.clearAuth();
+          this.router.navigate(['/auth/login']);
+          return;
+        }
+
+        // Set timer to logout when refresh token expires
+        this.tokenExpirationTimer = setTimeout(() => {
+          console.warn('Refresh token expired - logging out automatically');
+          this.clearAuth();
+          this.router.navigate(['/auth/login']);
+        }, refreshTimeUntilExpiry);
+
+        console.log(`Token expiration monitoring active. Refresh token expires in ${Math.floor(refreshTimeUntilExpiry / 1000)}s`);
+      }
+    }
   }
 }

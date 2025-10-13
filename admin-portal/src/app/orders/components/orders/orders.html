@@ -124,17 +124,14 @@
             </tr>
           </thead>
           <tbody>
-            @for (order of filteredOrders(); track order.id) {
+            @for (order of filteredOrders(); track order.order_id) {
               <tr>
                 <td>
-                  <span class="order-id">#{{ order.id.slice(-8) }}</span>
+                  <span class="order-id">#{{ order.order_id.toString().slice(-8) }}</span>
                 </td>
                 <td>
                   <div class="customer-info">
-                    <div class="customer-name">{{ order.customerName || 'Unknown' }}</div>
-                    @if (order.customerEmail) {
-                      <div class="customer-email">{{ order.customerEmail }}</div>
-                    }
+                    <div class="customer-name">{{ order.customer_name || 'Unknown' }}</div>
                   </div>
                 </td>
                 <td>
@@ -143,18 +140,18 @@
                   </span>
                 </td>
                 <td>
-                  <span class="item-count">{{ order.items.length }} item(s)</span>
+                  <span class="item-count">{{ order.items.length || 0 }} item(s)</span>
                 </td>
                 <td>
-                  <span class="amount">{{ formatCurrency(order.totalAmount) }}</span>
+                  <span class="amount">{{ formatCurrency(order.total_amount) }}</span>
                 </td>
                 <td>
-                  <span class="badge" [class]="getPaymentStatusClass(order.paymentStatus)">
-                    {{ order.paymentStatus | titlecase }}
+                  <span class="badge" [class]="getPaymentStatusClass(order.payment_status)">
+                    {{ order.payment_status | titlecase }}
                   </span>
                 </td>
                 <td>
-                  <span class="date">{{ formatDate(order.createdAt) }}</span>
+                  <span class="date">{{ formatDate(order.created_at) }}</span>
                 </td>
                 <td>
                   <div class="action-buttons">
@@ -184,7 +181,7 @@
                       </div>
                     }
 
-                    @if (order.status === 'delivered' && !order.returnRequested) {
+                    @if (order.status === 'delivered') {
                       <button
                         class="btn-icon btn-warning"
                         (click)="openReturnModal(order)"

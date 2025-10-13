@@ -37,7 +37,7 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
   }
 
   loadOrderPayments() {
-    this.ordersService.getOrderPayments(this.order().id)
+    this.ordersService.getOrderPayments(this.order().order_id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (payments) => {
@@ -50,7 +50,7 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
   }
 
   loadOrderReturns() {
-    this.ordersService.getOrderReturns(this.order().id)
+    this.ordersService.getOrderReturns(this.order().order_id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (returns) => {
@@ -66,9 +66,9 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
 
     const paymentData = {
-      orderId: this.order().id,
-      email: this.order().customerEmail || '',
-      amount: this.order().totalAmount,
+      order_id: this.order().order_id,
+      customer_email: this.order().customer_email || 'customer@example.com',
+      amount: this.order().total_amount,
       currency: 'NGN'
     };
 
@@ -116,8 +116,9 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
     this.close.emit();
   }
 
-  getStatusClass(status: OrderStatus | PaymentStatus): string {
+  getStatusClass(status: string): string {
     switch (status) {
+      case 'unpaid':
       case 'pending':
         return 'badge-warning';
       case 'processing':
@@ -159,11 +160,11 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
   }
 
   getOutstandingAmount(): number {
-    return Math.max(0, this.order().totalAmount - this.getTotalPaid());
+    return Math.max(0, this.order().total_amount - this.getTotalPaid());
   }
 
   canInitiatePayment(): boolean {
-    return this.order().paymentStatus !== 'paid' &&
+    return this.order().payment_status !== 'paid' &&
            this.order().status !== 'cancelled' &&
            this.getOutstandingAmount() > 0;
   }

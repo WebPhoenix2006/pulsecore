@@ -110,7 +110,9 @@ logger = logging.getLogger(__name__)
 
 class LogoutView(APIView):
     # Use Access token in Authorization Bearer Token, and Refresh token in logout body
-    permission_classes = [permissions.IsAuthenticated]
+    # NOTE: This endpoint should work even if the access token is expired,
+    # as long as the user can provide a valid refresh token to blacklist
+    permission_classes = [permissions.AllowAny]  # Changed to allow logout even with expired tokens
 
     def post(self, request):
         refresh_token = request.data.get("refresh")
@@ -126,16 +128,27 @@ class LogoutView(APIView):
             token.blacklist()
 
             # Optional: Log logout for security auditing
-            logger.info(f"User {request.user.id} logged out successfully")
+            user_id = getattr(request.user, 'id', 'anonymous')
+            logger.info(f"User {user_id} logged out successfully")
 
             return Response(
                 {"detail": "Successfully logged out."},
                 status=status.HTTP_205_RESET_CONTENT,
             )
         except TokenError as e:
+            error_msg = str(e).lower()
+            # If token is already blacklisted or expired, still return success
+            # This allows users to logout even if their tokens are already invalid
+            if 'blacklist' in error_msg or 'expired' in error_msg:
+                logger.info(f"Logout attempt with already blacklisted/expired token")
+                return Response(
+                    {"detail": "Successfully logged out (token was already invalid)."},
+                    status=status.HTTP_205_RESET_CONTENT,
+                )
+
             logger.warning(f"Invalid refresh token during logout: {str(e)}")
             return Response(
-                {"detail": "Invalid or expired refresh token."},
+                {"detail": "Invalid refresh token."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:

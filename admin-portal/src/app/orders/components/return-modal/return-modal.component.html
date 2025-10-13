@@ -20,19 +20,19 @@
           <div class="order-summary">
             <div class="summary-item">
               <span class="label">Order ID:</span>
-              <span class="value">#{{ order().id.slice(-8) }}</span>
+              <span class="value">#{{ order().order_id.toString().slice(-8) }}</span>
             </div>
             <div class="summary-item">
               <span class="label">Customer:</span>
-              <span class="value">{{ order().customerName || 'Unknown' }}</span>
+              <span class="value">{{ order().customer_name || 'Unknown' }}</span>
             </div>
             <div class="summary-item">
               <span class="label">Order Total:</span>
-              <span class="value">{{ formatCurrency(order().totalAmount) }}</span>
+              <span class="value">{{ formatCurrency(order().total_amount) }}</span>
             </div>
             <div class="summary-item">
               <span class="label">Order Date:</span>
-              <span class="value">{{ order().createdAt | date:'short' }}</span>
+              <span class="value">{{ order().created_at | date:'short' }}</span>
             </div>
           </div>
         </div>
@@ -157,15 +157,15 @@
           <div class="form-section">
             <h3>Items to be Returned</h3>
             <div class="items-summary">
-              @for (orderItem of order().items; track orderItem.id) {
+              @for (orderItem of order().items; track orderItem.item_id) {
                 <div class="summary-item-card">
                   <div class="item-info">
-                    <span class="item-name">{{ orderItem.skuName || orderItem.skuId }}</span>
-                    <span class="item-sku">SKU: {{ orderItem.skuId }}</span>
+                    <span class="item-name">{{ orderItem.sku_id }}</span>
+                    <span class="item-sku">SKU: {{ orderItem.sku_id }}</span>
                   </div>
                   <div class="item-quantity">
                     <span>Qty: {{ orderItem.quantity }}</span>
-                    <span class="item-total">{{ formatCurrency(orderItem.totalPrice) }}</span>
+                    <!-- <span class="item-total">{{ formatCurrency(orderItem.totalPrice) }}</span> -->
                   </div>
                 </div>
               }
@@ -192,7 +192,7 @@
                 <span>Estimated Refund:</span>
                 <span class="amount">
                   @if (returnType() === 'full') {
-                    {{ formatCurrency(order().totalAmount) }}
+                    {{ formatCurrency(order().total_amount) }}
                   } @else {
                     {{ formatCurrency(getTotalReturnValue()) }}
                   }

@@ -39,6 +39,7 @@ import { CustomScrollbarComponent } from './components/custom-scrollbar/custom-s
 import { PaginationComponent } from './components/pagination/pagination.component';
 import { SvgIcons } from './components/svg-icons/svg-icons';
 import { Dropdown } from './components/dropdown/dropdown';
+import { CustomSelectComponent } from './components/custom-select/custom-select.component';
 
 @NgModule({
   declarations: [
@@ -53,6 +54,7 @@ import { Dropdown } from './components/dropdown/dropdown';
     Dropdown,
     PaginationComponent,
     SvgIcons,
+    CustomSelectComponent,
   ],
   imports: [
     CommonModule,
@@ -90,6 +92,7 @@ import { Dropdown } from './components/dropdown/dropdown';
     PrimeDataTableComponent,
     SpecialH1,
     CustomScrollbarComponent,
+    CustomSelectComponent,
     // Export PrimeNG modules so they can be used in pages that import SharedModule
     TableModule,
     CardModule,

@@ -55,9 +55,9 @@ export class ReturnModalComponent implements OnInit, OnDestroy {
     // Add all order items to the form for partial returns
     this.order().items.forEach(item => {
       const itemGroup = this.fb.group({
-        orderItemId: [item.id],
-        skuId: [item.skuId],
-        skuName: [item.skuName || item.skuId],
+        orderItemId: [item.item_id],
+        skuId: [item.sku_id],
+        skuName: [item.sku_id], // OrderItem doesn't have skuName
         originalQuantity: [item.quantity],
         returnQuantity: [0, [Validators.min(0), Validators.max(item.quantity)]],
         reason: [''],
@@ -127,20 +127,9 @@ export class ReturnModalComponent implements OnInit, OnDestroy {
   }
 
   getTotalReturnValue(): number {
-    let total = 0;
-    const selectedItems = this.getSelectedItems();
-
-    selectedItems.forEach(control => {
-      const returnQuantity = control.get('returnQuantity')?.value || 0;
-      const skuId = control.get('skuId')?.value;
-      const orderItem = this.order().items.find(item => item.skuId === skuId);
-
-      if (orderItem) {
-        total += returnQuantity * orderItem.unitPrice;
-      }
-    });
-
-    return total;
+    // Cannot calculate total return value as OrderItem doesn't have unitPrice
+    // This would need to be calculated by the backend
+    return 0;
   }
 
   isQuantityValid(index: number): boolean {
@@ -169,12 +158,12 @@ export class ReturnModalComponent implements OnInit, OnDestroy {
       }));
 
       const returnData: ReturnRequest = {
-        orderId: this.order().id,
+        orderId: this.order().order_id,
         reason: this.returnForm.get('reason')?.value,
         items: this.returnType() === 'partial' ? returnItems : undefined
       };
 
-      this.ordersService.requestReturn(this.order().id, returnData)
+      this.ordersService.requestReturn(this.order().order_id, returnData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {

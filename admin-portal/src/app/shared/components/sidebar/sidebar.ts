@@ -102,12 +102,39 @@ export class Sidebar implements OnInit, OnDestroy {
 
   initializeMenuItems() {
     this.menuItems = [
-      // {
-      //   id: 'dashboard',
-      //   label: 'Dashboard',
-      //   icon: 'ri-dashboard-line',
-      //   route: '/dashboard',
-      // },
+      // Analytics Dashboard - Primary feature for admins
+      {
+        id: 'analytics',
+        label: 'Analytics',
+        icon: 'ri-bar-chart-2-line',
+        children: [
+          {
+            id: 'dashboard',
+            label: 'Dashboard',
+            icon: 'ri-dashboard-line',
+            route: '/analytics/dashboard',
+          },
+          {
+            id: 'sales',
+            label: 'Sales Analytics',
+            icon: 'ri-money-dollar-circle-line',
+            route: '/analytics/sales',
+          },
+          {
+            id: 'stock',
+            label: 'Stock Analytics',
+            icon: 'ri-stack-line',
+            route: '/analytics/stock',
+          },
+          {
+            id: 'stockouts',
+            label: 'Stockout Incidents',
+            icon: 'ri-alert-line',
+            route: '/analytics/stockouts',
+          },
+        ],
+      },
+      // Orders - Core business operation
       {
         id: 'orders',
         label: 'Orders',
@@ -116,7 +143,7 @@ export class Sidebar implements OnInit, OnDestroy {
         children: [
           {
             id: 'orders',
-            label: 'Orders',
+            label: 'All Orders',
             icon: 'ri-receipt-line',
             route: '/orders/'
           },
@@ -128,6 +155,7 @@ export class Sidebar implements OnInit, OnDestroy {
           },
         ],
       },
+      // Inventory - Stock management
       {
         id: 'inventory',
         label: 'Inventory',
@@ -141,56 +169,33 @@ export class Sidebar implements OnInit, OnDestroy {
           },
           {
             id: 'alerts',
-            label: 'Alerts',
+            label: 'Stock Alerts',
             icon: 'ri-alarm-warning-line',
             route: '/inventory/alerts'
           },
         ],
       },
+      // Catalog - Product setup
       {
         id: 'catalog',
         label: 'Catalog',
         icon: 'ri-book-open-line',
         children: [
           {
-            id: 'categories',
-            label: 'Categories',
-            icon: 'ri-folder-line',
-            route: '/catalog/categories',
-          },
-          {
             id: 'products',
             label: 'Products',
             icon: 'ri-product-hunt-line',
             route: '/catalog/products',
           },
-        ],
-      },
-      {
-        id: 'analytics',
-        label: 'Analytics',
-        icon: 'ri-bar-chart-2-line',
-        children: [
           {
-            id: 'sales',
-            label: 'Sales Report',
-            icon: 'ri-money-dollar-circle-line',
-            route: '/analytics/sales',
-          },
-          {
-            id: 'performance',
-            label: 'Performance',
-            icon: 'ri-line-chart-line',
-            route: '/analytics/performance',
-          },
-          {
-            id: 'customer-insights',
-            label: 'Customer Insights',
-            icon: 'ri-team-line',
-            route: '/analytics/customers',
+            id: 'categories',
+            label: 'Categories',
+            icon: 'ri-folder-line',
+            route: '/catalog/categories',
           },
         ],
       },
+      // Settings - Admin configuration
       {
         id: 'settings',
         label: 'Settings',

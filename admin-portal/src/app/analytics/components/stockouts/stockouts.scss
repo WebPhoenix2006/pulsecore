@@ -1,0 +1,34 @@
+@use '../shared-styles.scss';
+
+.product-cell {
+  .product-name {
+    font-weight: 500;
+    color: var(--text-color);
+  }
+}
+
+.order-cell {
+  .order-id {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+    background: rgba(99, 102, 241, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+  }
+
+  .no-order {
+    color: var(--muted-text);
+  }
+}
+
+.notes-cell {
+  .note {
+    color: var(--text-color);
+  }
+
+  .no-note {
+    color: var(--muted-text);
+    font-style: italic;
+  }
+}

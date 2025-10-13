@@ -1,15 +1,22 @@
 export interface Product {
   sku_id: string;
+  id?: string; // Normalized ID (same as sku_id)
+  tenant_id?: string;
   name: string;
   category?: string; // category UUID
+  category_id?: string; // Alternative naming
   attributes?: Record<string, string | number | boolean>;
   barcode?: string;
+  sku?: string;
   price: number;
+  stock_quantity?: number; // For inventory tracking
   supplier_id?: string;
   batch_number?: string;
   expiry_date?: string;
-  created_at: string;
-  updated_at: string;
+  description?: string;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
 
   // derived for UI
   category_name?: string;

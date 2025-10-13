@@ -52,16 +52,15 @@
             <div class="form-grid">
               <div class="form-field-container">
                 <label for="customerId" class="field-label required">Customer <span class="required-indicator">*</span></label>
-                <select
-                  id="customerId"
+                <app-custom-select
+                  [options]="customerOptions()"
+                  placeholder="Select a customer"
+                  [searchable]="true"
+                  [clearable]="true"
+                  [showCount]="true"
                   formControlName="customerId"
-                  (change)="onCustomerChange()"
-                  class="form-select">
-                  <option value="">Select a customer</option>
-                  @for (customer of customers(); track customer.id) {
-                    <option [value]="customer.id">{{ customer.name }}</option>
-                  }
-                </select>
+                  (selectionChange)="onCustomerChange($event)">
+                </app-custom-select>
               </div>
 
               <div class="form-field-container">
@@ -127,18 +126,15 @@
                       <div class="item-grid">
                         <div class="form-field-container">
                           <label>Product *</label>
-                          <select
+                          <app-custom-select
+                            [options]="productOptions()"
+                            placeholder="Select product"
+                            [searchable]="true"
+                            [clearable]="false"
+                            [showCount]="true"
                             formControlName="productId"
-                            (change)="onProductChange(i)"
-                            class="form-select">
-                            <option value="">Select product</option>
-                            @for (product of filteredProducts(); track product.id) {
-                              <option [value]="product.id">
-                                {{ product.name }} - {{ formatCurrency(product.price) }}
-                                ({{ product.stock_quantity }} available)
-                              </option>
-                            }
-                          </select>
+                            (selectionChange)="onProductChange(i, $event)">
+                          </app-custom-select>
                         </div>
 
                         <div class="form-field-container">

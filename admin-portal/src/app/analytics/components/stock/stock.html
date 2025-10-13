@@ -1,0 +1,89 @@
+<div class="analytics-page">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <i class="fas fa-boxes"></i>
+        Stock Analytics
+      </h1>
+      <p class="page-subtitle">Monitor inventory levels and trends</p>
+    </div>
+    <div class="header-actions">
+      <div class="date-filters">
+        <input
+          type="date"
+          [(ngModel)]="dateRange.start_date"
+          (change)="onDateRangeChange()"
+          class="date-input"
+          placeholder="Start Date"
+        />
+        <span class="date-separator">to</span>
+        <input
+          type="date"
+          [(ngModel)]="dateRange.end_date"
+          (change)="onDateRangeChange()"
+          class="date-input"
+          placeholder="End Date"
+        />
+      </div>
+      <button (click)="exportData()" class="export-btn">
+        <i class="fas fa-download"></i>
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading stock data...</p>
+  </div>
+
+  <div *ngIf="error && !loading" class="error-state">
+    <i class="fas fa-exclamation-circle"></i>
+    <p>{{ error }}</p>
+    <button (click)="loadStock()" class="retry-btn">Retry</button>
+  </div>
+
+  <div *ngIf="!loading && !error" class="content-card">
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Total Stock</th>
+            <th>Low Stock Items</th>
+            <th>Stockouts</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let stock of stockData">
+            <td class="date-cell">
+              <i class="fas fa-calendar"></i>
+              {{ stock.date | date : 'MMM dd, yyyy' }}
+            </td>
+            <td class="stock-cell">
+              <span class="badge success-badge">{{ stock.total_stock }}</span>
+            </td>
+            <td class="low-stock-cell">
+              <span class="badge warning-badge" *ngIf="stock.low_stock_count > 0">
+                {{ stock.low_stock_count }}
+              </span>
+              <span *ngIf="stock.low_stock_count === 0">-</span>
+            </td>
+            <td class="stockout-cell">
+              <span class="badge error-badge" *ngIf="stock.stockout_count > 0">
+                {{ stock.stockout_count }}
+              </span>
+              <span *ngIf="stock.stockout_count === 0">-</span>
+            </td>
+          </tr>
+          <tr *ngIf="stockData.length === 0">
+            <td colspan="4" class="empty-state">
+              <i class="fas fa-inbox"></i>
+              <p>No stock data available for the selected period</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

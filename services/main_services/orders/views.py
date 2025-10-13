@@ -48,6 +48,37 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response(ReturnSerializer(ret).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=False, methods=["get"], url_path="stats", url_name="stats")
+    def stats(self, request):
+        tenant_id = request.headers.get("X-Tenant-ID")
+        orders = Order.objects.filter(tenant_id=tenant_id)
+
+        total_orders = orders.count()
+        pending_orders = orders.filter(status='pending').count()
+        processing_orders = orders.filter(status='processing').count()
+        delivered_orders = orders.filter(status='delivered').count()
+        cancelled_orders = orders.filter(status='cancelled').count()
+
+        # Calculate total revenue from paid orders
+        from django.db.models import Sum
+        total_revenue = orders.filter(payment_status='paid').aggregate(
+            total=Sum('total_amount')
+        )['total'] or 0
+
+        pending_payments = orders.filter(payment_status='unpaid').count()
+
+        stats_data = {
+            'totalOrders': total_orders,
+            'pendingOrders': pending_orders,
+            'processingOrders': processing_orders,
+            'deliveredOrders': delivered_orders,
+            'cancelledOrders': cancelled_orders,
+            'totalRevenue': float(total_revenue),
+            'pendingPayments': pending_payments,
+        }
+
+        return Response(stats_data)
+
 
 class PaystackInitializeView(APIView):
     def post(self, request):

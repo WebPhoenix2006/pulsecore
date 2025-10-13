@@ -1,5 +1,8 @@
+from decimal import Decimal
+from django.db import transaction
 from rest_framework import serializers
 from .models import Order, OrderItem, Return, PaystackTransaction
+from main_services.inventory.models import SKU
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -28,18 +31,55 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         items_data = validated_data.pop("items")
-        # create order WITHOUT saving yet
-        order = Order(**validated_data)
 
-        total = 0
-        for item in items_data:
-            total += item["quantity"] * 500  # replace with SKU price lookup
+        # Use atomic transaction to ensure all or nothing
+        with transaction.atomic():
+            # Create order WITHOUT saving yet
+            order = Order(**validated_data)
 
-        order.total_amount = total
-        order.save()  # ✅ now save with total included
+            total = Decimal("0.00")
 
-        for item in items_data:
-            OrderItem.objects.create(order=order, **item)
+            # Calculate total and validate SKUs exist with sufficient stock
+            for item in items_data:
+                try:
+                    sku = SKU.objects.select_for_update().get(
+                        sku_id=item["sku_id"],
+                        tenant_id=validated_data["tenant_id"]
+                    )
+                except SKU.DoesNotExist:
+                    raise serializers.ValidationError(
+                        f"SKU {item['sku_id']} not found for this tenant"
+                    )
+
+                # Check stock availability
+                if sku.stock_level < item["quantity"]:
+                    raise serializers.ValidationError(
+                        f"Insufficient stock for {sku.name}. Available: {sku.stock_level}, Requested: {item['quantity']}"
+                    )
+
+                # Calculate item total: quantity * price
+                item_total = Decimal(str(item["quantity"])) * sku.price
+                total += item_total
+
+            order.total_amount = total
+            order.save()  # Save order with calculated total
+
+            # Create order items and reduce stock
+            for item in items_data:
+                # Create order item
+                OrderItem.objects.create(order=order, **item)
+
+                # Reduce stock using the SKU's adjust_stock method
+                sku = SKU.objects.get(
+                    sku_id=item["sku_id"],
+                    tenant_id=validated_data["tenant_id"]
+                )
+                sku.adjust_stock(
+                    delta=-item["quantity"],  # Negative for reduction
+                    reason="sale",
+                    reference=str(order.order_id),
+                    note=f"Order created for {order.customer_name}"
+                )
 
         return order
 

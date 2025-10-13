@@ -21,7 +21,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "0.0.0.0",
-    "https://pulsecore-qk5b.onrender.com",
+    "pulsecore-qk5b.onrender.com",
 ]
 
 
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "main_services.orders",
     "main_services.suppliers",
     "main_services.riders",
+    "main_services.analytics",
 ]
 
 MIDDLEWARE = [
@@ -205,6 +206,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:4200",
     "http://localhost:4201",
     "http://127.0.0.1:4201",
+    "https://pulsecore-inventory.vercel.app",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -248,3 +250,13 @@ LOGGING = {
 }
 
 PAYSTACK_SECRET_KEY = config("PAYSTACK_SECRET_KEY")
+
+# Celery Configuration
+CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND", default="redis://localhost:6379/0")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes

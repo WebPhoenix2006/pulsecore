@@ -1,0 +1,259 @@
+.analytics-page {
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+
+  .header-content {
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-color);
+      margin: 0 0 0.5rem 0;
+      font-family: 'Montserrat Alternates', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      i {
+        color: var(--secondary-color);
+      }
+    }
+
+    .page-subtitle {
+      color: var(--muted-text);
+      margin: 0;
+      font-size: 0.95rem;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .date-filters {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+
+      .date-input {
+        padding: 0.6rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--card-bg);
+        color: var(--text-color);
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+
+        &:focus {
+          outline: none;
+          border-color: var(--secondary-color);
+          box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+      }
+
+      .date-separator {
+        color: var(--muted-text);
+        font-size: 0.875rem;
+      }
+    }
+
+    .export-btn {
+      padding: 0.6rem 1.25rem;
+      background: var(--gradient-color);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      &:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+      }
+
+      i {
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--secondary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  i {
+    font-size: 3rem;
+    color: var(--error-color);
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: var(--muted-text);
+    margin-top: 1rem;
+    font-size: 1rem;
+  }
+
+  .retry-btn {
+    margin-top: 1rem;
+    padding: 0.6rem 1.5rem;
+    background: var(--gradient-color);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+
+    &:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.content-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+
+  thead {
+    tr {
+      background: var(--surface-color);
+
+      th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-color);
+        font-size: 0.875rem;
+        border-bottom: 2px solid var(--secondary-color);
+        white-space: nowrap;
+
+        &:first-child {
+          border-top-left-radius: 8px;
+        }
+
+        &:last-child {
+          border-top-right-radius: 8px;
+        }
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background: var(--surface-color);
+      }
+
+      td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-color);
+        font-size: 0.875rem;
+
+        &.date-cell {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: var(--text-color);
+
+          i {
+            color: var(--secondary-color);
+          }
+        }
+
+        &.orders-cell,
+        &.items-cell {
+          font-weight: 600;
+          color: var(--text-color);
+        }
+
+        &.revenue-cell {
+          font-weight: 700;
+          color: var(--success-color);
+          font-size: 1rem;
+        }
+
+        &.stock-cell,
+        &.low-stock-cell,
+        &.stockout-cell {
+          font-weight: 600;
+        }
+
+        &.empty-state {
+          text-align: center;
+          padding: 3rem 2rem;
+
+          i {
+            font-size: 3rem;
+            color: var(--muted-text);
+            margin-bottom: 1rem;
+            display: block;
+          }
+
+          p {
+            color: var(--muted-text);
+            margin: 0;
+          }
+        }
+      }
+
+      &:last-child td {
+        border-bottom: none;
+      }
+    }
+  }
+}

@@ -1,0 +1,196 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1 class="dashboard-title">Analytics Dashboard</h1>
+      <p class="dashboard-subtitle">Real-time insights into your business performance</p>
+    </div>
+    <div class="header-actions">
+      <div class="date-filters">
+        <input
+          type="date"
+          [(ngModel)]="dateRange.start_date"
+          (change)="onDateRangeChange()"
+          class="date-input"
+          placeholder="Start Date"
+        />
+        <span class="date-separator">to</span>
+        <input
+          type="date"
+          [(ngModel)]="dateRange.end_date"
+          (change)="onDateRangeChange()"
+          class="date-input"
+          placeholder="End Date"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading dashboard...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-state">
+    <i class="fas fa-exclamation-circle"></i>
+    <p>{{ error }}</p>
+    <button (click)="loadDashboard()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading && !error && dashboardData" class="dashboard-content">
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card revenue">
+        <div class="kpi-icon">
+          <i class="fas fa-dollar-sign"></i>
+        </div>
+        <div class="kpi-content">
+          <p class="kpi-label">Total Revenue</p>
+          <h2 class="kpi-value">${{ dashboardData.revenue_total }}</h2>
+        </div>
+      </div>
+
+      <div class="kpi-card sales">
+        <div class="kpi-icon">
+          <i class="fas fa-shopping-cart"></i>
+        </div>
+        <div class="kpi-content">
+          <p class="kpi-label">Total Orders</p>
+          <h2 class="kpi-value">{{ dashboardData.sales_count }}</h2>
+        </div>
+      </div>
+
+      <div class="kpi-card stock">
+        <div class="kpi-icon">
+          <i class="fas fa-boxes"></i>
+        </div>
+        <div class="kpi-content">
+          <p class="kpi-label">Total Stock</p>
+          <h2 class="kpi-value">{{ dashboardData.stock_total }}</h2>
+        </div>
+      </div>
+
+      <div class="kpi-card alert">
+        <div class="kpi-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="kpi-content">
+          <p class="kpi-label">Low Stock Items</p>
+          <h2 class="kpi-value">{{ dashboardData.low_stock_count }}</h2>
+        </div>
+      </div>
+
+      <div class="kpi-card danger">
+        <div class="kpi-icon">
+          <i class="fas fa-ban"></i>
+        </div>
+        <div class="kpi-content">
+          <p class="kpi-label">Stockouts</p>
+          <h2 class="kpi-value">{{ dashboardData.stockout_count }}</h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-grid">
+      <!-- Revenue Trend -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="fas fa-chart-line"></i>
+            Revenue Trend
+          </h3>
+          <button (click)="exportData('sales')" class="export-btn" title="Export Sales Data">
+            <i class="fas fa-download"></i>
+          </button>
+        </div>
+        <div class="chart-body">
+          <canvas
+            *ngIf="revenueChartData"
+            baseChart
+            [data]="revenueChartData"
+            [options]="revenueChartOptions"
+            [type]="'line'"
+          ></canvas>
+        </div>
+      </div>
+
+      <!-- Stock Trend -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="fas fa-chart-area"></i>
+            Stock Level Trend
+          </h3>
+          <button (click)="exportData('stock')" class="export-btn" title="Export Stock Data">
+            <i class="fas fa-download"></i>
+          </button>
+        </div>
+        <div class="chart-body">
+          <canvas
+            *ngIf="stockChartData"
+            baseChart
+            [data]="stockChartData"
+            [options]="stockChartOptions"
+            [type]="'line'"
+          ></canvas>
+        </div>
+      </div>
+
+      <!-- Top SKUs -->
+      <div class="chart-card full-width">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="fas fa-star"></i>
+            Top Selling Products
+          </h3>
+        </div>
+        <div class="chart-body">
+          <canvas
+            *ngIf="topSKUsChartData"
+            baseChart
+            [data]="topSKUsChartData"
+            [options]="topSKUsChartOptions"
+            [type]="'bar'"
+          ></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top SKUs Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3 class="table-title">
+          <i class="fas fa-list"></i>
+          Top Products Details
+        </h3>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Product Name</th>
+              <th>SKU ID</th>
+              <th>Units Sold</th>
+              <th>Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let sku of dashboardData.top_skus">
+              <td class="product-name">{{ sku.sku_name }}</td>
+              <td class="sku-id">{{ sku.sku_id }}</td>
+              <td class="units-sold">{{ sku.total_sold }}</td>
+              <td class="revenue">${{ sku.revenue }}</td>
+            </tr>
+            <tr *ngIf="dashboardData.top_skus.length === 0">
+              <td colspan="4" class="empty-state">No data available</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
