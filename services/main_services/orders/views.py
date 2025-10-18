@@ -54,30 +54,47 @@ class OrderViewSet(viewsets.ModelViewSet):
         orders = Order.objects.filter(tenant_id=tenant_id)
 
         total_orders = orders.count()
-        pending_orders = orders.filter(status='pending').count()
-        processing_orders = orders.filter(status='processing').count()
-        delivered_orders = orders.filter(status='delivered').count()
-        cancelled_orders = orders.filter(status='cancelled').count()
+        pending_orders = orders.filter(status="pending").count()
+        processing_orders = orders.filter(status="processing").count()
+        delivered_orders = orders.filter(status="delivered").count()
+        cancelled_orders = orders.filter(status="cancelled").count()
 
         # Calculate total revenue from paid orders
         from django.db.models import Sum
-        total_revenue = orders.filter(payment_status='paid').aggregate(
-            total=Sum('total_amount')
-        )['total'] or 0
 
-        pending_payments = orders.filter(payment_status='unpaid').count()
+        total_revenue = (
+            orders.filter(payment_status="paid").aggregate(total=Sum("total_amount"))[
+                "total"
+            ]
+            or 0
+        )
+
+        pending_payments = orders.filter(payment_status="unpaid").count()
 
         stats_data = {
-            'totalOrders': total_orders,
-            'pendingOrders': pending_orders,
-            'processingOrders': processing_orders,
-            'deliveredOrders': delivered_orders,
-            'cancelledOrders': cancelled_orders,
-            'totalRevenue': float(total_revenue),
-            'pendingPayments': pending_payments,
+            "totalOrders": total_orders,
+            "pendingOrders": pending_orders,
+            "processingOrders": processing_orders,
+            "deliveredOrders": delivered_orders,
+            "cancelledOrders": cancelled_orders,
+            "totalRevenue": float(total_revenue),
+            "pendingPayments": pending_payments,
         }
 
         return Response(stats_data)
+
+    @action(
+        detail=True, methods=["get"], url_path="transactions", url_name="transactions"
+    )
+    def list_transactions(self, request, pk=None):
+        """
+        Return all Paystack transactions for this order (tenant-scoped).
+        """
+        tenant_id = request.headers.get("X-Tenant-ID")
+        order = self.get_object()
+        txns = PaystackTransaction.objects.filter(order=order, tenant_id=tenant_id)
+        serializer = PaystackTransactionSerializer(txns, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class PaystackInitializeView(APIView):
@@ -110,7 +127,7 @@ class PaystackInitializeView(APIView):
 class PaystackVerifyView(APIView):
     def get(self, request, reference):
         tenant_id = request.headers.get("X-Tenant-ID")
-        client = PaystackClient()  # ✅ must instantiate
+        client = PaystackClient()  # must instantiate
         verify_resp = client.verify_transaction(reference)
 
         tx = get_object_or_404(
