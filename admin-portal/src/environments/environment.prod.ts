@@ -29,4 +29,11 @@ export const Environments = {
     alerts: `${api_url}/inventory/alerts/`,
     skus: `${api_url}/inventory/skus/`,
   },
+  analytics: {
+    dashboard: `${api_url}/analytics/dashboard/`,
+    sales: `${api_url}/analytics/sales/`,
+    stock: `${api_url}/analytics/stock/`,
+    stockouts: `${api_url}/analytics/stockouts/`,
+    export: `${api_url}/analytics/export/`,
+  },
 };
