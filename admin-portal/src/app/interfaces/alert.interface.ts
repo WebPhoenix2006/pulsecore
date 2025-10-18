@@ -13,7 +13,8 @@ export interface Alert {
 }
 
 export interface CreateAlertRequest {
-  sku_id: string;
+  sku: string;
+  current_stock: number;
   type: 'low_stock' | 'batch_expiry';
   threshold?: number;
 }

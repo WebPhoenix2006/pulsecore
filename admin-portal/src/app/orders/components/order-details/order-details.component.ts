@@ -8,7 +8,7 @@ import { Order, Payment, OrderStatus, PaymentStatus } from '../../interfaces/ord
   selector: 'app-order-details',
   standalone: false,
   templateUrl: './order-details.component.html',
-  styleUrls: ['./order-details.component.scss']
+  styleUrls: ['./order-details.component.scss'],
 })
 export class OrderDetailsComponent implements OnInit, OnDestroy {
   order = input.required<Order>();
@@ -21,10 +21,7 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(
-    private ordersService: OrdersService,
-    private toastService: ToastService
-  ) {}
+  constructor(private ordersService: OrdersService, private toastService: ToastService) {}
 
   ngOnInit() {
     this.loadOrderPayments();
@@ -37,7 +34,8 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
   }
 
   loadOrderPayments() {
-    this.ordersService.getOrderPayments(this.order().order_id)
+    this.ordersService
+      .getOrderPayments(this.order().order_id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (payments) => {
@@ -45,12 +43,13 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Failed to load order payments:', error);
-        }
+        },
       });
   }
 
   loadOrderReturns() {
-    this.ordersService.getOrderReturns(this.order().order_id)
+    this.ordersService
+      .getOrderReturns(this.order().order_id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (returns) => {
@@ -58,7 +57,7 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Failed to load order returns:', error);
-        }
+        },
       });
   }
 
@@ -69,15 +68,20 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
       order_id: this.order().order_id,
       customer_email: this.order().customer_email || 'customer@example.com',
       amount: this.order().total_amount,
-      currency: 'NGN'
+      currency: 'NGN',
     };
 
-    this.ordersService.initiatePayment(paymentData)
+    this.ordersService
+      .initiatePayment(paymentData)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (payment) => {
-          if (payment.authorizationUrl) {
-            window.open(payment.authorizationUrl, '_blank');
+          const redirectUrl = payment.authorization_url;
+          if (redirectUrl) {
+            // Use window.location.href to actually redirect (not open in new tab)
+            window.location.href = redirectUrl;
+          } else {
+            this.toastService.showError('Missing authorization URL');
           }
           this.loadOrderPayments();
           this.toastService.showSuccess('Payment initiated successfully');
@@ -86,14 +90,15 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
         error: (error) => {
           this.toastService.showError('Failed to initiate payment');
           this.isLoading.set(false);
-        }
+        },
       });
   }
 
   verifyPayment(reference: string) {
     this.isLoading.set(true);
 
-    this.ordersService.verifyPayment(reference)
+    this.ordersService
+      .verifyPayment(reference)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (payment) => {
@@ -104,7 +109,7 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
         error: (error) => {
           this.toastService.showError('Failed to verify payment');
           this.isLoading.set(false);
-        }
+        },
       });
   }
 
@@ -139,7 +144,7 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
-      currency: 'NGN'
+      currency: 'NGN',
     }).format(amount);
   }
 
@@ -149,13 +154,13 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
   getTotalPaid(): number {
     return this.payments()
-      .filter(p => p.status === 'paid')
+      .filter((p) => p.status === 'paid')
       .reduce((total, payment) => total + payment.amount, 0);
   }
 
@@ -164,9 +169,11 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
   }
 
   canInitiatePayment(): boolean {
-    return this.order().payment_status !== 'paid' &&
-           this.order().status !== 'cancelled' &&
-           this.getOutstandingAmount() > 0;
+    return (
+      this.order().payment_status !== 'paid' &&
+      this.order().status !== 'cancelled' &&
+      this.getOutstandingAmount() > 0
+    );
   }
 
   printOrder() {
