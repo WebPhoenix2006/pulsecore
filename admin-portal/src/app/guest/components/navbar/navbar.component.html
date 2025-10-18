@@ -1,28 +1,38 @@
-<nav class="navbar">
+<nav class="navbar" role="navigation" aria-label="Main Navigation">
   <div class="navbar-container">
-    <div class="navbar-brand">
+    <a class="navbar-brand" routerLink="/" (click)="isMobileMenuOpen = false">
       <div class="logo">
-        <span class="logo-icon">⚡</span>
+        <span class="logo-icon" aria-hidden="true">⚡</span>
         <span class="logo-text">PulseCore</span>
       </div>
-    </div>
+    </a>
 
-    <div class="navbar-menu" [class.active]="isMobileMenuOpen">
+    <!-- Toggler -->
+    <button
+      class="navbar-burger"
+      type="button"
+      (click)="toggleMobileMenu()"
+      [class.active]="isMobileMenuOpen"
+      [attr.aria-expanded]="isMobileMenuOpen"
+      aria-controls="primary-navigation"
+      aria-label="Toggle navigation">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- Menu -->
+    <div id="primary-navigation" class="navbar-menu" [class.active]="isMobileMenuOpen">
       <a class="navbar-item" (click)="scrollToSection('hero')">Home</a>
       <a class="navbar-item" (click)="scrollToSection('features')">Features</a>
       <a class="navbar-item" (click)="scrollToSection('pricing')">Pricing</a>
       <a class="navbar-item" (click)="scrollToSection('about')">About</a>
       <a class="navbar-item" (click)="scrollToSection('contact')">Contact</a>
+
       <div class="navbar-cta">
         <button class="btn-secondary" routerLink="/auth/login">Login</button>
         <button class="btn-primary" routerLink="/auth/signup">Get Started</button>
       </div>
-    </div>
-
-    <div class="navbar-burger" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen">
-      <span></span>
-      <span></span>
-      <span></span>
     </div>
   </div>
 </nav>
