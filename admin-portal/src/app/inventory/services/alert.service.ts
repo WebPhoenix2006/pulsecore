@@ -28,8 +28,8 @@ export class AlertService {
     return '550e8400-e29b-41d4-a716-446655440000';
   }
 
-  getAlerts(): Observable<Alert[]> {
-    return this.http.get<Alert[]>(this.baseUrl, { headers: this.getHeaders() });
+  getAlerts(): Observable<PaginatedResponse<Alert>> {
+    return this.http.get<PaginatedResponse<Alert>>(this.baseUrl, { headers: this.getHeaders() });
   }
 
   getAlert(alertId: string): Observable<Alert> {
@@ -49,19 +49,9 @@ export class AlertService {
   }
 
   acknowledgeAlert(alertId: string, data: AcknowledgeAlertRequest): Observable<Alert> {
-    return this.http.patch<Alert>(
-      `${this.baseUrl}${alertId}/acknowledge/`,
-      data,
-      { headers: this.getHeaders() }
-    );
-  }
-
-  dismissAlert(alertId: string): Observable<void> {
-    return this.http.patch<void>(
-      `${this.baseUrl}${alertId}/dismiss/`,
-      {},
-      { headers: this.getHeaders() }
-    );
+    return this.http.post<Alert>(`${this.baseUrl}${alertId}/acknowledge/`, data, {
+      headers: this.getHeaders(),
+    });
   }
 
   // Get alerts by type
@@ -71,6 +61,8 @@ export class AlertService {
 
   // Get unacknowledged alerts
   getUnacknowledgedAlerts(): Observable<Alert[]> {
-    return this.http.get<Alert[]>(`${this.baseUrl}?acknowledged=false`, { headers: this.getHeaders() });
+    return this.http.get<Alert[]>(`${this.baseUrl}?acknowledged=false`, {
+      headers: this.getHeaders(),
+    });
   }
 }

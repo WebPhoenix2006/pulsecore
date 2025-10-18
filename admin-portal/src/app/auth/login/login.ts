@@ -70,7 +70,7 @@ export class Login implements OnInit {
         this.toastService.showSuccess('Logged in successfully');
         this.authService.setAuth(data.access, data.refresh, data.tenant_id);
         this.isLoading.set(false);
-        this.router.navigateByUrl('catalog');
+        this.router.navigateByUrl('analytics');
       },
       error: (error) => {
         this.toastService.showError(error.message || 'Something went wrong. Please try again.');

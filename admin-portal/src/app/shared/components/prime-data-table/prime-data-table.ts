@@ -1,4 +1,15 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, TemplateRef, ContentChild, ViewChild } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  TemplateRef,
+  ContentChild,
+  ViewChild,
+} from '@angular/core';
 
 export interface TableColumn {
   field: string;
@@ -36,7 +47,8 @@ export class PrimeDataTableComponent implements OnInit, OnChanges {
   @Input() globalFilterFields: string[] = [];
   @Input() exportFilename: string = 'data';
   @Input() showCurrentPageReport: boolean = true;
-  @Input() currentPageReportTemplate: string = 'Showing {first} to {last} of {totalRecords} entries';
+  @Input() currentPageReportTemplate: string =
+    'Showing {first} to {last} of {totalRecords} entries';
   @Input() selectionMode: 'single' | 'multiple' | null = null;
   @Input() dataKey: string = 'id';
   @Input() actions: TableAction[] = [];
@@ -66,13 +78,13 @@ export class PrimeDataTableComponent implements OnInit, OnChanges {
   selectedRows: any[] = [];
   globalFilterValue: string = '';
   first: number = 0;
-  columnFilters: {[key: string]: any} = {};
+  columnFilters: { [key: string]: any } = {};
   filteredData: any[] = [];
   highlightTerm: string = '';
 
   ngOnInit() {
     if (this.globalFilterFields.length === 0) {
-      this.globalFilterFields = this.columns.map(col => col.field);
+      this.globalFilterFields = this.columns.map((col) => col.field);
     }
     this.filteredData = [...this.data];
     this.applyFilters();
@@ -119,8 +131,8 @@ export class PrimeDataTableComponent implements OnInit, OnChanges {
 
     // Apply global filter
     if (this.globalFilterValue) {
-      filtered = filtered.filter(item => {
-        return this.globalFilterFields.some(field => {
+      filtered = filtered.filter((item) => {
+        return this.globalFilterFields.some((field) => {
           const value = this.getFieldValue(item, field);
           return value?.toString().toLowerCase().includes(this.globalFilterValue.toLowerCase());
         });
@@ -128,12 +140,12 @@ export class PrimeDataTableComponent implements OnInit, OnChanges {
     }
 
     // Apply column filters
-    Object.keys(this.columnFilters).forEach(field => {
+    Object.keys(this.columnFilters).forEach((field) => {
       const filterValue = this.columnFilters[field];
       if (filterValue) {
-        filtered = filtered.filter(item => {
+        filtered = filtered.filter((item) => {
           const value = this.getFieldValue(item, field);
-          const column = this.columns.find(col => col.field === field);
+          const column = this.columns.find((col) => col.field === field);
 
           if (column?.type === 'date') {
             const itemDate = new Date(value);
@@ -203,12 +215,12 @@ export class PrimeDataTableComponent implements OnInit, OnChanges {
   }
 
   getActionsForRow(rowData: any): any[] {
-    return this.actions.map(action => ({
+    return this.actions.map((action) => ({
       label: action.label,
       value: action.value,
       icon: action.icon,
       iconPosition: action.iconPosition || 'left',
-      action: () => this.executeAction(action, rowData)
+      action: () => this.executeAction(action, rowData),
     }));
   }
 
@@ -224,12 +236,12 @@ export class PrimeDataTableComponent implements OnInit, OnChanges {
 
   getStatusClass(status: string): string {
     const statusMap: { [key: string]: string } = {
-      'active': 'success-badge',
-      'inactive': 'secondary-badge',
-      'pending': 'warning-badge',
-      'rejected': 'danger-badge',
-      'approved': 'success-badge',
-      'draft': 'info-badge'
+      active: 'success-badge',
+      inactive: 'secondary-badge',
+      pending: 'warning-badge',
+      rejected: 'danger-badge',
+      approved: 'success-badge',
+      draft: 'info-badge',
     };
     return `status-badge ${statusMap[status?.toLowerCase()] || 'secondary-badge'}`;
   }

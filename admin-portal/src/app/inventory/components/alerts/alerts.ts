@@ -1,6 +1,9 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
-import { TableColumn, TableAction } from '../../../shared/components/prime-data-table/prime-data-table';
+import {
+  TableColumn,
+  TableAction,
+} from '../../../shared/components/prime-data-table/prime-data-table';
 import { ToastService } from '../../../shared/services/toast.service';
 import { Alert, CreateAlertRequest, UpdateAlertRequest } from '../../../interfaces/alert.interface';
 import { AlertService } from '../../services/alert.service';
@@ -13,7 +16,7 @@ import { FormFieldOption } from '../../../interfaces/form-field-options';
   selector: 'app-alerts',
   standalone: false,
   templateUrl: './alerts.html',
-  styleUrl: './alerts.scss'
+  styleUrl: './alerts.scss',
 })
 export class Alerts implements OnInit {
   alerts = signal<Alert[]>([]);
@@ -29,7 +32,7 @@ export class Alerts implements OnInit {
   selectedAlert: Alert | null = null;
   alertTypeOptions: FormFieldOption[] = [
     { label: 'Low Stock', value: 'low_stock' },
-    { label: 'Batch Expiry', value: 'batch_expiry' }
+    { label: 'Batch Expiry', value: 'batch_expiry' },
   ];
 
   tableColumns: TableColumn[] = [
@@ -39,7 +42,7 @@ export class Alerts implements OnInit {
       sortable: true,
       filterable: true,
       type: 'status',
-      width: '15%'
+      width: '15%',
     },
     {
       field: 'sku_name',
@@ -47,73 +50,73 @@ export class Alerts implements OnInit {
       sortable: true,
       filterable: true,
       type: 'text',
-      width: '25%'
+      width: '25%',
     },
     {
       field: 'current_stock',
       header: 'Current Stock',
       sortable: true,
       type: 'text',
-      width: '15%'
+      width: '15%',
     },
     {
       field: 'threshold',
       header: 'Threshold',
       sortable: true,
       type: 'text',
-      width: '15%'
+      width: '15%',
     },
     {
       field: 'created_at',
       header: 'Created',
       sortable: true,
       type: 'date',
-      width: '15%'
+      width: '15%',
     },
-    {
-      field: 'acknowledged',
-      header: 'Status',
-      sortable: true,
-      type: 'status',
-      width: '10%'
-    },
+    // {
+    //   field: 'acknowledged',
+    //   header: 'Status',
+    //   sortable: true,
+    //   type: 'status',
+    //   width: '10%',
+    // },
     {
       field: 'actions',
       header: 'Actions',
       type: 'actions',
-      width: '120px'
-    }
+      width: '120px',
+    },
   ];
 
   tableActions: TableAction[] = [
     {
       label: 'View Details',
       value: 'view',
-      icon: 'eye',
+      icon: 'view-eye',
       iconPosition: 'left',
-      action: (rowData) => this.onViewAlert(rowData)
+      action: (rowData) => this.onViewAlert(rowData),
     },
     {
       label: 'Acknowledge',
       value: 'acknowledge',
       icon: 'check',
       iconPosition: 'left',
-      action: (rowData) => this.acknowledgeAlert(rowData.alert_id)
+      action: (rowData) => this.acknowledgeAlert(rowData.alert_id),
     },
     {
       label: 'Dismiss',
       value: 'dismiss',
       icon: 'times',
       iconPosition: 'left',
-      action: (rowData) => this.dismissAlert(rowData.alert_id)
+      action: (rowData) => this.onDeleteAlert(rowData.alert_id),
     },
     {
       label: 'View SKU',
       value: 'view-sku',
-      icon: 'external-link',
+      icon: 'view-eye',
       iconPosition: 'left',
-      action: (rowData) => this.viewSKU(rowData.sku_id)
-    }
+      action: (rowData) => this.viewSKU(rowData.sku_id),
+    },
   ];
 
   constructor(
@@ -134,25 +137,27 @@ export class Alerts implements OnInit {
     this.skuService.getSKUs().subscribe({
       next: (response: PaginatedResponse<SKU>) => {
         this.skus = response.results;
-        this.skuOptions = this.skus.map(sku => ({
+        this.skuOptions = this.skus.map((sku) => ({
           label: `${sku.name} (${sku.sku_code || 'N/A'})`,
-          value: sku.sku_id
+          value: sku.sku_id,
         }));
       },
       error: () => this.toastService.showError('Failed to load SKUs'),
     });
+    return this.skus;
   }
 
   private loadAlerts() {
     this.loading.set(true);
     this.alertService.getAlerts().subscribe({
-      next: (alerts: Alert[]) => {
-        // Ensure we always have an array
-        const alertsArray = Array.isArray(alerts) ? alerts : [];
+      next: (response: PaginatedResponse<Alert>) => {
+        // Extract the results array from paginated response
+        const alertsArray = response.results || [];
         console.log('Loaded alerts:', alertsArray);
         this.alerts.set(alertsArray);
         this.loading.set(false);
       },
+
       error: (error) => {
         console.error('Failed to load alerts:', error);
         this.toastService.showError('Failed to load alerts');
@@ -166,14 +171,24 @@ export class Alerts implements OnInit {
     this.alertForm = this.fb.group({
       sku: ['', [Validators.required]],
       type: ['', [Validators.required]],
-      threshold: ['']
+      currentstock: ['', [Validators.required]],
+      threshold: [''],
     });
   }
 
   // Form control getters
-  get skuControl() { return this.alertForm.get('sku') as FormControl; }
-  get typeControl() { return this.alertForm.get('type') as FormControl; }
-  get thresholdControl() { return this.alertForm.get('threshold') as FormControl; }
+  get skuControl() {
+    return this.alertForm.get('sku') as FormControl;
+  }
+  get typeControl() {
+    return this.alertForm.get('type') as FormControl;
+  }
+  get thresholdControl() {
+    return this.alertForm.get('threshold') as FormControl;
+  }
+  get currentStock() {
+    return this.alertForm.get('currentstock') as FormControl;
+  }
 
   onCreateAlert() {
     this.alertForm.reset();
@@ -192,9 +207,10 @@ export class Alerts implements OnInit {
 
     const formValue = this.alertForm.value;
     const alertData: CreateAlertRequest = {
-      sku_id: formValue.sku,
+      sku: formValue.sku,
       type: formValue.type,
-      threshold: formValue.threshold ? parseInt(formValue.threshold) : undefined
+      current_stock: parseInt(formValue.threshold),
+      threshold: formValue.threshold ? parseInt(formValue.threshold) : undefined,
     };
 
     this.loading.set(true);
@@ -207,9 +223,11 @@ export class Alerts implements OnInit {
         this.loading.set(false);
       },
       error: (error) => {
-        this.toastService.showError(`Failed to create alert: ${error.error?.message || error.message}`);
+        this.toastService.showError(
+          `Failed to create alert: ${error.error?.message || error.message}`
+        );
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -244,8 +262,18 @@ export class Alerts implements OnInit {
   }
 
   private generateAlertCSV(): string {
-    const headers = ['Alert ID', 'Type', 'SKU Name', 'Current Stock', 'Threshold', 'Status', 'Acknowledged By', 'Acknowledged At', 'Created At'];
-    const rows = this.alerts().map(alert => [
+    const headers = [
+      'Alert ID',
+      'Type',
+      'SKU Name',
+      'Current Stock',
+      'Threshold',
+      'Status',
+      'Acknowledged By',
+      'Acknowledged At',
+      'Created At',
+    ];
+    const rows = this.alerts().map((alert) => [
       alert.alert_id || '',
       alert.type,
       alert.sku_name || '',
@@ -254,12 +282,10 @@ export class Alerts implements OnInit {
       alert.acknowledged ? 'Acknowledged' : 'Pending',
       alert.acknowledged_by || '',
       alert.acknowledged_at || '',
-      alert.created_at || ''
+      alert.created_at || '',
     ]);
 
-    return [headers, ...rows]
-      .map(row => row.map(field => `"${field}"`).join(','))
-      .join('\n');
+    return [headers, ...rows].map((row) => row.map((field) => `"${field}"`).join(',')).join('\n');
   }
 
   private downloadCSV(data: string, filename: string): void {
@@ -280,42 +306,49 @@ export class Alerts implements OnInit {
   }
 
   acknowledgeAlert(alertId: string) {
-    this.alertService.acknowledgeAlert(alertId, {
-      acknowledged_by: 'current-user-id' // TODO: Get from auth service
-    }).subscribe({
-      next: (updated: Alert) => {
-        this.alerts.update((a) => a.map((alert) => (alert.alert_id === alertId ? updated : alert)));
-        this.toastService.showSuccess('Alert acknowledged successfully!');
-        if (this.selectedAlert && this.selectedAlert.alert_id === alertId) {
-          this.selectedAlert = updated;
-        }
-        this.viewModalVisible = false;
-      },
-      error: () => {
-        this.toastService.showError('Failed to acknowledge alert');
-      },
-    });
+    this.alertService
+      .acknowledgeAlert(alertId, {
+        acknowledged_by: 'current-user-id', // TODO: Get from auth service
+      })
+      .subscribe({
+        next: (updated: Alert) => {
+          this.alerts.update((a) =>
+            a.map((alert) => (alert.alert_id === alertId ? updated : alert))
+          );
+          this.toastService.showSuccess('Alert acknowledged successfully!');
+          if (this.selectedAlert && this.selectedAlert.alert_id === alertId) {
+            this.selectedAlert = updated;
+          }
+          this.viewModalVisible = false;
+        },
+        error: () => {
+          this.toastService.showError('Failed to acknowledge alert');
+        },
+      });
   }
 
-  private dismissAlert(alertId: string) {
-    this.alertService.dismissAlert(alertId).subscribe({
-      next: () => {
-        this.alerts.update((a) => a.filter((alert) => alert.alert_id !== alertId));
-        this.toastService.showSuccess('Alert dismissed successfully!');
-      },
-      error: () => {
-        this.toastService.showError('Failed to dismiss alert');
-      },
-    });
-  }
+  // private dismissAlert(alertId: string) {
+  //   this.alertService.dismissAlert(alertId).subscribe({
+  //     next: () => {
+  //       this.alerts.update((a) => a.filter((alert) => alert.alert_id !== alertId));
+  //       this.toastService.showSuccess('Alert dismissed successfully!');
+  //     },
+  //     error: () => {
+  //       this.toastService.showError('Failed to dismiss alert');
+  //     },
+  //   });
+  // }
 
   private viewSKU(skuId: string) {
     // Find the SKU from the loaded SKUs
-    const sku = this.skus.find(s => s.sku_id === skuId);
+    const sku = this.loadSKUs().find((s) => s.sku_id === skuId);
     if (sku) {
       // Show SKU details in a toast with more information
-      this.toastService.showInfo(`SKU: ${sku.name} | Code: ${sku.sku_code || 'N/A'} | Stock: ${sku.stock_level || 'N/A'}`);
+      this.toastService.showInfo(
+        `SKU: ${sku.name} | Code: ${sku.sku_code || 'N/A'} | Stock: ${sku.stock_level || 'N/A'}`
+      );
     } else {
+      console.log(skuId);
       this.toastService.showInfo(`SKU ID: ${skuId} - Navigate to SKU details`);
     }
   }

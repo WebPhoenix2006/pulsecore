@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { AnalyticsService } from '../../services/analytics.service';
 import { SalesData, DateRangeFilter } from '../../interfaces/analytics.interface';
 import { Subject, takeUntil } from 'rxjs';
@@ -17,7 +17,7 @@ export class Sales implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private analyticsService: AnalyticsService) {}
+  constructor(private analyticsService: AnalyticsService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     // Set default date range to last 30 days
@@ -27,7 +27,7 @@ export class Sales implements OnInit, OnDestroy {
 
     this.dateRange = {
       start_date: this.formatDate(thirtyDaysAgo),
-      end_date: this.formatDate(today)
+      end_date: this.formatDate(today),
     };
 
     this.loadSales();
@@ -53,6 +53,7 @@ export class Sales implements OnInit, OnDestroy {
         next: (response) => {
           this.salesData = response.results || (response as any);
           this.loading = false;
+          this.cdr.detectChanges();
         },
         error: (err) => {
           this.error = 'Failed to load sales data';

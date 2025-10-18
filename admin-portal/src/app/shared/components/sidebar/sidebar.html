@@ -9,20 +9,15 @@
           [attr.data-tooltip]="isLeftsidebarCollased() ? 'Expand Sidebar' : 'Collapse Sidebar'"
           [attr.title]="isLeftsidebarCollased() ? 'Expand Sidebar' : 'Collapse Sidebar'"
         >
-          <i class="fa-solid fa-bars"></i>
+          <i
+            class="fa-solid {{
+              isLeftsidebarCollased() ? 'fa-arrow-right' : 'fa-arrow-left'
+            }} mx-auto"
+          ></i>
         </span>
         <!-- <img src="/images/bistropulse-logo.png" alt="BistroPulse Logo" /> -->
         <div class="app-title">BistroPulse</div>
       </div>
-
-      <span
-        (click)="closeSidebar()"
-        class="icon-wrapper"
-        data-tooltip="Close Sidebar"
-        title="Close Sidebar"
-      >
-        <i (click)="closeSidebar()" class="fa-solid fa-times"></i>
-      </span>
     </div>
 
     <!-- User Info Section -->

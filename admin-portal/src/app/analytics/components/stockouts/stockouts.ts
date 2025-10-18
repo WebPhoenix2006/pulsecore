@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { AnalyticsService } from '../../services/analytics.service';
 import { StockoutIncident, DateRangeFilter } from '../../interfaces/analytics.interface';
 import { Subject, takeUntil } from 'rxjs';
@@ -17,7 +17,7 @@ export class Stockouts implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private analyticsService: AnalyticsService) {}
+  constructor(private analyticsService: AnalyticsService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.loadStockouts();
@@ -39,6 +39,7 @@ export class Stockouts implements OnInit, OnDestroy {
         next: (response) => {
           this.stockouts = response.results || (response as any);
           this.loading = false;
+          this.cdr.detectChanges();
         },
         error: (err) => {
           this.error = 'Failed to load stockout incidents';

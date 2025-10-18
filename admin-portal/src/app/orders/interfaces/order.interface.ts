@@ -54,7 +54,7 @@ export interface Payment {
   status: PaymentStatus;
   provider: PaymentProvider;
   reference: string;
-  authorizationUrl?: string;
+  authorization_url?: string;
   accessCode?: string;
   gatewayResponse?: any;
   paidAt?: string;
