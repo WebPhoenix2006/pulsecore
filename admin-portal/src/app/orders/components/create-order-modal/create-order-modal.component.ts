@@ -1,11 +1,21 @@
-import { Component, OnInit, OnDestroy, signal, output, computed } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  signal,
+  output,
+} from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { OrdersService } from '../../services/orders.service';
 import { CatalogService, Category } from '../../services/catalog.service';
 import { Product } from '../../../interfaces/product.interface';
 import { ToastService } from '../../../shared/services/toast.service';
-import { CreateOrderRequest, CreateOrderItem, DeliveryAddress } from '../../interfaces/order.interface';
+import {
+  CreateOrderRequest,
+  CreateOrderItem,
+  DeliveryAddress,
+} from '../../interfaces/order.interface';
 import { SelectOption } from '../../../shared/components/custom-select/custom-select.component';
 
 // Using Product interface from CatalogService instead of SKU
@@ -21,7 +31,7 @@ interface Customer {
   selector: 'app-create-order-modal',
   standalone: false,
   templateUrl: './create-order-modal.component.html',
-  styleUrls: ['./create-order-modal.component.scss']
+  styleUrls: ['./create-order-modal.component.scss'],
 })
 export class CreateOrderModalComponent implements OnInit, OnDestroy {
   orderForm: FormGroup;
@@ -35,22 +45,9 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
   filteredProducts = signal<Product[]>([]);
   categories = signal<Category[]>([]);
 
-  // Select options for custom-select
-  customerOptions = computed<SelectOption[]>(() => {
-    return this.customers().map(customer => ({
-      value: customer.id,
-      label: `${customer.name} - ${customer.email}`,
-      metadata: customer
-    }));
-  });
-
-  productOptions = computed<SelectOption[]>(() => {
-    return this.filteredProducts().map(product => ({
-      value: product.sku_id,  // Always use sku_id
-      label: `${product.name} - ${this.formatCurrency(product.price)} (${product.stock_quantity ?? 999} available)`,
-      metadata: product
-    }));
-  });
+  // Cached select options (writable signals to avoid recomputation)
+  customerOptions = signal<SelectOption[]>([]);
+  productOptions = signal<SelectOption[]>([]);
 
   // Outputs
   orderCreated = output<void>();
@@ -97,12 +94,12 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
         state: [''],
         postalCode: [''],
         country: ['Nigeria'],
-        landmark: ['']
+        landmark: [''],
       }),
 
       // Additional Information
       notes: [''],
-      discount: [0, [Validators.min(0)]]
+      discount: [0, [Validators.min(0)]],
     });
   }
 
@@ -119,28 +116,50 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
     const mockCustomers: Customer[] = [
       { id: '1', name: 'John Doe', email: 'john@example.com', phone: '+234801234567' },
       { id: '2', name: 'Jane Smith', email: 'jane@example.com', phone: '+234809876543' },
-      { id: '3', name: 'Mike Johnson', email: 'mike@example.com' }
+      { id: '3', name: 'Mike Johnson', email: 'mike@example.com' },
     ];
     this.customers.set(mockCustomers);
+
+    // Build customer options
+    const options = mockCustomers.map((customer) => ({
+      value: customer.id,
+      label: `${customer.name} - ${customer.email}`,
+      metadata: customer,
+    }));
+    this.customerOptions.set(options);
   }
 
   loadProducts() {
-    this.catalogService.getProducts()
+    this.catalogService
+      .getProducts()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           this.products.set(response.results);
           this.filteredProducts.set(response.results);
+
+          // Build product options once when loaded
+          this.updateProductOptions();
         },
         error: (error) => {
           this.toastService.showError('Failed to load products');
           console.error('Error loading products:', error);
-        }
+        },
       });
   }
 
+  private updateProductOptions() {
+    const options = this.filteredProducts().map((product) => ({
+      value: product.sku_id,
+      label: `${product.name} - ${this.formatCurrency(product.price)} (${product.stock_quantity ?? 0} in stock)`,
+      metadata: product,
+    }));
+    this.productOptions.set(options);
+  }
+
   loadCategories() {
-    this.catalogService.getCategories()
+    this.catalogService
+      .getCategories()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -148,7 +167,7 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading categories:', error);
-        }
+        },
       });
   }
 
@@ -158,27 +177,33 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
       this.orderForm.patchValue({
         customerName: customer.name,
         customerEmail: customer.email,
-        customerPhone: customer.phone || ''
+        customerPhone: customer.phone || '',
       });
     } else {
       this.orderForm.patchValue({
         customerName: '',
         customerEmail: '',
-        customerPhone: ''
+        customerPhone: '',
       });
     }
   }
 
   addOrderItem() {
+    // Create the form group
     const itemGroup = this.fb.group({
       productId: ['', Validators.required],
       productName: [''],
       quantity: [1, [Validators.required, Validators.min(1)]],
       unitPrice: [0],
-      totalPrice: [0]
+      totalPrice: [0],
     });
 
+    // Push to array
     this.itemsArray.push(itemGroup);
+
+    // Force synchronous update to register controls before template renders
+    this.itemsArray.updateValueAndValidity({ emitEvent: false });
+    this.orderForm.updateValueAndValidity({ emitEvent: false });
   }
 
   removeOrderItem(index: number) {
@@ -190,12 +215,23 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
 
     if (option && option.metadata) {
       const product = option.metadata as Product;
-      // Always use sku_id as it's what the backend expects
+      // Use inventory_sku if available, otherwise show error
+      if (!product.inventory_sku) {
+        this.toastService.showError(`Product "${product.name}" is not linked to an inventory SKU`);
+        itemGroup.patchValue({
+          productId: '',
+          productName: '',
+          unitPrice: 0,
+          quantity: 1,
+          totalPrice: 0,
+        });
+        return;
+      }
       itemGroup.patchValue({
-        productId: product.sku_id,
+        productId: product.inventory_sku,
         productName: product.name,
         unitPrice: product.price,
-        quantity: 1
+        quantity: 1,
       });
       this.calculateItemTotal(index);
     } else {
@@ -204,7 +240,7 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
         productName: '',
         unitPrice: 0,
         quantity: 1,
-        totalPrice: 0
+        totalPrice: 0,
       });
     }
   }
@@ -258,9 +294,11 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
       case 3:
         if (this.orderForm.get('includeDelivery')?.value) {
           const deliveryGroup = this.deliveryAddressGroup;
-          return deliveryGroup.get('street')?.value &&
-                 deliveryGroup.get('city')?.value &&
-                 deliveryGroup.get('state')?.value;
+          return (
+            deliveryGroup.get('street')?.value &&
+            deliveryGroup.get('city')?.value &&
+            deliveryGroup.get('state')?.value
+          );
         }
         return true;
       default:
@@ -278,28 +316,34 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
       const orderData: any = {
         customer_name: formValue.customerName || 'Walk-in Customer',
         items: formValue.items.map((item: any) => ({
-          sku_id: item.productId,  // Backend expects sku_id, not skuId
-          quantity: item.quantity
+          sku_id: item.productId, // Backend expects sku_id, not skuId
+          quantity: item.quantity,
         })),
         status: 'pending',
-        payment_status: 'unpaid'
+        payment_status: 'unpaid',
       };
 
-      this.ordersService.createOrder(orderData)
+      this.ordersService
+        .createOrder(orderData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (response: any) => {
             const total = response.total_amount || response.totalAmount || 0;
-            this.toastService.showSuccess(`Order created successfully! Total: ${this.formatCurrency(parseFloat(total))}`);
+            this.toastService.showSuccess(
+              `Order created successfully! Total: ${this.formatCurrency(parseFloat(total))}`
+            );
             this.orderCreated.emit();
             this.isLoading.set(false);
           },
           error: (error) => {
-            const errorMsg = error?.error?.detail || error?.error?.non_field_errors?.[0] || 'Failed to create order';
+            const errorMsg =
+              error?.error?.detail ||
+              error?.error?.non_field_errors?.[0] ||
+              'Failed to create order';
             this.toastService.showError(errorMsg);
             this.isLoading.set(false);
             console.error('Create order error:', error);
-          }
+          },
         });
     } else {
       this.toastService.showError('Please fill in all required fields');
@@ -313,7 +357,7 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
-      currency: 'NGN'
+      currency: 'NGN',
     }).format(amount);
   }
 
@@ -334,17 +378,21 @@ export class CreateOrderModalComponent implements OnInit, OnDestroy {
     if (!searchTerm) {
       this.filteredProducts.set(this.products());
     } else {
-      const filtered = this.products().filter(product =>
+      const filtered = this.products().filter((product) =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
       this.filteredProducts.set(filtered);
     }
+
+    // Update options after filtering
+    this.updateProductOptions();
   }
 
   getProductAvailableQuantity(productId: string): number {
     if (!productId) return 0;
-    const product = this.products().find(s => s.sku_id === productId);
-    return product?.stock_quantity ?? 999;
+    // productId now contains inventory_sku, so search by that
+    const product = this.products().find((s) => s.inventory_sku === productId);
+    return product?.stock_quantity ?? 0;
   }
 
   isQuantityValid(index: number): boolean {

@@ -28,6 +28,6 @@ class CategoryViewSet(TenantScopedMixin, viewsets.ModelViewSet):
 
 
 class ProductViewSet(TenantScopedMixin, viewsets.ModelViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.objects.select_related('inventory_sku').all()
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticated]

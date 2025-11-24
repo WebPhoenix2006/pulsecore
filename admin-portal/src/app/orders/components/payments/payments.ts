@@ -18,7 +18,7 @@ interface PaymentStats {
   selector: 'app-payments',
   standalone: false,
   templateUrl: './payments.html',
-  styleUrl: './payments.scss'
+  styleUrl: './payments.scss',
 })
 export class Payments implements OnInit, OnDestroy {
   payments = signal<Payment[]>([]);
@@ -41,10 +41,7 @@ export class Payments implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(
-    private ordersService: OrdersService,
-    private toastService: ToastService
-  ) {}
+  constructor(private ordersService: OrdersService, private toastService: ToastService) {}
 
   ngOnInit() {
     this.loadPayments();
@@ -59,7 +56,8 @@ export class Payments implements OnInit, OnDestroy {
   loadPayments() {
     this.isLoading.set(true);
 
-    this.ordersService.getPayments()
+    this.ordersService
+      .getPayments()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -72,7 +70,7 @@ export class Payments implements OnInit, OnDestroy {
         error: (error) => {
           this.toastService.showError('Failed to load payments');
           this.isLoading.set(false);
-        }
+        },
       });
   }
 
@@ -81,12 +79,16 @@ export class Payments implements OnInit, OnDestroy {
 
     const stats: PaymentStats = {
       totalPayments: payments.length,
-      pendingPayments: payments.filter(p => p.status === PaymentStatus.PENDING).length,
-      successfulPayments: payments.filter(p => p.status === PaymentStatus.PAID).length,
-      failedPayments: payments.filter(p => p.status === PaymentStatus.FAILED).length,
+      pendingPayments: payments.filter((p) => p.status === PaymentStatus.PENDING).length,
+      successfulPayments: payments.filter((p) => p.status === PaymentStatus.PAID).length,
+      failedPayments: payments.filter((p) => p.status === PaymentStatus.FAILED).length,
       totalAmount: payments.reduce((sum, p) => sum + p.amount, 0),
-      successfulAmount: payments.filter(p => p.status === PaymentStatus.PAID).reduce((sum, p) => sum + p.amount, 0),
-      pendingAmount: payments.filter(p => p.status === PaymentStatus.PENDING).reduce((sum, p) => sum + p.amount, 0)
+      successfulAmount: payments
+        .filter((p) => p.status === PaymentStatus.PAID)
+        .reduce((sum, p) => sum + p.amount, 0),
+      pendingAmount: payments
+        .filter((p) => p.status === PaymentStatus.PENDING)
+        .reduce((sum, p) => sum + p.amount, 0),
     };
 
     this.paymentStats.set(stats);
@@ -98,20 +100,21 @@ export class Payments implements OnInit, OnDestroy {
     // Filter by search term
     if (this.searchTerm()) {
       const term = this.searchTerm().toLowerCase();
-      filtered = filtered.filter(payment =>
-        payment.reference.toLowerCase().includes(term) ||
-        payment.order_id.toLowerCase().includes(term)
+      filtered = filtered.filter(
+        (payment) =>
+          payment.reference.toLowerCase().includes(term) ||
+          payment.order_id?.toLowerCase().includes(term)
       );
     }
 
     // Filter by status
     if (this.selectedStatus() !== 'all') {
-      filtered = filtered.filter(payment => payment.status === this.selectedStatus());
+      filtered = filtered.filter((payment) => payment.status === this.selectedStatus());
     }
 
     // Filter by provider
     if (this.selectedProvider() !== 'all') {
-      filtered = filtered.filter(payment => payment.provider === this.selectedProvider());
+      filtered = filtered.filter((payment) => payment.provider === this.selectedProvider());
     }
 
     this.filteredPayments.set(filtered);
@@ -142,7 +145,8 @@ export class Payments implements OnInit, OnDestroy {
   verifyPayment(payment: Payment) {
     this.isLoading.set(true);
 
-    this.ordersService.verifyPayment(payment.reference)
+    this.ordersService
+      .verifyPayment(payment.reference)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (updatedPayment) => {
@@ -152,7 +156,7 @@ export class Payments implements OnInit, OnDestroy {
         error: (error) => {
           this.toastService.showError('Failed to verify payment');
           this.isLoading.set(false);
-        }
+        },
       });
   }
 
@@ -185,24 +189,30 @@ export class Payments implements OnInit, OnDestroy {
     // Note: Backend handles pagination automatically, implement URL parameter pagination if needed
   }
 
-  getStatusClass(status: PaymentStatus): string {
+  getStatusClass(status: PaymentStatus | string): string {
     switch (status) {
       case PaymentStatus.PENDING:
+      case 'pending':
         return 'badge-warning';
       case PaymentStatus.PAID:
+      case 'paid':
+      case 'success':
         return 'badge-success';
       case PaymentStatus.FAILED:
+      case 'failed':
         return 'badge-error';
       case PaymentStatus.REFUNDED:
+      case 'refunded':
         return 'badge-secondary';
       default:
         return 'badge-secondary';
     }
   }
 
-  getProviderIcon(provider: PaymentProvider): string {
+  getProviderIcon(provider: PaymentProvider | string | undefined): string {
     switch (provider) {
       case PaymentProvider.PAYSTACK:
+      case 'paystack':
         return 'ri-bank-card-line';
       default:
         return 'ri-bank-line';
@@ -212,17 +222,18 @@ export class Payments implements OnInit, OnDestroy {
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
-      currency: 'NGN'
+      currency: 'NGN',
     }).format(amount);
   }
 
-  formatDate(dateString: string): string {
+  formatDate(dateString: string | undefined): string {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-NG', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 

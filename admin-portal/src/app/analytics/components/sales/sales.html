@@ -62,7 +62,8 @@
             </td>
             <td class="orders-cell">{{ sale.total_orders }}</td>
             <td class="items-cell">{{ sale.total_items }}</td>
-            <td class="revenue-cell">${{ sale.total_revenue }}</td>
+            <td class="revenue-cell">₦{{ sale.total_revenue | thousandSep }}</td>
+            <!-- <td class="amount">{{ sale.total | thousandSep:2 }}</td> -->
           </tr>
           <tr *ngIf="salesData.length === 0">
             <td colspan="4" class="empty-state">

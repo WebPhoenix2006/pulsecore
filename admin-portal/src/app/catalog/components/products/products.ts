@@ -14,6 +14,8 @@ import { Category } from '../../../interfaces/category.interface';
 import { ProductService } from '../../services/product';
 import { DataTableHelperService } from '../../../shared/services/data-table-helper.service';
 import { FormFieldOption } from '../../../interfaces/form-field-options';
+import { SKUService } from '../../../inventory/services/sku.service';
+import { SKU } from '../../../interfaces/sku.interface';
 
 @Component({
   selector: 'app-products',
@@ -24,6 +26,7 @@ import { FormFieldOption } from '../../../interfaces/form-field-options';
 export class Products implements OnInit {
   products = signal<Product[]>([]);
   categories: Category[] = [];
+  skus: SKU[] = [];
   loading = signal(false);
   selectedProducts: Product[] = [];
 
@@ -34,6 +37,7 @@ export class Products implements OnInit {
   productForm!: FormGroup;
   currentProductId: string | null = null;
   categoryOptions: FormFieldOption[] = [];
+  skuOptions: FormFieldOption[] = [];
   selectedProduct: Product | null = null;
 
   tableColumns: TableColumn[] = [
@@ -124,6 +128,7 @@ export class Products implements OnInit {
   constructor(
     private productService: ProductService,
     private categoryService: CategoryService,
+    private skuService: SKUService,
     private toastService: ToastService,
     private dataTableHelper: DataTableHelperService,
     private fb: FormBuilder
@@ -133,6 +138,7 @@ export class Products implements OnInit {
 
   ngOnInit() {
     this.loadCategories();
+    this.loadSKUs();
     this.loadProducts();
   }
 
@@ -146,6 +152,19 @@ export class Products implements OnInit {
         }));
       },
       error: () => this.toastService.showError('Failed to load categories'),
+    });
+  }
+
+  private loadSKUs() {
+    this.skuService.getSKUs().subscribe({
+      next: (response: PaginatedResponse<SKU>) => {
+        this.skus = response.results;
+        this.skuOptions = this.skus.map(sku => ({
+          label: `${sku.name} (${sku.sku_code || 'No code'})`,
+          value: sku.sku_id
+        }));
+      },
+      error: () => this.toastService.showError('Failed to load SKUs'),
     });
   }
 
@@ -183,6 +202,7 @@ export class Products implements OnInit {
 
   private initializeForm() {
     this.productForm = this.fb.group({
+      skuId: ['', [Validators.required]],
       name: ['', [Validators.required]],
       category: [''],
       price: ['', [Validators.required, Validators.min(0)]],
@@ -194,6 +214,7 @@ export class Products implements OnInit {
   }
 
   // Form control getters
+  get skuIdControl() { return this.productForm.get('skuId') as FormControl; }
   get nameControl() { return this.productForm.get('name') as FormControl; }
   get categoryControl() { return this.productForm.get('category') as FormControl; }
   get priceControl() { return this.productForm.get('price') as FormControl; }
@@ -213,6 +234,7 @@ export class Products implements OnInit {
     this.isEditMode = true;
     this.currentProductId = product.sku_id;
     this.productForm.patchValue({
+      skuId: product.inventory_sku || '',
       name: product.name,
       category: product.category || '',
       price: product.price,
@@ -231,6 +253,7 @@ export class Products implements OnInit {
 
     const formValue = this.productForm.value;
     const productData = {
+      inventory_sku: formValue.skuId,
       name: formValue.name,
       category: formValue.category || undefined,
       price: parseFloat(formValue.price),

@@ -202,22 +202,22 @@
                     <div class="payment-details">
                       <div class="detail-item">
                         <span class="label">Provider:</span>
-                        <span>{{ payment.provider | titlecase }}</span>
+                        <span>{{ payment.provider || 'Paystack' | titlecase }}</span>
                       </div>
                       <div class="detail-item">
                         <span class="label">Created:</span>
-                        <span>{{ formatDate(payment.createdAt) }}</span>
+                        <span>{{ formatDate((payment.created_at || payment.createdAt)!) }}</span>
                       </div>
-                      @if (payment.paidAt) {
+                      @if (payment.paid_at || payment.paidAt) {
                         <div class="detail-item">
                           <span class="label">Paid At:</span>
-                          <span>{{ formatDate(payment.paidAt) }}</span>
+                          <span>{{ formatDate((payment.paid_at || payment.paidAt)!) }}</span>
                         </div>
                       }
-                      @if (payment.failedAt) {
+                      @if (payment.failed_at || payment.failedAt) {
                         <div class="detail-item">
                           <span class="label">Failed At:</span>
-                          <span>{{ formatDate(payment.failedAt) }}</span>
+                          <span>{{ formatDate((payment.failed_at || payment.failedAt)!) }}</span>
                         </div>
                       }
                     </div>

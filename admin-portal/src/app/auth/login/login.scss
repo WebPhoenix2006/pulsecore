@@ -1,17 +1,44 @@
 .login-container {
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   background: var(--bg-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+
+  @media (max-width: 768px) {
+    padding: 15px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 10px;
+  }
 }
 
 .login-card {
   display: flex;
   width: 900px;
+  max-width: 100%;
   height: 550px;
   background: var(--bg-color);
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    height: auto;
+    min-height: auto;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 15px;
+  }
+
+  @media (max-width: 480px) {
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .login-form-side {
@@ -20,17 +47,59 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+
+  @media (max-width: 768px) {
+    padding: 30px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 25px 20px;
+  }
+
+  .title-image {
+    text-align: center;
+
+    img {
+      max-width: 180px;
+      height: auto;
+
+      @media (max-width: 768px) {
+        max-width: 150px;
+      }
+
+      @media (max-width: 480px) {
+        max-width: 120px;
+      }
+    }
+  }
 }
 
 .form-heading {
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 5px;
+
+  @media (max-width: 768px) {
+    font-size: 1.75rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.5rem;
+  }
 }
 
 .form-subtext {
   color: var(--muted-text);
   margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+  }
 }
 
 .form-options {
@@ -39,6 +108,13 @@
   align-items: center;
   margin: 15px 0;
   font-size: 0.9rem;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.85rem;
+  }
 
   .remember-me {
     display: flex;
@@ -62,6 +138,11 @@
   margin-top: 20px;
   font-size: 0.9rem;
   text-align: center;
+
+  @media (max-width: 480px) {
+    font-size: 0.85rem;
+    margin-top: 15px;
+  }
 
   a {
     color: var(--secondary-color);

@@ -6,7 +6,37 @@
       <p class="dashboard-subtitle">Real-time insights into your business performance</p>
     </div>
     <div class="header-actions">
-      <div class="date-filters">
+      <div class="time-period-tabs">
+        <button
+          class="tab-btn"
+          [class.active]="selectedPeriod === 'month'"
+          (click)="selectTimePeriod('month')"
+        >
+          Last Month
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="selectedPeriod === '6months'"
+          (click)="selectTimePeriod('6months')"
+        >
+          Last 6 Months
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="selectedPeriod === 'year'"
+          (click)="selectTimePeriod('year')"
+        >
+          This Year
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="selectedPeriod === 'custom'"
+          (click)="selectedPeriod = 'custom'"
+        >
+          Custom
+        </button>
+      </div>
+      <div class="date-filters" *ngIf="selectedPeriod === 'custom'">
         <input
           type="date"
           [(ngModel)]="dateRange.start_date"
@@ -49,7 +79,7 @@
         </div>
         <div class="kpi-content">
           <p class="kpi-label">Total Revenue</p>
-          <h2 class="kpi-value">${{ dashboardData.revenue_total }}</h2>
+          <h2 class="kpi-value">₦{{ dashboardData.revenue_total | thousandSep }}</h2>
         </div>
       </div>
 
@@ -59,7 +89,7 @@
         </div>
         <div class="kpi-content">
           <p class="kpi-label">Total Orders</p>
-          <h2 class="kpi-value">{{ dashboardData.sales_count }}</h2>
+          <h2 class="kpi-value">{{ dashboardData.sales_count | thousandSep }}</h2>
         </div>
       </div>
 
@@ -69,7 +99,7 @@
         </div>
         <div class="kpi-content">
           <p class="kpi-label">Total Stock</p>
-          <h2 class="kpi-value">{{ dashboardData.stock_total }}</h2>
+          <h2 class="kpi-value">{{ dashboardData.stock_total | thousandSep }}</h2>
         </div>
       </div>
 
@@ -79,7 +109,7 @@
         </div>
         <div class="kpi-content">
           <p class="kpi-label">Low Stock Items</p>
-          <h2 class="kpi-value">{{ dashboardData.low_stock_count }}</h2>
+          <h2 class="kpi-value">{{ dashboardData.low_stock_count | thousandSep }}</h2>
         </div>
       </div>
 
@@ -89,7 +119,7 @@
         </div>
         <div class="kpi-content">
           <p class="kpi-label">Stockouts</p>
-          <h2 class="kpi-value">{{ dashboardData.stockout_count }}</h2>
+          <h2 class="kpi-value">{{ dashboardData.stockout_count | thousandSep }}</h2>
         </div>
       </div>
     </div>
@@ -109,10 +139,9 @@
         </div>
         <div class="chart-body">
           <canvas
-            *ngIf="revenueChartData"
             baseChart
-            [data]="revenueChartData"
-            [options]="revenueChartOptions"
+            [data]="revenueChartData!"
+            [options]="revenueChartOptions!"
             [type]="'line'"
           ></canvas>
         </div>
@@ -131,10 +160,9 @@
         </div>
         <div class="chart-body">
           <canvas
-            *ngIf="stockChartData"
             baseChart
-            [data]="stockChartData"
-            [options]="stockChartOptions"
+            [data]="stockChartData!"
+            [options]="stockChartOptions!"
             [type]="'line'"
           ></canvas>
         </div>
@@ -150,10 +178,9 @@
         </div>
         <div class="chart-body">
           <canvas
-            *ngIf="topSKUsChartData"
             baseChart
-            [data]="topSKUsChartData"
-            [options]="topSKUsChartOptions"
+            [data]="topSKUsChartData!"
+            [options]="topSKUsChartOptions!"
             [type]="'bar'"
           ></canvas>
         </div>
@@ -180,10 +207,10 @@
           </thead>
           <tbody>
             <tr *ngFor="let sku of dashboardData.top_skus">
-              <td class="product-name">{{ sku.sku_name }}</td>
-              <td class="sku-id">{{ sku.sku_id }}</td>
-              <td class="units-sold">{{ sku.total_sold }}</td>
-              <td class="revenue">${{ sku.revenue }}</td>
+              <td class="product-name">{{ sku.sku_name | thousandSep }}</td>
+              <td class="sku-id">{{ sku.sku_id | thousandSep }}</td>
+              <td class="units-sold">{{ sku.total_sold | thousandSep }}</td>
+              <td class="revenue">₦{{ sku.revenue | thousandSep }}</td>
             </tr>
             <tr *ngIf="dashboardData.top_skus.length === 0">
               <td colspan="4" class="empty-state">No data available</td>

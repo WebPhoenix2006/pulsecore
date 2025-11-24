@@ -38,7 +38,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(OrderSerializer(order).data)
 
-    @action(detail=True, methods=["post"], url_path="return", url_name="return")
+    @action(detail=True, methods=["post", "get"], url_path="return", url_name="return")
     def create_return(self, request, pk=None):
         order = self.get_object()  # <--- get the order from the URL
         serializer = ReturnSerializer(data=request.data)
@@ -102,14 +102,17 @@ class PaystackInitializeView(APIView):
         tenant_id = request.headers.get("X-Tenant-ID")
         data = request.data
         order_id = data.get("order_id")
+        callback_url = data.get("callbackUrl")  # Get callback URL from frontend
 
         order = get_object_or_404(Order, order_id=order_id, tenant_id=tenant_id)
         client = PaystackClient()
 
+        # Initialize transaction with callback URL
         paystack_resp = client.initialize_transaction(
             email=data["customer_email"],
             amount=int(order.total_amount * 100),  # kobo
             reference=str(order.order_id),
+            callback_url=callback_url,
         )
 
         transaction = PaystackTransaction.objects.create(
@@ -119,6 +122,7 @@ class PaystackInitializeView(APIView):
             amount=order.total_amount,
             currency="NGN",
             authorization_url=paystack_resp["data"]["authorization_url"],
+            provider="paystack",
             status="initialized",
         )
         return Response(PaystackTransactionSerializer(transaction).data, status=201)

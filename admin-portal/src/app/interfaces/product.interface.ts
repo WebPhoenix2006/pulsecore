@@ -15,6 +15,7 @@ export interface Product {
   expiry_date?: string;
   description?: string;
   is_active?: boolean;
+  inventory_sku?: string | null; // Link to inventory SKU
   created_at?: string;
   updated_at?: string;
 
@@ -23,6 +24,7 @@ export interface Product {
 }
 
 export interface CreateProductRequest {
+  inventory_sku: string;
   name: string;
   category?: string;
   attributes?: Record<string, string | number | boolean>;
@@ -34,6 +36,7 @@ export interface CreateProductRequest {
 }
 
 export interface UpdateProductRequest {
+  inventory_sku?: string;
   name?: string;
   category?: string;
   attributes?: Record<string, string | number | boolean>;

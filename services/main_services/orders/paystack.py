@@ -18,7 +18,7 @@ class PaystackClient:
         }
 
     def initialize_transaction(
-        self, email: str, amount: int, reference: str, currency: str = "NGN"
+        self, email: str, amount: int, reference: str, currency: str = "NGN", callback_url: str = None
     ):
         """
         Initialize a Paystack transaction.
@@ -26,6 +26,7 @@ class PaystackClient:
         - amount: in kobo (e.g. 5000 = ₦50)
         - reference: unique transaction ref (we use order_id)
         - currency: usually NGN
+        - callback_url: URL to redirect after payment
         """
         payload = {
             "email": email,
@@ -33,6 +34,10 @@ class PaystackClient:
             "currency": currency,
             "reference": reference,
         }
+
+        if callback_url:
+            payload["callback_url"] = callback_url
+
         resp = requests.post(
             f"{self.base_url}/transaction/initialize",
             headers=self.headers,

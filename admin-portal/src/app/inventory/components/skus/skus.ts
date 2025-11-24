@@ -1,6 +1,9 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
-import { TableColumn, TableAction } from '../../../shared/components/prime-data-table/prime-data-table';
+import {
+  TableColumn,
+  TableAction,
+} from '../../../shared/components/prime-data-table/prime-data-table';
 import { ToastService } from '../../../shared/services/toast.service';
 import { SKU, CreateSKURequest, UpdateSKURequest } from '../../../interfaces/sku.interface';
 import { SKUService } from '../../services/sku.service';
@@ -38,7 +41,7 @@ export class Skus implements OnInit {
   adjustmentTypeOptions: FormFieldOption[] = [
     { label: 'Increase Stock', value: 'increase' },
     { label: 'Decrease Stock', value: 'decrease' },
-    { label: 'Set Absolute Value', value: 'set' }
+    { label: 'Set Absolute Value', value: 'set' },
   ];
 
   tableColumns: TableColumn[] = [
@@ -48,7 +51,7 @@ export class Skus implements OnInit {
       sortable: true,
       filterable: true,
       type: 'text',
-      width: '15%'
+      width: '15%',
     },
     {
       field: 'name',
@@ -56,48 +59,48 @@ export class Skus implements OnInit {
       sortable: true,
       filterable: true,
       type: 'text',
-      width: '25%'
+      width: '25%',
     },
     {
       field: 'category_name',
       header: 'Category',
       sortable: true,
       type: 'text',
-      width: '15%'
+      width: '15%',
     },
     {
       field: 'stock_level',
       header: 'Stock Level',
       sortable: true,
       type: 'text',
-      width: '12%'
+      width: '12%',
     },
     {
       field: 'reorder_threshold',
       header: 'Reorder Level',
       sortable: true,
       type: 'text',
-      width: '12%'
+      width: '12%',
     },
-    {
-      field: 'price',
-      header: 'Price',
-      sortable: true,
-      type: 'text',
-      width: '10%'
-    },
+    // {
+    //   field: 'price',
+    //   header: 'Price',
+    //   sortable: true,
+    //   type: 'text',
+    //   width: '10%'
+    // },
     {
       field: 'barcode',
       header: 'Barcode',
       type: 'text',
-      width: '11%'
+      width: '11%',
     },
     {
       field: 'actions',
       header: 'Actions',
       type: 'actions',
-      width: '120px'
-    }
+      width: '120px',
+    },
   ];
 
   tableActions: TableAction[] = [
@@ -106,36 +109,36 @@ export class Skus implements OnInit {
       value: 'view',
       icon: 'eye',
       iconPosition: 'left',
-      action: (rowData) => this.onViewSku(rowData)
+      action: (rowData) => this.onViewSku(rowData),
     },
     {
       label: 'Edit',
       value: 'edit',
       icon: 'edit',
       iconPosition: 'left',
-      action: (rowData) => this.onEditSku(rowData)
+      action: (rowData) => this.onEditSku(rowData),
     },
     {
       label: 'Delete',
       value: 'delete',
       icon: 'trash',
       iconPosition: 'left',
-      action: (rowData) => this.onDeleteSku(rowData.sku_id)
+      action: (rowData) => this.onDeleteSku(rowData.sku_id),
     },
     {
       label: 'Adjust Stock',
       value: 'adjust-stock',
       icon: 'plus-minus',
       iconPosition: 'left',
-      action: (rowData) => this.adjustStock(rowData.sku_id)
+      action: (rowData) => this.adjustStock(rowData.sku_id),
     },
     {
       label: 'View Batches',
       value: 'view-batches',
       icon: 'list',
       iconPosition: 'left',
-      action: (rowData) => this.viewBatches(rowData.sku_id)
-    }
+      action: (rowData) => this.viewBatches(rowData.sku_id),
+    },
   ];
 
   constructor(
@@ -156,9 +159,9 @@ export class Skus implements OnInit {
     this.categoryService.getCategories().subscribe({
       next: (response: PaginatedResponse<Category>) => {
         this.categories = response.results;
-        this.categoryOptions = this.categories.map(cat => ({
+        this.categoryOptions = this.categories.map((cat) => ({
           label: cat.name,
-          value: cat.id
+          value: cat.id,
         }));
       },
       error: () => this.toastService.showError('Failed to load categories'),
@@ -188,36 +191,58 @@ export class Skus implements OnInit {
       name: ['', [Validators.required]],
       skuCode: [''],
       category: ['', [Validators.required]],
-      price: ['', [Validators.required, Validators.min(0)]],
+      // price: ['', [Validators.required, Validators.min(0)]],
       stockLevel: ['', [Validators.required, Validators.min(0)]],
       reorderThreshold: [''],
       barcode: [''],
       supplierId: [''],
-      trackBatches: [false]
+      trackBatches: [false],
     });
 
     this.adjustStockForm = this.fb.group({
       adjustmentType: ['', [Validators.required]],
       quantity: ['', [Validators.required, Validators.min(1)]],
-      reason: ['', [Validators.required]]
+      reason: ['', [Validators.required]],
     });
   }
 
   // Form control getters
-  get nameControl() { return this.skuForm.get('name') as FormControl; }
-  get skuCodeControl() { return this.skuForm.get('skuCode') as FormControl; }
-  get categoryControl() { return this.skuForm.get('category') as FormControl; }
-  get priceControl() { return this.skuForm.get('price') as FormControl; }
-  get stockLevelControl() { return this.skuForm.get('stockLevel') as FormControl; }
-  get reorderThresholdControl() { return this.skuForm.get('reorderThreshold') as FormControl; }
-  get barcodeControl() { return this.skuForm.get('barcode') as FormControl; }
-  get supplierIdControl() { return this.skuForm.get('supplierId') as FormControl; }
-  get trackBatchesControl() { return this.skuForm.get('trackBatches') as FormControl; }
+  get nameControl() {
+    return this.skuForm.get('name') as FormControl;
+  }
+  get skuCodeControl() {
+    return this.skuForm.get('skuCode') as FormControl;
+  }
+  get categoryControl() {
+    return this.skuForm.get('category') as FormControl;
+  }
+  // get priceControl() { return this.skuForm.get('price') as FormControl; }
+  get stockLevelControl() {
+    return this.skuForm.get('stockLevel') as FormControl;
+  }
+  get reorderThresholdControl() {
+    return this.skuForm.get('reorderThreshold') as FormControl;
+  }
+  get barcodeControl() {
+    return this.skuForm.get('barcode') as FormControl;
+  }
+  get supplierIdControl() {
+    return this.skuForm.get('supplierId') as FormControl;
+  }
+  get trackBatchesControl() {
+    return this.skuForm.get('trackBatches') as FormControl;
+  }
 
   // Adjust Stock Form controls
-  get adjustmentTypeControl() { return this.adjustStockForm.get('adjustmentType') as FormControl; }
-  get quantityControl() { return this.adjustStockForm.get('quantity') as FormControl; }
-  get reasonControl() { return this.adjustStockForm.get('reason') as FormControl; }
+  get adjustmentTypeControl() {
+    return this.adjustStockForm.get('adjustmentType') as FormControl;
+  }
+  get quantityControl() {
+    return this.adjustStockForm.get('quantity') as FormControl;
+  }
+  get reasonControl() {
+    return this.adjustStockForm.get('reason') as FormControl;
+  }
 
   onCreateSku() {
     this.isEditMode = false;
@@ -234,12 +259,12 @@ export class Skus implements OnInit {
       name: sku.name,
       skuCode: sku.sku_code || '',
       category: sku.category?.toString() || '',
-      price: sku.price,
+      // price: sku.price,
       stockLevel: sku.stock_level,
       reorderThreshold: sku.reorder_threshold || '',
       barcode: sku.barcode || '',
       supplierId: sku.supplier_id || '',
-      trackBatches: sku.track_batches
+      trackBatches: sku.track_batches,
     });
     this.modalVisible = true;
   }
@@ -254,12 +279,12 @@ export class Skus implements OnInit {
       name: formValue.name,
       sku_code: formValue.skuCode || null,
       category: formValue.category,
-      price: parseFloat(formValue.price),
+      // price: parseFloat(formValue.price),
       stock_level: parseInt(formValue.stockLevel),
       reorder_threshold: formValue.reorderThreshold ? parseInt(formValue.reorderThreshold) : null,
       barcode: formValue.barcode || null,
       supplier_id: formValue.supplierId || null,
-      track_batches: formValue.trackBatches
+      track_batches: formValue.trackBatches,
     };
 
     this.loading.set(true);
@@ -267,17 +292,19 @@ export class Skus implements OnInit {
     if (this.isEditMode && this.currentSkuId) {
       this.skuService.updateSKU(this.currentSkuId, skuData as UpdateSKURequest).subscribe({
         next: (updatedSku) => {
-          this.skus.update(skus =>
-            skus.map(s => s.sku_id === this.currentSkuId ? updatedSku : s)
+          this.skus.update((skus) =>
+            skus.map((s) => (s.sku_id === this.currentSkuId ? updatedSku : s))
           );
           this.toastService.showSuccess('SKU updated successfully!');
           this.modalVisible = false;
           this.loading.set(false);
         },
         error: (error) => {
-          this.toastService.showError(`Failed to update SKU: ${error.error?.message || error.message}`);
+          this.toastService.showError(
+            `Failed to update SKU: ${error.error?.message || error.message}`
+          );
           this.loading.set(false);
-        }
+        },
       });
     } else {
       this.skuService.createSKU(skuData as CreateSKURequest).subscribe({
@@ -288,9 +315,11 @@ export class Skus implements OnInit {
           this.loading.set(false);
         },
         error: (error) => {
-          this.toastService.showError(`Failed to create SKU: ${error.error?.message || error.message}`);
+          this.toastService.showError(
+            `Failed to create SKU: ${error.error?.message || error.message}`
+          );
           this.loading.set(false);
-        }
+        },
       });
     }
   }
@@ -328,24 +357,33 @@ export class Skus implements OnInit {
   }
 
   private generateSKUCSV(): string {
-    const headers = ['SKU ID', 'Name', 'SKU Code', 'Category', 'Price', 'Stock Level', 'Reorder Threshold', 'Barcode', 'Supplier ID', 'Track Batches', 'Created At'];
-    const rows = this.skus().map(sku => [
+    const headers = [
+      'SKU ID',
+      'Name',
+      'SKU Code',
+      'Category',
+      'Price',
+      'Stock Level',
+      'Reorder Threshold',
+      'Barcode',
+      'Supplier ID',
+      'Track Batches',
+      'Created At',
+    ];
+    const rows = this.skus().map((sku) => [
       sku.sku_id || '',
       sku.name,
       sku.sku_code || '',
       sku.category_name || '',
-      sku.price?.toString() || '',
       sku.stock_level?.toString() || '',
       sku.reorder_threshold?.toString() || '',
       sku.barcode || '',
       sku.supplier_id || '',
       sku.track_batches ? 'Yes' : 'No',
-      sku.created_at || ''
+      sku.created_at || '',
     ]);
 
-    return [headers, ...rows]
-      .map(row => row.map(field => `"${field}"`).join(','))
-      .join('\n');
+    return [headers, ...rows].map((row) => row.map((field) => `"${field}"`).join(',')).join('\n');
   }
 
   private downloadCSV(data: string, filename: string): void {
@@ -366,7 +404,7 @@ export class Skus implements OnInit {
   }
 
   private adjustStock(skuId: string) {
-    const sku = this.skus().find(s => s.sku_id === skuId);
+    const sku = this.skus().find((s) => s.sku_id === skuId);
     if (sku) {
       this.selectedSku = sku;
       this.adjustStockForm.reset();
@@ -375,7 +413,7 @@ export class Skus implements OnInit {
   }
 
   private viewBatches(skuId: string) {
-    const sku = this.skus().find(s => s.sku_id === skuId);
+    const sku = this.skus().find((s) => s.sku_id === skuId);
     if (sku) {
       this.selectedSku = sku;
       this.loadBatches(skuId);
@@ -393,15 +431,15 @@ export class Skus implements OnInit {
           quantity: 50,
           manufacturing_date: new Date('2024-01-15'),
           expiry_date: new Date('2025-01-15'),
-          status: 'active'
+          status: 'active',
         },
         {
           batch_number: 'BATCH-002',
           quantity: 30,
           manufacturing_date: new Date('2024-02-01'),
           expiry_date: new Date('2025-02-01'),
-          status: 'active'
-        }
+          status: 'active',
+        },
       ];
       this.batchesLoading = false;
     }, 500);
@@ -429,11 +467,9 @@ export class Skus implements OnInit {
     }
 
     // Update the SKU in the list
-    this.skus.update(skus =>
-      skus.map(sku =>
-        sku.sku_id === this.selectedSku!.sku_id
-          ? { ...sku, stock_level: newStock }
-          : sku
+    this.skus.update((skus) =>
+      skus.map((sku) =>
+        sku.sku_id === this.selectedSku!.sku_id ? { ...sku, stock_level: newStock } : sku
       )
     );
 

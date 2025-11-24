@@ -12,7 +12,6 @@ class SKUSerializer(serializers.ModelSerializer):
             "category",
             "attributes",
             "barcode",
-            "price",
             "stock_level",
             "supplier_id",
             "track_batches",
@@ -20,7 +19,12 @@ class SKUSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("sku_id", "stock_level", "created_at", "updated_at")
+        read_only_fields = (
+            "sku_id",
+            "created_at",
+            "updated_at",
+            "sku_code",
+        )
 
 
 class BatchSerializer(serializers.ModelSerializer):

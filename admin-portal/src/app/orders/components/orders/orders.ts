@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import { OrdersService } from '../../services/orders.service';
 import { ToastService } from '../../../shared/services/toast.service';
 import { Order, OrderStatus, OrderStats } from '../../interfaces/order.interface';
@@ -33,10 +34,21 @@ export class Orders implements OnInit, OnDestroy {
 
   constructor(
     private ordersService: OrdersService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
+    // Check for payment callback from Paystack
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      const reference = params['reference'];
+      const orderId = params['order_id'];
+
+      if (reference) {
+        this.handlePaymentCallback(reference, orderId);
+      }
+    });
+
     this.loadOrders();
     this.loadOrderStats();
   }
@@ -129,6 +141,25 @@ export class Orders implements OnInit, OnDestroy {
   closeOrderDetailsModal() {
     this.showOrderDetailsModal.set(false);
     this.selectedOrder.set(null);
+  }
+
+  getStatusOptions(order: Order) {
+    return this.orderStatuses
+      .filter(status => status !== order.status)
+      .map(status => ({
+        label: this.formatStatusLabel(status),
+        value: status,
+        icon: '',
+        iconPosition: 'left'
+      }));
+  }
+
+  formatStatusLabel(status: OrderStatus): string {
+    return status.charAt(0).toUpperCase() + status.slice(1);
+  }
+
+  onStatusSelected(selectedOption: any, order: Order) {
+    this.updateOrderStatus(order, selectedOption.value);
   }
 
   updateOrderStatus(order: Order, newStatus: OrderStatus) {
@@ -259,5 +290,49 @@ export class Orders implements OnInit, OnDestroy {
 
   absValue(value: number): number {
     return Math.abs(value);
+  }
+
+  handlePaymentCallback(reference: string, orderId: string) {
+    this.isLoading.set(true);
+    this.toastService.showInfo('Verifying payment...');
+
+    this.ordersService.verifyPayment(reference)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (payment) => {
+          this.loadOrders();
+          this.loadOrderStats();
+
+          // Check for successful payment status (backend might return 'success' or 'paid')
+          const paymentStatus = payment.status.toString().toLowerCase();
+          if (paymentStatus === 'paid' || paymentStatus === 'success') {
+            this.toastService.showSuccess('Payment verified successfully!');
+
+            // If orderId is provided, open the order details modal
+            if (orderId) {
+              const order = this.orders().find(o => o.order_id.toString() === orderId);
+              if (order) {
+                this.viewOrderDetails(order);
+              }
+            }
+          } else if (paymentStatus === 'failed') {
+            this.toastService.showError('Payment verification failed');
+          } else {
+            this.toastService.showWarning(`Payment status: ${payment.status}`);
+          }
+
+          this.isLoading.set(false);
+
+          // Clean up URL parameters
+          window.history.replaceState({}, document.title, window.location.pathname);
+        },
+        error: (error) => {
+          this.toastService.showError('Failed to verify payment. Please check manually.');
+          this.isLoading.set(false);
+
+          // Clean up URL parameters even on error
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      });
   }
 }

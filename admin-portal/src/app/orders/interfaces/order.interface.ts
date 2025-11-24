@@ -47,20 +47,26 @@ export interface UpdateOrderRequest {
 }
 
 export interface Payment {
-  id: string;
-  order_id: string;
+  id?: string;
+  transaction_id?: string; // Backend uses transaction_id
+  order_id?: string;
+  order?: string; // Backend returns order as string
   amount: number;
   currency: string;
-  status: PaymentStatus;
-  provider: PaymentProvider;
+  status: PaymentStatus | string; // Backend may return 'initialized', 'success', 'failed'
+  provider?: PaymentProvider | string;
   reference: string;
   authorization_url?: string;
   accessCode?: string;
   gatewayResponse?: any;
   paidAt?: string;
+  paid_at?: string; // Backend uses snake_case
   failedAt?: string;
-  createdAt: string;
-  updatedAt: string;
+  failed_at?: string; // Backend uses snake_case
+  createdAt?: string;
+  created_at?: string; // Backend uses snake_case
+  updatedAt?: string;
+  updated_at?: string; // Backend uses snake_case
 }
 
 export interface InitiatePaymentRequest {

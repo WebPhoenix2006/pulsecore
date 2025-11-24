@@ -1,4 +1,3 @@
-// sidebar.component.ts
 import { Component, input, OnInit, output, signal, OnDestroy, HostListener } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
@@ -29,6 +28,7 @@ export class Sidebar implements OnInit, OnDestroy {
   currentRoute: string = '';
   isLoading = signal<boolean>(false);
   showMobileBackdrop = signal<boolean>(false);
+  userFullname: string = '';
 
   // Input and Output properties
   isLeftsidebarCollased = input.required<boolean>();
@@ -61,11 +61,18 @@ export class Sidebar implements OnInit, OnDestroy {
 
     // Initial active state update
     this.updateActiveStates();
+
+    // Load current user name from localStorage
+    this.loadCurrentUser();
+
+    // Update when other tabs change auth
+    window.addEventListener('storage', this.handleStorageEvent);
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+    window.removeEventListener('storage', this.handleStorageEvent);
   }
 
   // Handle window resize for responsive behavior
@@ -84,6 +91,31 @@ export class Sidebar implements OnInit, OnDestroy {
       this.closeSidebar();
     }
   }
+
+  // Load user full name from stored user object
+  private loadCurrentUser() {
+    const user = this.authService.getStoredUser ? this.authService.getStoredUser() : null;
+    if (!user) {
+      this.userFullname = 'Restaurant Manager';
+      return;
+    }
+
+    // Prefer a full_name field, fall back to first + last, then username/email
+    const fullName =
+      (user as any).full_name ||
+      `${(user as any).first_name || ''} ${(user as any).last_name || ''}`.trim() ||
+      (user as any).username ||
+      (user as any).email;
+
+    this.userFullname = fullName || 'Restaurant Manager';
+  }
+
+  // Keep sidebar in sync if localStorage 'user' changes in another tab
+  private handleStorageEvent = (e: StorageEvent) => {
+    if (e.key === 'user') {
+      this.loadCurrentUser();
+    }
+  };
 
   toggleSidebarState(): void {
     const newState = !this.isLeftsidebarCollased();
@@ -144,14 +176,14 @@ export class Sidebar implements OnInit, OnDestroy {
           {
             id: 'orders',
             label: 'All Orders',
-            icon: 'ri-receipt-line',
-            route: '/orders/'
+            icon: 'ri-shopping-cart-line',
+            route: '/orders/',
           },
           {
             id: 'payments',
             label: 'Payments',
             icon: 'ri-bank-card-line',
-            route: '/orders/payments/'
+            route: '/orders/payments/',
           },
         ],
       },
@@ -171,7 +203,7 @@ export class Sidebar implements OnInit, OnDestroy {
             id: 'alerts',
             label: 'Stock Alerts',
             icon: 'ri-alarm-warning-line',
-            route: '/inventory/alerts'
+            route: '/inventory/alerts',
           },
         ],
       },
