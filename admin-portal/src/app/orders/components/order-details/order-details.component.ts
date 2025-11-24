@@ -64,11 +64,15 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
   initiatePayment() {
     this.isLoading.set(true);
 
+    // Build callback URL with order_id parameter
+    const callbackUrl = `${window.location.origin}/orders?order_id=${this.order().order_id}`;
+
     const paymentData = {
       order_id: this.order().order_id,
       customer_email: this.order().customer_email || 'customer@example.com',
       amount: this.order().total_amount,
       currency: 'NGN',
+      callbackUrl: callbackUrl,
     };
 
     this.ordersService
@@ -78,14 +82,15 @@ export class OrderDetailsComponent implements OnInit, OnDestroy {
         next: (payment) => {
           const redirectUrl = payment.authorization_url;
           if (redirectUrl) {
-            // Use window.location.href to actually redirect (not open in new tab)
-            window.location.href = redirectUrl;
+            this.toastService.showSuccess('Opening payment page in new tab...');
+            // Open payment page in new tab so user can monitor from current tab
+            window.open(redirectUrl, '_blank');
+            this.loadOrderPayments(); // Refresh payments list
+            this.isLoading.set(false);
           } else {
             this.toastService.showError('Missing authorization URL');
+            this.isLoading.set(false);
           }
-          this.loadOrderPayments();
-          this.toastService.showSuccess('Payment initiated successfully');
-          this.isLoading.set(false);
         },
         error: (error) => {
           this.toastService.showError('Failed to initiate payment');

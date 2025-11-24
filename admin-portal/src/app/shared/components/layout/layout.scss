@@ -66,6 +66,48 @@
   }
 }
 
+// Mobile Menu Toggle Button
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+  background: var(--secondary-color);
+  border: none;
+  color: var(--white);
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  font-size: 20px;
+
+  &:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &.sidebar-open {
+    left: 20px;
+  }
+
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  i {
+    pointer-events: none;
+  }
+}
+
 // Add a backdrop for mobile when sidebar is open
 .mobile-backdrop {
   display: none;
@@ -78,9 +120,11 @@
   z-index: 999;
   opacity: 0;
   transition: opacity 0.3s ease;
+  pointer-events: none;
 
   &.show {
     opacity: 1;
+    pointer-events: auto;
   }
 
   @media (max-width: 768px) {

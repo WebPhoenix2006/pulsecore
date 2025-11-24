@@ -153,7 +153,7 @@
               <span class="payment-reference">{{ payment.reference }}</span>
             </td>
             <td>
-              <span class="order-id">#{{ payment.order_id.slice(-8) }}</span>
+              <span class="order-id">#{{ payment.order_id?.slice(-8) ?? 'N/A' }}</span>
             </td>
             <td>
               <span class="amount">{{ formatCurrency(payment.amount) }}</span>
@@ -298,7 +298,7 @@
             </div>
             <div class="detail-item">
               <label>Order ID</label>
-              <span class="order-id">#{{ selectedPayment()!.order_id.slice(-8) }}</span>
+              <span class="order-id">#{{ selectedPayment()!.order_id?.slice(-8) ?? 'N/A' }}</span>
             </div>
           </div>
         </div>
@@ -313,7 +313,7 @@
               </div>
               <div class="timeline-content">
                 <h4>Payment Created</h4>
-                <p>{{ formatDate(selectedPayment()!.createdAt) }}</p>
+                <p>{{ formatDate(selectedPayment()!.createdAt ?? '') }}</p>
               </div>
             </div>
 

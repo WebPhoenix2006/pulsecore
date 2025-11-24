@@ -23,10 +23,18 @@ export class OrdersService {
   constructor(private http: HttpClient) {}
 
   // Order Management
-  getOrders(): Observable<{ results: Order[]; count: number; next: string | null; previous: string | null }> {
-    return this.http.get<{ results: Order[]; count: number; next: string | null; previous: string | null }>(
-      this.baseUrl
-    );
+  getOrders(): Observable<{
+    results: Order[];
+    count: number;
+    next: string | null;
+    previous: string | null;
+  }> {
+    return this.http.get<{
+      results: Order[];
+      count: number;
+      next: string | null;
+      previous: string | null;
+    }>(this.baseUrl);
   }
 
   getOrder(id: string): Observable<Order> {
@@ -51,11 +59,19 @@ export class OrdersService {
   }
 
   // Payment Management - Note: Payments are PaystackTransactions in backend
-  getPayments(): Observable<{ results: Payment[]; count: number; next: string | null; previous: string | null }> {
+  getPayments(): Observable<{
+    results: Payment[];
+    count: number;
+    next: string | null;
+    previous: string | null;
+  }> {
     // This endpoint might not exist, payments are accessed through orders' transactions
-    return this.http.get<{ results: Payment[]; count: number; next: string | null; previous: string | null }>(
-      `${this.baseUrl}transactions/`
-    );
+    return this.http.get<{
+      results: Payment[];
+      count: number;
+      next: string | null;
+      previous: string | null;
+    }>(`${this.baseUrl}transactions/`);
   }
 
   getPayment(id: string): Observable<Payment> {
@@ -80,6 +96,6 @@ export class OrdersService {
   }
 
   getOrderReturns(orderId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}${orderId}/returns/`);
+    return this.http.get<any[]>(`${this.baseUrl}${orderId}/return/`);
   }
 }

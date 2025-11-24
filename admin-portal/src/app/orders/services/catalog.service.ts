@@ -16,15 +16,21 @@ export interface Category {
   updated_at: string;
 }
 
-// Backend product structure
+// Backend product structure from /catalog/products/
 export interface ProductResponse {
   sku_id: string;
   tenant_id: string;
+  inventory_sku?: string; // ID of linked inventory SKU
   name: string;
-  description?: string;
+  category?: string;
   attributes?: any;
   barcode?: string;
-  sku?: string;
+  price: string | number; // Catalog has price as direct field
+  stock_quantity?: number; // From linked inventory_sku
+  sku_code?: string; // From linked inventory_sku
+  supplier_id?: string;
+  batch_number?: string;
+  expiry_date?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -49,11 +55,15 @@ export class CatalogService {
       sku_id: product.sku_id,
       tenant_id: product.tenant_id,
       name: product.name,
-      description: product.description,
-      price: product.attributes?.price || 0,
-      stock_quantity: product.attributes?.stock_quantity ?? 999, // Default to 999 if not provided
-      sku: product.sku,
+      category: product.category,
+      price: typeof product.price === 'string' ? parseFloat(product.price) : product.price,
+      stock_quantity: product.stock_quantity ?? 0, // From linked inventory_sku
+      sku: product.sku_code, // From linked inventory_sku
       barcode: product.barcode,
+      inventory_sku: product.inventory_sku, // Link to inventory SKU
+      supplier_id: product.supplier_id,
+      batch_number: product.batch_number,
+      expiry_date: product.expiry_date,
       attributes: product.attributes,
       created_at: product.created_at,
       updated_at: product.updated_at
@@ -69,13 +79,37 @@ export class CatalogService {
     return this.http.get<Category>(`${Environments.catalog.categories}${id}/`);
   }
 
-  // Products - Use inventory SKUs instead of catalog products
+  // Products - Fetch from catalog products endpoint and enrich with inventory data
   getProducts(): Observable<PaginatedResponse<Product>> {
-    return this.http.get<PaginatedResponse<ProductResponse>>(Environments.inventory.skus)
+    return this.http.get<PaginatedResponse<ProductResponse>>(Environments.catalog.products)
       .pipe(
         map(response => ({
           ...response,
           results: response.results.map(p => this.transformProduct(p))
+        }))
+      );
+  }
+
+  // Get products with inventory stock levels
+  getProductsWithStock(): Observable<PaginatedResponse<Product>> {
+    return this.http.get<PaginatedResponse<any>>(Environments.inventory.skus)
+      .pipe(
+        map(response => ({
+          ...response,
+          results: response.results.map((sku: any) => ({
+            id: sku.sku_id,
+            sku_id: sku.sku_id,
+            tenant_id: sku.tenant_id,
+            name: sku.name,
+            category: sku.category,
+            price: sku.attributes?.price || 0,
+            stock_quantity: sku.stock_level ?? 0,
+            barcode: sku.barcode,
+            supplier_id: sku.supplier_id,
+            attributes: sku.attributes,
+            created_at: sku.created_at,
+            updated_at: sku.updated_at
+          }))
         }))
       );
   }

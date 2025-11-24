@@ -6,6 +6,7 @@ import { Environments } from '../../environments/environment';
 import { Router } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
 import { catchError, tap, map } from 'rxjs/operators';
+import { User } from '../interfaces/auth/user.interface';
 
 interface TokenRefreshResponse {
   access: string;
@@ -18,6 +19,7 @@ export class AuthService {
   private accessKey = 'token';
   private refreshKey = 'refresh-token';
   private tenantId = 'tenant-id';
+  private userKey = 'user'; // changed from username -> user
   private isRefreshing = false;
   private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
   private tokenExpirationTimer: any;
@@ -27,11 +29,13 @@ export class AuthService {
     this.startTokenExpirationMonitoring();
   }
 
-  // Store authentication tokens and tenant ID after successful login
-  setAuth(access: string, refresh: string, tenantId: string) {
+  // Store authentication tokens, tenant ID and user object after successful login
+  setAuth(access: string, refresh: string, tenantId: string, user: User) {
     localStorage.setItem(this.accessKey, access);
     localStorage.setItem(this.refreshKey, refresh);
     localStorage.setItem(this.tenantId, tenantId);
+    // store full user object as JSON
+    localStorage.setItem(this.userKey, JSON.stringify(user));
     // Restart token monitoring when new tokens are set
     this.startTokenExpirationMonitoring();
   }
@@ -43,11 +47,13 @@ export class AuthService {
   getRefreshToken(): string | null {
     return localStorage.getItem(this.refreshKey);
   }
+  getUser() {
+    return localStorage.getItem(this.userKey);
+  }
 
   // Get the current user's tenant ID (required for multi-tenant API calls)
   getTenantId(): string | null {
     const tenantId = localStorage.getItem(this.tenantId);
-    console.log(tenantId);
     return localStorage.getItem(this.tenantId);
   }
 
@@ -86,23 +92,28 @@ export class AuthService {
     };
 
     // Try to blacklist the token on backend, but don't fail if it's already blacklisted
-    return this.http.post<LogoutResponseInterface>(Environments.auth.logout, data, {
-      responseType: 'text' as 'json',
-    }).pipe(
-      tap(() => {
-        console.log('Successfully blacklisted token on backend');
-        this.clearAuth();
-        this.router.navigate(['/auth/login']);
-      }),
-      catchError((error) => {
-        // Clear auth even if logout fails (token might be already blacklisted/expired)
-        console.warn('Logout API failed (token may be expired/blacklisted), clearing local storage:', error);
-        this.clearAuth();
-        this.router.navigate(['/auth/login']);
-        // Return success since we successfully logged out locally
-        return throwError(() => error);
+    return this.http
+      .post<LogoutResponseInterface>(Environments.auth.logout, data, {
+        responseType: 'text' as 'json',
       })
-    );
+      .pipe(
+        tap(() => {
+          console.log('Successfully blacklisted token on backend');
+          this.clearAuth();
+          this.router.navigate(['/auth/login']);
+        }),
+        catchError((error) => {
+          // Clear auth even if logout fails (token might be already blacklisted/expired)
+          console.warn(
+            'Logout API failed (token may be expired/blacklisted), clearing local storage:',
+            error
+          );
+          this.clearAuth();
+          this.router.navigate(['/auth/login']);
+          // Return success since we successfully logged out locally
+          return throwError(() => error);
+        })
+      );
   }
 
   refreshAccessToken(): Observable<string> {
@@ -145,6 +156,7 @@ export class AuthService {
     localStorage.removeItem(this.accessKey);
     localStorage.removeItem(this.refreshKey);
     localStorage.removeItem(this.tenantId);
+    localStorage.removeItem(this.userKey); // remove stored user
     // Clear token expiration timer
     if (this.tokenExpirationTimer) {
       clearTimeout(this.tokenExpirationTimer);
@@ -188,6 +200,17 @@ export class AuthService {
     return this.http.get<any>(Environments.auth.currentUser);
   }
 
+  // Convenience: get stored user object from localStorage
+  getStoredUser(): User | null {
+    const raw = localStorage.getItem(this.userKey);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as User;
+    } catch {
+      return null;
+    }
+  }
+
   // Monitor token expiration and automatically logout or refresh
   private startTokenExpirationMonitoring() {
     // Clear any existing timer
@@ -204,8 +227,12 @@ export class AuthService {
     }
 
     // Both tokens expired - logout immediately
-    if (accessToken && this.isTokenExpired(accessToken) &&
-        refreshToken && this.isTokenExpired(refreshToken)) {
+    if (
+      accessToken &&
+      this.isTokenExpired(accessToken) &&
+      refreshToken &&
+      this.isTokenExpired(refreshToken)
+    ) {
       console.warn('Both tokens expired - logging out automatically');
       this.clearAuth();
       this.router.navigate(['/auth/login']);
@@ -232,8 +259,6 @@ export class AuthService {
           this.clearAuth();
           this.router.navigate(['/auth/login']);
         }, refreshTimeUntilExpiry);
-
-        console.log(`Token expiration monitoring active. Refresh token expires in ${Math.floor(refreshTimeUntilExpiry / 1000)}s`);
       }
     }
   }

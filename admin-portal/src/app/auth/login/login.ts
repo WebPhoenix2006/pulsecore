@@ -68,12 +68,14 @@ export class Login implements OnInit {
     this.loginService.loginUser(data).subscribe({
       next: (data: AuthResponseInterface) => {
         this.toastService.showSuccess('Logged in successfully');
-        this.authService.setAuth(data.access, data.refresh, data.tenant_id);
+        this.authService.setAuth(data.access, data.refresh, data.tenant_id, data.user);
         this.isLoading.set(false);
         this.router.navigateByUrl('analytics');
       },
       error: (error) => {
-        this.toastService.showError(error.message || 'Something went wrong. Please try again.');
+        this.toastService.showError(
+          error.message.non_field_errors || 'Something went wrong. Please try again.'
+        );
         console.log(error.message);
         this.isLoading.set(false);
       },

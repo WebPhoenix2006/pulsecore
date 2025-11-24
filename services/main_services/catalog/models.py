@@ -21,6 +21,17 @@ class Category(models.Model):
 class Product(models.Model):
     sku_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant_id = models.UUIDField()
+
+    # Link to inventory SKU - select which SKU this product's inventory is tracked with
+    inventory_sku = models.OneToOneField(
+        'inventory.SKU',
+        on_delete=models.SET_NULL,
+        related_name='catalog_product',
+        null=True,
+        blank=True,
+        help_text='Select the inventory SKU that tracks stock for this product'
+    )
+
     name = models.CharField(max_length=255)
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, null=True, related_name="pruducts"

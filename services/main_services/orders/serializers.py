@@ -3,6 +3,7 @@ from django.db import transaction
 from rest_framework import serializers
 from .models import Order, OrderItem, Return, PaystackTransaction
 from main_services.inventory.models import SKU
+from main_services.catalog.models import Product
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -57,8 +58,20 @@ class OrderSerializer(serializers.ModelSerializer):
                         f"Insufficient stock for {sku.name}. Available: {sku.stock_level}, Requested: {item['quantity']}"
                     )
 
+                # Get price from the Product catalog (not from SKU)
+                try:
+                    product = Product.objects.get(
+                        inventory_sku=sku,
+                        tenant_id=validated_data["tenant_id"]
+                    )
+                    price = product.price
+                except Product.DoesNotExist:
+                    raise serializers.ValidationError(
+                        f"Product not found for SKU {sku.name}"
+                    )
+
                 # Calculate item total: quantity * price
-                item_total = Decimal(str(item["quantity"])) * sku.price
+                item_total = Decimal(str(item["quantity"])) * price
                 total += item_total
 
             order.total_amount = total
@@ -109,6 +122,7 @@ class PaystackTransactionSerializer(serializers.ModelSerializer):
             "amount",
             "currency",
             "authorization_url",
+            "provider",
             "status",
             "paid_at",
             "created_at",

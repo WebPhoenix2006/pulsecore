@@ -2,11 +2,8 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'analytics', pathMatch: 'full' },
-  {
-    path: 'home',
-    loadChildren: () => import('./guest/guest.module').then((m) => m.GuestModule),
-  },
+  { path: '', redirectTo: 'auth', pathMatch: 'full' },
+
   { path: 'auth', loadChildren: () => import('./auth/auth-module').then((m) => m.AuthModule) },
   {
     path: 'analytics',

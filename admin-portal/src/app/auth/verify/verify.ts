@@ -47,7 +47,7 @@ export class Verify implements OnInit {
         this.isLoading.set(false);
         this.toastService.showSuccess('Email verified successfully', 2000);
         console.log(data);
-        this.authService.setAuth(data!.access, data!.refresh, data!.tenant_id);
+        this.authService.setAuth(data!.access, data!.refresh, data!.tenant_id, data!.user);
         this.router.navigate(['/auth/login']);
       },
 

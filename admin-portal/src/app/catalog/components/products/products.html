@@ -6,7 +6,7 @@
     [loading]="loading()"
     [actions]="tableActions"
     tableTitle="Products"
-    tableDescription="Manage all products (SKUs)"
+    tableDescription="Manage all products"
     createLabel="Add Product"
     emptyMessage="No products found"
     [showCreate]="true"
@@ -18,7 +18,8 @@
     (createClick)="onCreateProduct()"
     (refreshClick)="onRefreshData()"
     (exportClick)="onExportData()"
-    (selectionChange)="onSelectionChange($event)">
+    (selectionChange)="onSelectionChange($event)"
+  >
   </app-prime-data-table>
 
   <!-- Create/Edit Product Modal -->
@@ -30,6 +31,16 @@
     [style]="{ width: '600px' }"
   >
     <form [formGroup]="productForm" (ngSubmit)="onSubmitProduct()">
+      <app-form-field
+        label="SKU"
+        type="select"
+        [required]="true"
+        [errorMessage]="'SKU is required'"
+        [formControl]="skuIdControl"
+        [options]="skuOptions"
+        placeholder="Select a SKU"
+      ></app-form-field>
+
       <app-form-field
         label="Product Name"
         type="text"
@@ -119,7 +130,7 @@
       </div>
       <div class="detail-row">
         <strong>Price:</strong>
-        <span>${{ selectedProduct.price }}</span>
+        <span>₦{{ selectedProduct.price }}</span>
       </div>
       <div class="detail-row" *ngIf="selectedProduct.barcode">
         <strong>Barcode:</strong>
@@ -131,7 +142,7 @@
       </div>
       <div class="detail-row" *ngIf="selectedProduct.expiry_date">
         <strong>Expiry Date:</strong>
-        <span>{{ selectedProduct.expiry_date | date:'mediumDate' }}</span>
+        <span>{{ selectedProduct.expiry_date | date : 'mediumDate' }}</span>
       </div>
       <div class="detail-row" *ngIf="selectedProduct.supplier_id">
         <strong>Supplier ID:</strong>
@@ -139,11 +150,11 @@
       </div>
       <div class="detail-row" *ngIf="selectedProduct.created_at">
         <strong>Created:</strong>
-        <span>{{ selectedProduct.created_at | date:'medium' }}</span>
+        <span>{{ selectedProduct.created_at | date : 'medium' }}</span>
       </div>
       <div class="detail-row" *ngIf="selectedProduct.updated_at">
         <strong>Last Updated:</strong>
-        <span>{{ selectedProduct.updated_at | date:'medium' }}</span>
+        <span>{{ selectedProduct.updated_at | date : 'medium' }}</span>
       </div>
     </div>
     <div class="actions">

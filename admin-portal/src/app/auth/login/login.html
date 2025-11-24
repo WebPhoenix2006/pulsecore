@@ -1,9 +1,16 @@
 <div class="login-container centered p-5">
   <div class="login-card">
+    <!-- Right: Gradient welcome block -->
+    @if (!isScreenSmall()) {
+    <app-gradient-background
+      title="Welcome Back!"
+      body="Log in to access your dashboard and continue where you left off."
+    />
+    }
     <!-- Left: Form -->
     <div class="login-form-side">
-      <div class="title-image mb-5">
-        <img src="/images/bistropulse-logo.png" alt="bistropulse-logo" />
+      <div class="title-image">
+        <!-- <img src="/images/bistropulse-logo.png" alt="bistropulse-logo" /> -->
       </div>
 
       <h2 class="form-heading">Hello!</h2>
@@ -47,13 +54,5 @@
         </p>
       </form>
     </div>
-
-    <!-- Right: Gradient welcome block -->
-    @if (!isScreenSmall()) {
-    <app-gradient-background
-      title="Welcome Back!"
-      body="Log in to access your dashboard and continue where you left off."
-    />
-    }
   </div>
 </div>

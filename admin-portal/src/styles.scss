@@ -363,12 +363,6 @@ body {
   }
 }
 
-canvas {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-}
-
 // Global PrimeNG overrides to ensure our custom styling works
 .p-datatable {
   background: transparent !important;

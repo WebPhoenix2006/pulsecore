@@ -36,7 +36,7 @@ def generate_daily_sales(date=None):
         orders = Order.objects.filter(
             tenant_id=tenant_id,
             created_at__range=[start, end],
-            status__in=["completed", "paid", "delivered", "processing"],
+            status__in=["delivered", "processing"],
             payment_status="paid",
         )
         totals = orders.aggregate(

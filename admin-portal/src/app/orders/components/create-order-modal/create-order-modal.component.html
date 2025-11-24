@@ -120,7 +120,7 @@
                   <p>No items added yet. Click "Add Item" to start building the order.</p>
                 </div>
               } @else {
-                <div class="items-list">
+                <div class="items-list" formArrayName="items">
                   @for (item of itemsArray.controls; track $index; let i = $index) {
                     <div class="item-row" [formGroupName]="i">
                       <div class="item-grid">

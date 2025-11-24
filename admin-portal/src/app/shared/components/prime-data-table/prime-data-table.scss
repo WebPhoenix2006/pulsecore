@@ -601,6 +601,7 @@
         font-weight: 500;
         transition: all 0.3s ease;
         color: var(--text-color);
+        background-color: var(--card-bg);
 
         // Cell types styling
         &.cell-text .cell-text {
@@ -631,7 +632,9 @@
           text-transform: uppercase;
           letter-spacing: 0.5px;
           border: 1px solid transparent;
+          background-color: var(--card-bg);
 
+          background-color: var(--card-bg);
           .badge-indicator {
             width: 8px;
             height: 8px;

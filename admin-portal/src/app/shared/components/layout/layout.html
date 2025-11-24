@@ -1,5 +1,14 @@
 <div class="layout-parent">
+  <!-- Mobile Menu Toggle Button -->
+  <button class="mobile-menu-toggle" (click)="toggleMobileSidebar()" [class.sidebar-open]="!sidebarState()">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+
   <app-sidebar [isLeftsidebarCollased]="sidebarState()" (toggleState)="acceptState($event)" />
+
+  <!-- Mobile Backdrop -->
+  <div class="mobile-backdrop" [class.show]="!sidebarState()" (click)="closeMobileSidebar()"></div>
+
   <div class="body" [ngClass]="!sidebarState() ? 'body-trimmed' : 'body-md-screen'">
     <router-outlet />
   </div>

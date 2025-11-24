@@ -1,31 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)",
-      "Bash(npm run build:*)",
-      "Bash(npx tsc:*)",
-      "Bash(npm run lint)",
-      "Bash(npm cache clean:*)",
-      "Bash(ng serve:*)",
-      "Bash(taskkill:*)",
-      "Bash(npx sass:*)",
-      "Bash(npx ng build:*)",
-      "mcp__ide__getDiagnostics",
+      "Bash(ng:*)",
       "Bash(curl:*)",
-      "Bash(mkdir:*)",
-      "Bash(npm run serve:*)",
-      "Bash(npm run:*)",
-      "Bash(netstat:*)",
-      "Bash(findstr:*)",
-      "Bash(timeout:*)",
-      "Bash(dir \"C:\\WebPhoenix\\pulsecore\\services\\main_services\\analytics\\tests\")",
-      "Bash(python -m pytest main_services/analytics/tests/ -v)",
-      "Bash(python -m pytest main_services/analytics/tests/ -v --tb=short)",
-      "Bash(python -m pytest:*)",
-      "Bash(python manage.py:*)",
       "Bash(python:*)",
-      "Read(//c/Users/webaf/Pictures/Screenshots/**)",
-      "Bash(dir \"C:\\WebPhoenix\\pulsecore\\admin-portal\\src\\app\\orders\" /s /b)"
+      "Bash(npm run build:*)",
+      "Bash(pip uninstall:*)",
+      "Bash(pip install:*)",
+      "Bash(celery:*)",
+      "Bash(timeout 3 bash:*)",
+      "Bash(timeout 10 celery:*)"
     ],
     "deny": [],
     "ask": []

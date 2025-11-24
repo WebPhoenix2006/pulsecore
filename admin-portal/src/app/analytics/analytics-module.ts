@@ -15,6 +15,7 @@ import { Stockouts } from './components/stockouts/stockouts';
 
 // Services
 import { AnalyticsService } from './services/analytics.service';
+import { ThousandSeparatorPipe } from '../shared/pipes/thousand-separator.pipe';
 
 @NgModule({
   declarations: [Dashboard, Sales, Stock, Stockouts],
@@ -25,6 +26,7 @@ import { AnalyticsService } from './services/analytics.service';
     Layout,
     SharedModule,
     BaseChartDirective,
+    ThousandSeparatorPipe,
   ],
   providers: [AnalyticsService, provideCharts(withDefaultRegisterables())],
 })

@@ -43,7 +43,7 @@ class OrderItem(models.Model):
 class Return(models.Model):
     return_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="returns")
-    reason = models.TextField()
+    reason = models.TextField(null=True, blank=True)
     restock = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -60,6 +60,7 @@ class PaystackTransaction(models.Model):
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     currency = models.CharField(max_length=10, default="NGN")
     authorization_url = models.URLField()
+    provider = models.CharField(max_length=50, default="paystack")
     status = models.CharField(
         max_length=20,
         choices=[

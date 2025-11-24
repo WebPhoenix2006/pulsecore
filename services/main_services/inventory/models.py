@@ -1,4 +1,6 @@
 import uuid
+import random
+import string
 from django.db import models, transaction
 from django.utils import timezone
 from django.conf import settings
@@ -8,16 +10,30 @@ def generate_uuid():
     return uuid.uuid4()
 
 
+alphanumeric_chars = string.ascii_uppercase + string.digits
+
+
+def generate_rand(length):
+    return "".join(random.choice(alphanumeric_chars) for _ in range(length))
+
+
 class SKU(models.Model):
     sku_id = models.UUIDField(primary_key=True, default=generate_uuid, editable=False)
     tenant_id = models.UUIDField(db_index=True)
 
     name = models.CharField(max_length=255)
-    sku_code = models.CharField(max_length=64, blank=True, null=True, db_index=True)
+    sku_code = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        db_index=True,
+        editable=False,
+        default=generate_rand(6),
+    )
     category = models.CharField(max_length=128, db_index=True)
     attributes = models.JSONField(default=dict, blank=True)
     barcode = models.CharField(max_length=128, blank=True, null=True, db_index=True)
-    price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    # price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     stock_level = models.IntegerField(default=0)
     supplier_id = models.UUIDField(blank=True, null=True)
     track_batches = models.BooleanField(default=False)
